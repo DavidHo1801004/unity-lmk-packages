@@ -1,0 +1,74 @@
+.unity-label {
+	-unity-text-align: middle-left;
+}
+
+#container {
+	margin-bottom: 1px;
+}
+
+.content > * > .unity-foldout__toggle {
+	margin-top: 1px;
+	height: 18px;
+
+	-unity-text-align: middle-left;
+}
+.content {
+	margin-right: -5px;
+}
+.content > * > .unity-foldout__toggle {
+	margin: 2px 0px 0px -15px;
+
+	background-color: var(--lmk-color-header-background);
+	border-width: 0px 0px 1px 0px;
+	border-color: var(--lmk-color-border);
+}
+.content > * > .unity-foldout__toggle:hover {
+	background-color: var(--lmk-color-header-background-hover);
+}
+
+/* Value is None: keep the bound label (prefab override bar, context menu) but hide the empty foldout. */
+.content.empty .unity-foldout__checkmark {
+	visibility: hidden;
+}
+.content.empty > * > #unity-content {
+	display: none;
+}
+
+
+
+.content > * > #unity-content {
+	margin: 0px 1px 1px 0px;
+	padding: 4px 6px 0px 15px;
+
+	border-color: var(--lmk-color-content-border);
+	border-width: 0px 1px 1px 1px;
+}
+
+
+
+#type-select {
+	position: absolute;
+	width: 60%;
+	right: 0px;
+	top: 1px;
+	margin: 0px;
+}
+#type-select.missing .unity-base-popup-field__text {
+	color: var(--lmk-color-text-error);
+}
+
+#missing-type-box {
+	margin-top: 2px;
+}
+#type-select .unity-base-popup-field__input {
+	background-color: var(--lmk-color-field-background);
+	border-width: 1px;
+	border-color: var(--lmk-color-field-border);
+
+	transition: background-color;
+	transition-duration: 0.12s;
+}
+#type-select:hover .unity-base-popup-field__input {
+	background-color: var(--lmk-color-field-background-hover);
+	border-color: var(--lmk-color-field-border-hover);
+}

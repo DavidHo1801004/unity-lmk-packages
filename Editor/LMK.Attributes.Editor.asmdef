@@ -1,0 +1,19 @@
+{
+    "name": "LMK.Attributes.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:7a3a24ffd93b30945b651382ad3a0712",
+        "GUID:9492516da2337774186b76cd876bcea4"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
