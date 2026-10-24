@@ -1,0 +1,9 @@
+.placeholder-text-field .placeholder-text-field__placeholder {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 2px;
+
+	color: var(--lmk-color-text-placeholder);
+}

@@ -1,0 +1,27 @@
+/*
+ * LMK editor colour palette: light skin.
+ * Public variables for every LMK USS file. Applied by LMK.Editor.Styles.LMKTheme.Apply.
+ * Rule: no colour literals in any other LMK USS file; use var(--lmk-color-*).
+ * Keep the variable names in sync with LMKThemeDark.uss.
+ */
+.lmk-theme {
+	--lmk-color-text-muted: rgba(0, 0, 0, 0.5);
+	--lmk-color-text-placeholder: rgb(140, 140, 140);
+	--lmk-color-text-error: rgb(190, 40, 40);
+	--lmk-color-icon: rgb(70, 70, 70);
+	--lmk-color-separator: rgb(80, 80, 80);
+
+	--lmk-color-popup-background: rgb(203, 203, 203);
+	--lmk-color-popup-content-background: rgb(225, 225, 225);
+	--lmk-color-item-hover: rgba(0, 0, 0, 0.1);
+
+	--lmk-color-header-background: rgba(0, 0, 0, 0.06);
+	--lmk-color-header-background-hover: rgba(0, 0, 0, 0.12);
+	--lmk-color-border: rgb(153, 153, 153);
+	--lmk-color-content-border: rgba(0, 0, 0, 0.25);
+
+	--lmk-color-field-background: rgb(240, 240, 240);
+	--lmk-color-field-background-hover: rgb(250, 250, 250);
+	--lmk-color-field-border: rgba(0, 0, 0, 0.25);
+	--lmk-color-field-border-hover: rgba(0, 0, 0, 0.4);
+}

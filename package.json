@@ -1,0 +1,25 @@
+{
+  "name": "com.lmk.editor",
+  "version": "0.1.0",
+  "displayName": "LMK Editor",
+  "description": "Shared UI Toolkit editor library for LMK packages: colour theme, searchable hierarchical dropdown, search query syntax and reusable editor controls.",
+  "unity": "6000.3",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidHo1801004/unity-lmk-packages.git"
+  },
+  "documentationUrl": "https://github.com/DavidHo1801004/unity-lmk-packages/blob/upm/com.lmk.editor/README.md",
+  "changelogUrl": "https://github.com/DavidHo1801004/unity-lmk-packages/blob/upm/com.lmk.editor/CHANGELOG.md",
+  "licensesUrl": "https://github.com/DavidHo1801004/unity-lmk-packages/blob/upm/com.lmk.editor/LICENSE.md",
+  "keywords": [
+    "editor",
+    "ui toolkit",
+    "dropdown",
+    "search"
+  ],
+  "author": {
+    "name": "David Ho",
+    "url": "https://github.com/DavidHo1801004"
+  }
+}

@@ -1,0 +1,28 @@
+.search-bar {
+	min-height: 22px;
+	margin: 2px;
+}
+
+.search-bar .search-bar__icon {
+	position: absolute;
+	height: 16px;
+	width: 16px;
+	left: 10px;
+	top: 3px;
+
+	--unity-image-tint-color: var(--lmk-color-icon);
+}
+
+.search-bar .unit-text-element {
+	height: 22px;
+}
+
+.search-bar #unity-text-input,
+.search-bar #unity-text-input .unity-text-field__input {
+	border-width: 1px;
+	border-radius: 11px;
+}
+
+.search-bar .unity-text-element {
+	padding-left: 28px;
+}
