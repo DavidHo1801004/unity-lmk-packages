@@ -1,0 +1,113 @@
+# Sign one released package version and publish it as a GitHub Release, for OpenUPM (trackingMode: githubRelease).
+#
+# Release tags point at package-only snapshot commits that don't contain this workflow, so it can't run on tag push.
+# Tools/release-package.sh dispatches it after pushing a tag, or run it by hand:
+#   gh workflow run sign-release.yml --repo DavidHo1801004/unity-lmk-packages -f tag=com.lmk.editor/0.1.2
+#
+# Needs secrets UPM_SERVICE_ACCOUNT_KEY_ID and UPM_SERVICE_ACCOUNT_KEY_SECRET (service account with the
+# "Package Manager Package Signer" role), and variable LMK_UNITY_ORG_ID (Unity Cloud organization ID).
+name: Sign release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, <package>/<version> (e.g. com.lmk.editor/0.1.2)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sign-${{ inputs.tag }}
+
+env:
+  TAG: ${{ inputs.tag }}
+  # Pinned UPM CLI; update both values together (checksum from releases/<version>/upm-linux-x64.zip.sha256).
+  UPM_CLI_VERSION: v9.36.0
+  UPM_CLI_SHA256: a7c00db477daa4161f24bf0af5d2589e88f3e6276f9798d44bae601d957dbe04
+
+jobs:
+  sign:
+    name: Sign ${{ inputs.tag }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate tag
+        run: |
+          [[ "$TAG" =~ ^(com\.lmk\.[a-z0-9.-]+)/([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?)$ ]] \
+            || { echo "::error::'$TAG' isn't a <package>/<version> release tag"; exit 1; }
+          echo "PACKAGE=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+          echo "VERSION=${BASH_REMATCH[2]}" >> "$GITHUB_ENV"
+
+      - name: Check out tag
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          path: package
+
+      - name: Check package manifest
+        run: |
+          name=$(jq -r .name package/package.json)
+          version=$(jq -r .version package/package.json)
+          [ "$name" = "$PACKAGE" ] && [ "$version" = "$VERSION" ] \
+            || { echo "::error::package.json is $name $version, tag is $PACKAGE $VERSION"; exit 1; }
+
+      - name: Check for an existing signed asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A signed tarball is the release itself: never replace one.
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' 2>/dev/null | grep -q '\.tgz$'; then
+            echo "::error::Release $TAG already has a tarball; bump the version instead"
+            exit 1
+          fi
+
+      - name: Install UPM CLI
+        run: |
+          curl -fsSL -o upm.zip "https://cdn.packages.unity.com/upm-cli/releases/$UPM_CLI_VERSION/upm-linux-x64.zip"
+          echo "$UPM_CLI_SHA256  upm.zip" | sha256sum -c -
+          mkdir -p "$HOME/.upm/bin"
+          unzip -q upm.zip -d "$HOME/.upm/bin"
+          chmod +x "$HOME/.upm/bin/UnityPackageManager"
+          # Same wrapper as Unity's install.sh.
+          printf '#!/bin/sh\nexec "$(dirname "$0")/UnityPackageManager" "$@"\n' > "$HOME/.upm/bin/upm"
+          chmod +x "$HOME/.upm/bin/upm"
+          echo "$HOME/.upm/bin" >> "$GITHUB_PATH"
+          rm upm.zip
+
+      - name: Sign package
+        env:
+          UPM_SERVICE_ACCOUNT_KEY_ID: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_ID }}
+          UPM_SERVICE_ACCOUNT_KEY_SECRET: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_SECRET }}
+          LMK_UNITY_ORG_ID: ${{ vars.LMK_UNITY_ORG_ID }}
+        run: |
+          [ -n "$LMK_UNITY_ORG_ID" ] || { echo "::error::Repository variable LMK_UNITY_ORG_ID isn't set"; exit 1; }
+          upm --version
+          upm pack package --organization-id "$LMK_UNITY_ORG_ID" --destination dist
+
+      - name: Verify signed tarball
+        run: |
+          shopt -s nullglob
+          archives=(dist/*.tgz)
+          [ "${#archives[@]}" -eq 1 ] || { echo "::error::Expected one tarball, found ${#archives[@]}"; exit 1; }
+          archive="${archives[0]}"
+          tar -tzf "$archive" | grep -qx 'package/.attestation.p7m' || { echo "::error::$archive has no signature"; exit 1; }
+          [ "$(tar -xOzf "$archive" package/package.json | jq -r '.name + "@" + .version')" = "$PACKAGE@$VERSION" ] \
+            || { echo "::error::$archive doesn't contain $PACKAGE $VERSION"; exit 1; }
+          echo "ARCHIVE=$archive" >> "$GITHUB_ENV"
+          sha256sum "$archive"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Release notes: this version's CHANGELOG.md section, without its heading.
+          awk -v v="$VERSION" '/^## \[/ { if (found) exit; if (index($0, "## [" v "]") == 1) { found = 1; next } } found' \
+            package/CHANGELOG.md > notes.md
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ARCHIVE" --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" "$ARCHIVE" --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "$PACKAGE $VERSION" --notes-file notes.md
+          fi

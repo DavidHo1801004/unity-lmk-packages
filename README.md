@@ -38,11 +38,21 @@ https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.1.1
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.1.0
 ```
 
+## Package signatures
+
+New releases are signed with [Unity package signatures](https://docs.unity3d.com/Manual/upm-signature.html). Each signed tarball is attached to the version's GitHub Release, and OpenUPM serves that tarball.
+
+- The Package Manager shows LMK packages as **Signed (limited)**, because the signing organization isn't one of yours. This is expected.
+- Unity 6.7 and newer block packages signed by other organizations by default. To install LMK packages, set *Project Settings → Package Manager* security threshold to **Accept all signed packages**.
+- Unity doesn't check signatures on Git URL installs.
+- On OpenUPM, versions published before signing started (`com.lmk.attributes` 0.1.0, `com.lmk.editor` 0.1.1 and earlier) are unsigned.
+
 ## Repository layout
 
 - Each package lives on its own branch, `upm/<package>`, with the package at the branch root.
 - Each version is a tag `<package>/<version>`, e.g. `com.lmk.attributes/0.1.0`.
-- This branch (`main`) only holds this page.
+- Each signed version has a GitHub Release with the same tag and the signed `.tgz`.
+- This branch (`main`) holds this page and the signing workflow.
 
 Documentation, changelog and licence are in each package branch.
 
