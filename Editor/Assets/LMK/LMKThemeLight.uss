@@ -24,4 +24,9 @@
 	--lmk-color-field-background-hover: rgb(250, 250, 250);
 	--lmk-color-field-border: rgba(0, 0, 0, 0.25);
 	--lmk-color-field-border-hover: rgba(0, 0, 0, 0.4);
+
+	--lmk-color-button-background: rgb(203, 203, 203);
+	--lmk-color-button-background-active: rgb(190, 190, 190);
+	--lmk-color-button-background-hover: rgb(180, 180, 180);
+	--lmk-color-button-border: rgb(153, 153, 153);
 }

@@ -41,5 +41,7 @@ Elements keep the palette they were built with when the Editor skin changes; reb
 | `--lmk-color-content-border` | Foldout content borders |
 | `--lmk-color-field-background` / `-hover` | Input fields |
 | `--lmk-color-field-border` / `-hover` | Input field borders |
+| `--lmk-color-button-background` / `-active` / `-hover` | Toolbar buttons (normal, active, hovered) |
+| `--lmk-color-button-border` | Toolbar button borders |
 
 The values are defined in `Editor/Assets/LMK/LMKThemeDark.uss` and `LMKThemeLight.uss`. Keep both files in sync, and use only these variables (no colour literals) in LMK USS files.

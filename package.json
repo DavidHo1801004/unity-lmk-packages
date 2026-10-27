@@ -1,6 +1,6 @@
 {
   "name": "com.lmk.editor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "LMK Editor",
   "description": "Shared UI Toolkit editor library for LMK packages: colour theme, searchable hierarchical dropdown, search query syntax and reusable editor controls.",
   "unity": "6000.3",

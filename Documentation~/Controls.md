@@ -32,6 +32,34 @@ separator.Color = Color.clear; // Color.clear uses the theme colour --lmk-color-
 
 UXML attributes: `text`, `color`.
 
+## ToolbarButton
+
+A `Button` for toolbars, working as a plain button or a toggle. It keeps every `Button` feature (`text`, `iconImage`, `clicked`, keyboard submit, `SetEnabled`).
+
+```csharp
+var refresh = new ToolbarButton(false, Refresh) { text = "Refresh" };
+
+var pin = new ToolbarButton(true) { text = "Pin" };
+pin.RegisterValueChangedCallback(e => SetPinned(e.newValue));
+pin.SetValueWithoutNotify(true); // on, without a ChangeEvent
+```
+
+- Display states, from lowest to highest highlight: normal, active (pressed in button mode, on in toggle mode), hovered. The background gets darker with each level.
+- Square corners with a 1px border on the left and right. Each button has a -1px left margin, so buttons placed in a row share one border between them.
+- In toggle mode each click flips `value` before other `clicked` handlers run. In button mode `value` is always `false`; switching `IsToggle` off resets it.
+- Replacing `clickable` also removes the toggle behaviour.
+- UXML attributes: `is-toggle`, `value`.
+- Colours: `--lmk-color-button-background` / `-active` / `-hover`, border `--lmk-color-button-border`, icon tint `--lmk-color-icon`.
+
+A row of toolbar buttons:
+
+```csharp
+var toolbar = new VisualElement();
+toolbar.style.flexDirection = FlexDirection.Row;
+toolbar.Add(new ToolbarButton(false, Undo) { text = "Undo" });
+toolbar.Add(new ToolbarButton(false, Redo) { text = "Redo" });
+```
+
 ## Switcher
 
 A container that shows one child at a time.

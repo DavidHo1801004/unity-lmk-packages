@@ -1,0 +1,35 @@
+.toolbar-button {
+	min-width: 22px;
+	min-height: 20px;
+	margin: 0px 0px 0px -1px;
+	padding: 2px 4px;
+
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+
+	background-color: var(--lmk-color-button-background);
+	border-width: 0px 1px 0px 1px;
+	border-radius: 0px;
+	border-color: var(--lmk-color-button-border);
+}
+
+.toolbar-button .unity-button__image {
+	--unity-image-tint-color: var(--lmk-color-icon);
+}
+
+/* Active: pressed (button mode) or on (toggle mode). */
+.toolbar-button:active:enabled,
+.toolbar-button.toolbar-button--active:enabled {
+	background-color: var(--lmk-color-button-background-active);
+}
+
+/* Hovered: highest highlight, so it is declared last. */
+.toolbar-button:hover:enabled,
+.toolbar-button.toolbar-button--active:hover:enabled {
+	background-color: var(--lmk-color-button-background-hover);
+}
+
+.toolbar-button:disabled {
+	opacity: 0.5;
+}
