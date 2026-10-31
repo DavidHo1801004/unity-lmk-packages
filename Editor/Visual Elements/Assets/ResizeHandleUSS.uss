@@ -1,0 +1,20 @@
+.resize-handle {
+	flex-shrink: 0;
+}
+
+.resize-handle--horizontal {
+	width: 6px;
+	align-self: stretch;
+	cursor: resize-horizontal;
+}
+
+.resize-handle--vertical {
+	height: 6px;
+	align-self: stretch;
+	cursor: resize-vertical;
+}
+
+.resize-handle:hover:enabled,
+.resize-handle.resize-handle--dragging:enabled {
+	background-color: var(--lmk-color-item-hover);
+}

@@ -29,4 +29,6 @@
 	--lmk-color-button-background-active: rgb(190, 190, 190);
 	--lmk-color-button-background-hover: rgb(180, 180, 180);
 	--lmk-color-button-border: rgb(153, 153, 153);
+
+	--lmk-color-drop-indicator: rgb(58, 114, 176);
 }

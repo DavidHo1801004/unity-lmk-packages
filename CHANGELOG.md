@@ -3,6 +3,19 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-10-31
+
+### Added
+- `ResizeHandle`: drag handle that resizes its parent or raises drag events.
+- `DragReorderManipulator`: drag to reorder the children of a container, with a drop indicator.
+- `ObjectLabel`: read-only object reference display with `None` and `Missing` states.
+- `ColorLabel`: read-only colour swatch and hex value.
+- `LMKTheme`: `--lmk-color-drop-indicator` variable.
+- EditMode tests for the new elements, including real pointer events through a window.
+
+### Fixed
+- `ToolbarButton` documentation: the toggle example didn't compile. Use `RegisterCallback<ChangeEvent<bool>>`.
+
 ## [0.1.1] - 2026-10-27
 
 ### Added

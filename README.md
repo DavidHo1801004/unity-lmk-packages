@@ -9,7 +9,8 @@ Shared UI Toolkit editor library used by the LMK packages. It provides a colour 
 - `SearchableDropdown`: popup with a search bar, a folder hierarchy built from `"Folder/Sub/Item"` paths, expand/collapse all, and a JEI-like search syntax.
 - `HierarchyItem`: base class for logical item hierarchies with registered, two-phase event callbacks.
 - `SearchQuery`: search text parser (AND, OR, NOT, phrases, field prefixes).
-- Controls: `SearchBar`, `PlaceholderTextField`, `NamedSeparator`, `ToolbarButton`, `Switcher` (also available in UI Builder under *LMK*).
+- Controls: `SearchBar`, `PlaceholderTextField`, `NamedSeparator`, `ToolbarButton`, `Switcher`, `ResizeHandle`, `ObjectLabel`, `ColorLabel` (also available in UI Builder under *LMK*).
+- `DragReorderManipulator`: drag to reorder the children of any container.
 
 **Not included:** runtime features, or inspector attributes (see `com.lmk.attributes`).
 
@@ -27,11 +28,11 @@ Shared UI Toolkit editor library used by the LMK packages. It provides a colour 
       { "name": "OpenUPM", "url": "https://package.openupm.com", "scopes": [ "com.lmk" ] }
     ],
     "dependencies": {
-      "com.lmk.editor": "0.1.1"
+      "com.lmk.editor": "0.2.0"
     }
     ```
 - **Git URL:** in *Package Manager → + → Add package from git URL*, enter
-  `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.1.1`
+  `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.2.0`
 - **Embedded:** copy the `com.lmk.editor` folder into your project's `Packages/` folder.
 
 The package is published on branch `upm/com.lmk.editor`, with one tag per version (`com.lmk.editor/<version>`).
@@ -51,7 +52,7 @@ UnityEditor.PopupWindow.Show(buttonRect, dropdown);
 
 - [Theme](Documentation~/Theme.md): palette variables and applying them to your own UI.
 - [Searchable dropdown](Documentation~/SearchableDropdown.md): dropdown, `HierarchyItem` events and search syntax.
-- [Controls](Documentation~/Controls.md): `SearchBar`, `PlaceholderTextField`, `NamedSeparator`, `ToolbarButton`, `Switcher`.
+- [Controls](Documentation~/Controls.md): `SearchBar`, `PlaceholderTextField`, `NamedSeparator`, `ToolbarButton`, `Switcher`, `ResizeHandle`, `DragReorderManipulator`, `ObjectLabel`, `ColorLabel`.
 
 ## License
 

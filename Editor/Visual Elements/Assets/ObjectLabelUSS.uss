@@ -1,0 +1,28 @@
+.object-label {
+	flex-direction: row;
+	align-items: center;
+	min-width: 0px;
+}
+
+.object-label .object-label__icon {
+	flex-shrink: 0;
+	width: 16px;
+	height: 16px;
+	margin-right: 4px;
+}
+
+.object-label .object-label__name {
+	flex-shrink: 1;
+	min-width: 0px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.object-label.object-label--none .object-label__name {
+	color: var(--lmk-color-text-muted);
+}
+
+.object-label.object-label--missing .object-label__name {
+	color: var(--lmk-color-text-error);
+}

@@ -1,0 +1,23 @@
+.color-label {
+	flex-direction: row;
+	align-items: center;
+	min-width: 0px;
+}
+
+.color-label .color-label__swatch {
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+	margin-right: 4px;
+
+	border-width: 1px;
+	border-color: var(--lmk-color-content-border);
+}
+
+.color-label .color-label__hex {
+	flex-shrink: 1;
+	min-width: 0px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
