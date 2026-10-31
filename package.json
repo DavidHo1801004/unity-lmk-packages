@@ -1,6 +1,6 @@
 {
   "name": "com.lmk.attributes",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "LMK Attributes",
   "description": "Inspector attributes for Unity. [InlineInstanced] adds a searchable type picker to [SerializeReference] fields, lists and arrays.",
   "unity": "6000.3",
@@ -23,6 +23,7 @@
     "url": "https://github.com/DavidHo1801004"
   },
   "dependencies": {
-    "com.lmk.editor": "0.1.0"
+    "com.lmk.editor": "0.1.0",
+    "com.unity.nuget.mono-cecil": "1.11.6"
   }
 }

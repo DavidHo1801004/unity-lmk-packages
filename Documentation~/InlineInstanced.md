@@ -25,20 +25,36 @@ A class is listed when it is **exposed** and **instantiable**.
 - not a `UnityEngine.Object`;
 - marked `[Serializable]`. Unity requires it for `[SerializeReference]` values, and it is **not inherited**, so mark every class.
 - has a parameterless constructor (any visibility);
-- not defined in an editor-only assembly, since it would be missing in player builds.
+- not defined in an editor-only assembly.
 
-The field type can be the attributed class, any of its base classes or interfaces, an intermediate class, or `object`.
+The field type can be the attributed class, any of its base classes or interfaces, an intermediate class, or `object`. If no class can be listed for a field, its row shows a warning.
+
+## Player builds
+
+Every listed class must exist in player builds. Saved data of a class that the player doesn't have can't be skipped, so **the whole component holding it fails to load**.
+
+Editor-only assemblies are filtered out of the list, but a class wrapped in `#if UNITY_EDITOR` inside a runtime assembly can't be seen that way, so builds check for it. The build fails and names each such class, even if no saved data uses it yet. To fix it, do one of the following:
+
+- move the class out of the `#if`;
+- move it into an Editor assembly;
+- add `[CanNotReferenceInline]`, which also removes it from the picker. Remove any saved data using it first, since the build no longer checks it.
+
+The check covers assemblies compiled from source, not precompiled plugin DLLs.
 
 ## Collections
 
-On a `List<T>` or `T[]`, each element gets its own picker. Every element, and every selected object in multi-editing, gets its own instance.
+On a `List<T>` or `T[]`, each element gets its own picker, and each selected object in multi-editing gets its own instance when a type is picked.
+
+Unity's **Duplicate Array Element** copies the reference rather than the object, so both elements share one instance and editing one edits the other. The later element shows a warning with a **Make Unique** button, which gives it its own copy, nested references included. The `+` button adds an empty element and isn't affected.
 
 ## Missing types
 
-If a class used by saved data is renamed, moved or deleted, the field shows **Missing: Namespace.ClassName** with a warning. The data is kept until another type is picked. For a rename or move, add `[UnityEngine.Scripting.APIUpdating.MovedFrom]` to the class to restore it.
+If a class used by saved data is renamed, moved or deleted, the Inspector shows one warning listing the missing classes. Unity doesn't report which field held a missing class, so those fields display **None**.
+
+**Saving can permanently remove the data.** For example, it is lost when a scene that stayed open while the class was deleted is saved. Restore the class before saving. For a rename or move, add `[UnityEngine.Scripting.APIUpdating.MovedFrom]` to the class.
 
 ## Notes
 
 - The type list for each field type is built on first use and cached until scripts recompile.
-- Changing the type replaces the instance; values of the previous type are not copied.
-- IMGUI inspectors (custom `OnInspectorGUI`, `EditorGUILayout.PropertyField`) get a simpler fallback with a standard menu.
+- Changing the type replaces the instance; values of the previous type are not copied. Picking the current type does nothing.
+- IMGUI inspectors (custom `OnInspectorGUI`, `EditorGUILayout.PropertyField`) get a simpler fallback with a standard menu. It shows the missing types warning on each empty field, and doesn't detect shared instances.

@@ -6,17 +6,14 @@
 	margin-bottom: 1px;
 }
 
-.content > * > .unity-foldout__toggle {
-	margin-top: 1px;
-	height: 18px;
-
-	-unity-text-align: middle-left;
-}
 .content {
 	margin-right: -5px;
 }
 .content > * > .unity-foldout__toggle {
 	margin: 2px 0px 0px -15px;
+	height: 18px;
+
+	-unity-text-align: middle-left;
 
 	background-color: var(--lmk-color-header-background);
 	border-width: 0px 0px 1px 0px;
@@ -53,12 +50,13 @@
 	top: 1px;
 	margin: 0px;
 }
-#type-select.missing .unity-base-popup-field__text {
-	color: var(--lmk-color-text-error);
-}
 
-#missing-type-box {
+#warning-box {
 	margin-top: 2px;
+}
+#make-unique-button {
+	align-self: flex-end;
+	margin: 2px 0px 0px 0px;
 }
 #type-select .unity-base-popup-field__input {
 	background-color: var(--lmk-color-field-background);

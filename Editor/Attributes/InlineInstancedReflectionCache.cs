@@ -21,7 +21,6 @@ namespace LMK.Editor.Attributes
 
         public readonly bool isValid;
         public readonly IReadOnlyList<Type> exposedTypes;
-        public readonly IReadOnlyList<CustomReferencedPathAttribute> customPathAttributes;
 
         /// <summary>
         /// Dropdown items: "None" at index 0, then one item per exposed type. Rich text. <br/>
@@ -42,15 +41,12 @@ namespace LMK.Editor.Attributes
 
         private readonly Dictionary<Type, int> indexLookup;
 
-        public int Count => exposedTypes?.Count ?? 0;
-
         internal InlineInstancedTypeCacheData(
             IReadOnlyList<Type> _ExposedTypes,
             IReadOnlyList<CustomReferencedPathAttribute> _CustomPathAttributes)
         {
             isValid = _ExposedTypes.Count > 0;
             exposedTypes = _ExposedTypes;
-            customPathAttributes = _CustomPathAttributes;
 
             indexLookup = new Dictionary<Type, int>(_ExposedTypes.Count);
             for (int i = 0; i < _ExposedTypes.Count; i++)
@@ -101,6 +97,8 @@ namespace LMK.Editor.Attributes
 
         private static HashSet<string> editorOnlyAssemblyNames;
 
+        private static Type[] exposedCandidates;
+
         /// <summary>
         /// Get the cached instance reference data of the given field <paramref name="_Type"/>.
         /// </summary>
@@ -146,13 +144,14 @@ namespace LMK.Editor.Attributes
             if (_Type == null) return false;
             if (!instantiableCache.TryGetValue(_Type, out bool isInstantiable))
             {
-                isInstantiable = CheckInstantiable(_Type);
+                isInstantiable = IsCreatable(_Type) && !IsEditorOnly(_Type.Assembly);
                 instantiableCache[_Type] = isInstantiable;
             }
             return isInstantiable;
         }
 
-        private static bool CheckInstantiable(Type _Type)
+        // The checks on the type itself, whichever assembly it comes from.
+        internal static bool IsCreatable(Type _Type)
         {
             if (_Type.IsAbstract || _Type.IsInterface || _Type.IsValueType) return false;
             if (_Type.ContainsGenericParameters) return false;
@@ -160,7 +159,6 @@ namespace LMK.Editor.Attributes
             if (!IsSerializable(_Type)) return false;
             if (_Type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null, Type.EmptyTypes, null) == null) return false;
-            if (IsEditorOnly(_Type.Assembly)) return false;
 
             return true;
         }
@@ -178,22 +176,46 @@ namespace LMK.Editor.Attributes
             return false;
         }
 
-        private static InlineInstancedTypeCacheData BuildTypeData(Type _FieldType)
+        /// <summary>
+        /// Every type that can be listed for some field type: exposed and instantiable.
+        /// </summary>
+        /// <remarks>
+        /// Starts from the marked types, so a field of type <see cref="object"/> doesn't have to check every loaded type.
+        /// </remarks>
+        internal static IReadOnlyList<Type> GetExposedCandidates()
         {
-            var derivedTypes = TypeCache.GetTypesDerivedFrom(_FieldType);
-            var entries = new List<(Type type, CustomReferencedPathAttribute attr, string sortKey)>();
+            if (exposedCandidates != null) return exposedCandidates;
+
+            var candidates = new HashSet<Type>();
 
             void TryAdd(Type _Type)
             {
-                if (!IsExposed(_Type) || !IsInstantiable(_Type)) return;
-
-                var attr = _Type.GetCustomAttribute<CustomReferencedPathAttribute>();
-                entries.Add((_Type, attr, RichTextUtility.StripTags(attr?.CustomName) ?? _Type.Name));
+                if (IsExposed(_Type) && IsInstantiable(_Type))
+                    candidates.Add(_Type);
             }
 
-            TryAdd(_FieldType);
-            foreach (var type in derivedTypes)
-                TryAdd(type);
+            foreach (var markedType in TypeCache.GetTypesWithAttribute<CanReferenceInlineAttribute>())
+            {
+                TryAdd(markedType);
+                foreach (var derivedType in TypeCache.GetTypesDerivedFrom(markedType))
+                    TryAdd(derivedType);
+            }
+
+            exposedCandidates = candidates.ToArray();
+            return exposedCandidates;
+        }
+
+        private static InlineInstancedTypeCacheData BuildTypeData(Type _FieldType)
+        {
+            var entries = new List<(Type type, CustomReferencedPathAttribute attr, string sortKey)>();
+
+            foreach (var type in GetExposedCandidates())
+            {
+                if (!_FieldType.IsAssignableFrom(type)) continue;
+
+                var attr = type.GetCustomAttribute<CustomReferencedPathAttribute>();
+                entries.Add((type, attr, RichTextUtility.StripTags(attr?.CustomName) ?? type.Name));
+            }
 
             // Full name breaks ties, so the order is the same on every reload.
             entries.Sort((a, b) =>

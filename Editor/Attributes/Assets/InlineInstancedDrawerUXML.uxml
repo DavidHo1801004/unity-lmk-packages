@@ -9,6 +9,7 @@
     <ui:VisualElement name="container">
         <uie:PropertyField name="property-field" class="content"/>
         <ui:DropdownField name="type-select"/>
-        <ui:HelpBox name="missing-type-box" message-type="Warning"/>
+        <ui:HelpBox name="warning-box" message-type="Warning"/>
+        <ui:Button name="make-unique-button" text="Make Unique"/>
     </ui:VisualElement>
 </ui:UXML>

@@ -5,7 +5,7 @@ Inspector attributes for Unity. `[InlineInstanced]` adds a searchable type picke
 ## Scope
 
 **Included:**
-- `[InlineInstanced]`: type picker for `[SerializeReference]` fields, lists and arrays. Supports multi-object editing, undo, prefab overrides, missing-type warnings, and both UI Toolkit and IMGUI inspectors.
+- `[InlineInstanced]`: type picker for `[SerializeReference]` fields, lists and arrays. Supports multi-object editing, undo, prefab overrides, missing-type and shared-instance warnings, a build check for classes missing from the player, and both UI Toolkit and IMGUI inspectors.
 - `[CanReferenceInline]` / `[CanNotReferenceInline]`: choose which classes appear in the picker.
 - `[CustomReferencedPath]`: folder path, display name, tooltip and icon of a class in the picker.
 
@@ -15,6 +15,7 @@ Inspector attributes for Unity. `[InlineInstanced]` adds a searchable type picke
 
 - Unity 6000.3 or newer.
 - `com.lmk.editor` 0.1.0 (dependency).
+- `com.unity.nuget.mono-cecil` 1.11.6 (dependency, installed automatically from the Unity registry).
 
 ## Installation
 
@@ -26,12 +27,12 @@ Inspector attributes for Unity. `[InlineInstanced]` adds a searchable type picke
       { "name": "OpenUPM", "url": "https://package.openupm.com", "scopes": [ "com.lmk" ] }
     ],
     "dependencies": {
-      "com.lmk.attributes": "0.1.0"
+      "com.lmk.attributes": "0.2.0"
     }
     ```
 - **Git URL:** add **both** packages in *Package Manager → + → Add package from git URL*, editor first:
   1. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.1.0`
-  2. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.1.0`
+  2. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.2.0`
 
   The Package Manager doesn't resolve dependencies from git URLs, so `com.lmk.editor` must be added by hand.
   Update both tags together when upgrading.
