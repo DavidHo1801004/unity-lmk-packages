@@ -1,0 +1,8 @@
+/* In normal flow: Unity sizes a UI Toolkit popup window from its content's layout. */
+.lmk-anchored-popup {
+	padding: 4px;
+
+	background-color: var(--lmk-color-popup-background);
+	border-width: 1px;
+	border-color: var(--lmk-color-popup-border);
+}

@@ -1,0 +1,27 @@
+.lmk-panel-layout {
+	flex-grow: 1;
+	overflow: hidden;
+}
+
+.lmk-panel-layout__container {
+	flex-grow: 1;
+	flex-direction: row;
+}
+
+/* Resizable panels keep the size the layout gives them; the fill child takes what is left. */
+.lmk-panel-layout__panel {
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+
+.lmk-panel-layout__fill {
+	flex-grow: 1;
+	flex-shrink: 1;
+	flex-basis: 0px;
+	min-width: 0px;
+	min-height: 0px;
+}
+
+.lmk-panel-layout__handle {
+	position: absolute;
+}

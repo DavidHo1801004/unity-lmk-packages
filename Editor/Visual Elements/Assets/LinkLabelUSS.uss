@@ -1,0 +1,26 @@
+/* The underline is a bottom border. The padding it replaces on hover keeps the height the same. */
+.lmk-link-label {
+	padding-bottom: 1px;
+	border-bottom-width: 0px;
+
+	color: var(--lmk-color-link);
+	cursor: link;
+}
+
+.lmk-link-label:hover:enabled {
+	padding-bottom: 0px;
+	border-bottom-width: 1px;
+
+	color: var(--lmk-color-link-hover);
+	border-color: var(--lmk-color-link-hover);
+}
+
+.lmk-link-label:focus:enabled {
+	color: var(--lmk-color-link-hover);
+}
+
+/* Plain muted text, without the hover effect or link cursor. */
+.lmk-link-label:disabled {
+	color: var(--lmk-color-text-muted);
+	cursor: arrow;
+}

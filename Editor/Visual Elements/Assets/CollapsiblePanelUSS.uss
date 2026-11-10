@@ -1,0 +1,106 @@
+.lmk-collapsible-panel {
+	flex-direction: column;
+	overflow: hidden;
+
+	border-width: 1px;
+	border-color: var(--lmk-color-content-border);
+}
+
+.lmk-collapsible-panel__header {
+	flex-direction: row;
+	align-items: center;
+	flex-shrink: 0;
+	height: 22px;
+	padding-left: 6px;
+
+	background-color: var(--lmk-color-header-background);
+	border-bottom-width: 1px;
+	border-color: var(--lmk-color-border);
+}
+
+.lmk-collapsible-panel__header:hover {
+	background-color: var(--lmk-color-header-background-hover);
+}
+
+.lmk-collapsible-panel__title {
+	flex-grow: 1;
+	flex-shrink: 1;
+	margin: 0px;
+	padding: 0px;
+
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	-unity-text-align: middle-left;
+	-unity-font-style: bold;
+}
+
+.lmk-collapsible-panel__header-actions {
+	flex-direction: row;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+/* Two classes, so it beats .toolbar-button but not its hover and active rules. */
+.lmk-collapsible-panel__header .lmk-collapsible-panel__collapse-button {
+	flex-shrink: 0;
+	width: 22px;
+	height: 21px;
+	margin: 0px;
+	padding: 0px;
+
+	background-color: transparent;
+	border-width: 0px;
+}
+
+.lmk-collapsible-panel__chevron {
+	width: 8px;
+	height: 8px;
+
+	--unity-image-tint-color: var(--lmk-color-icon);
+}
+
+.lmk-collapsible-panel__content {
+	flex-grow: 1;
+	flex-shrink: 1;
+}
+
+/* Collapsed: only the header shows. */
+.lmk-collapsible-panel--collapsed {
+	flex-grow: 0;
+}
+
+.lmk-collapsible-panel--collapsed > .lmk-collapsible-panel__header {
+	border-bottom-width: 0px;
+}
+
+/* Collapsed sideways: a strip with the expand button at the top and the title rotated below it. */
+.lmk-collapsible-panel--collapsed.lmk-collapsible-panel--horizontal {
+	width: 24px;
+	min-width: 24px;
+	max-width: 24px;
+}
+
+.lmk-collapsible-panel--collapsed.lmk-collapsible-panel--horizontal > .lmk-collapsible-panel__header {
+	flex-grow: 1;
+	flex-direction: column;
+	align-items: center;
+	height: auto;
+	padding-left: 0px;
+}
+
+.lmk-collapsible-panel--collapsed.lmk-collapsible-panel--horizontal .lmk-collapsible-panel__header-actions {
+	display: none;
+}
+
+/* Rotated clockwise around its top-left corner, so the text runs down and its left edge sits at `left`. */
+.lmk-collapsible-panel--collapsed.lmk-collapsible-panel--horizontal .lmk-collapsible-panel__title {
+	position: absolute;
+	top: 26px;
+	left: 19px;
+	flex-grow: 0;
+
+	overflow: visible;
+	transform-origin: left top;
+	rotate: 90deg;
+}

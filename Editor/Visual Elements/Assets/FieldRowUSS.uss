@@ -1,0 +1,44 @@
+.lmk-field-row {
+	flex-direction: row;
+	align-items: center;
+	min-height: 20px;
+}
+
+.lmk-field-row__label {
+	flex-shrink: 0;
+	margin: 0px 6px 0px 0px;
+	padding: 0px;
+
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	-unity-text-align: middle-left;
+	color: var(--lmk-color-text-muted);
+}
+
+/* The value area is a row, so a value and a button sit on one line. */
+.lmk-field-row__value {
+	flex-grow: 1;
+	flex-shrink: 1;
+	flex-direction: row;
+	align-items: center;
+	min-width: 0px;
+}
+
+.lmk-field-row__value > .unity-base-field {
+	flex-grow: 1;
+	flex-shrink: 1;
+}
+
+/* Label next to the first line of a tall value, e.g. a multi-line text field. */
+.lmk-field-row--align-top {
+	align-items: flex-start;
+}
+
+.lmk-field-row--align-top > .lmk-field-row__value {
+	align-items: flex-start;
+}
+
+.lmk-field-row--align-top > .lmk-field-row__label {
+	padding-top: 3px;
+}

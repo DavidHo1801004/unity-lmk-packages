@@ -3,6 +3,22 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-11-10
+
+### Added
+- `CollapsiblePanel`: titled panel with header actions, collapsing to its header or sideways to a strip with a rotated title.
+- `PanelLayout`: row or column of panels around a fill child, with resize handles, reordering by panel header, collapsing, and per-user layout saved through `EditorUserSettings`.
+- `AnchoredPopup`: popup window with any content, placed under an anchor element, closed by Esc, focus loss or `Close()`.
+- `FieldRowGroup` and `FieldRow`: label and value rows whose labels line up.
+- `EditableLabel`: label edited in place by double-click or its pencil button, with character filtering, validation and a title variant.
+- `LinkLabel`: clickable text styled as a link, usable from the keyboard.
+- `DragReorderManipulator.CanStartDrag`: decide which presses start a drag, e.g. only on a handle.
+- `LMKTheme`: `--lmk-color-link`, `-link-hover`, `-item-selected`, `-row-alternate` and `-popup-border` variables.
+- EditMode tests for the new elements, including real popup windows, focus and keyboard input.
+
+### Fixed
+- `DragReorderManipulator` didn't start a drag when its target was another element's content container.
+
 ## [0.2.0] - 2026-10-31
 
 ### Added

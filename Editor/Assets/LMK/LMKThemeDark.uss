@@ -13,7 +13,10 @@
 
 	--lmk-color-popup-background: rgb(50, 50, 50);
 	--lmk-color-popup-content-background: rgb(35, 35, 35);
+	--lmk-color-popup-border: rgb(25, 25, 25);
 	--lmk-color-item-hover: rgba(255, 255, 255, 0.1);
+	--lmk-color-item-selected: rgba(44, 93, 135, 0.8);
+	--lmk-color-row-alternate: rgba(1, 1, 1, 0.2);
 
 	--lmk-color-header-background: rgba(1, 1, 1, 0.2);
 	--lmk-color-header-background-hover: rgb(80, 80, 80);
@@ -29,6 +32,9 @@
 	--lmk-color-button-background-active: rgb(38, 38, 38);
 	--lmk-color-button-background-hover: rgb(30, 30, 30);
 	--lmk-color-button-border: rgb(12, 12, 12);
+
+	--lmk-color-link: rgb(76, 126, 255);
+	--lmk-color-link-hover: rgb(120, 160, 255);
 
 	--lmk-color-drop-indicator: rgb(58, 121, 187);
 }

@@ -24,6 +24,13 @@ namespace LMK.Editor.UIElements
         public Func<VisualElement, bool> CanReorder { get; set; }
 
         /// <summary>
+        /// Whether a press can start a drag, given the pressed element (the child itself or one of its descendants).
+        /// Null accepts every press. <br/>
+        /// Use it to drag only by a handle, or to keep a child in place while it still counts as a drop slot.
+        /// </summary>
+        public Func<VisualElement, bool> CanStartDrag { get; set; }
+
+        /// <summary>
         /// Called on a drop that changes the order, with the child index to move from and to. <br/>
         /// <c>to</c> is the child's index after the move: remove at <c>from</c>, then insert at <c>to</c>.
         /// </summary>
@@ -38,7 +45,7 @@ namespace LMK.Editor.UIElements
 
         private const string USS_CLASS_DRAGGING = USS_CLASS + "__item--dragging";
 
-        private const string USS_CLASS_INDICATOR = USS_CLASS + "__indicator";
+        internal const string USS_CLASS_INDICATOR = USS_CLASS + "__indicator";
 
         private const string USS_CLASS_INDICATOR_HORIZONTAL = USS_CLASS_INDICATOR + "--horizontal";
 
@@ -109,7 +116,10 @@ namespace LMK.Editor.UIElements
         {
             if (isDragging || !CanStartManipulation(_Event)) return;
 
-            pressedChild = FindChildAt(_Event.target as VisualElement);
+            var pressed = _Event.target as VisualElement;
+            if (CanStartDrag != null && !CanStartDrag(pressed)) return;
+
+            pressedChild = FindChildAt(pressed);
             if (pressedChild == null) return;
 
             pressPosition = _Event.position;
@@ -226,12 +236,13 @@ namespace LMK.Editor.UIElements
             slots.Clear();
         }
 
-        // The direct child of the target containing _Element.
+        // The child of the target containing _Element. Compared through hierarchy.parent: a child's logical parent is the
+        // element that owns the content container, which isn't the target when the target is a content container itself.
         private VisualElement FindChildAt(VisualElement _Element)
         {
             for (var element = _Element; element != null && element != target; element = element.hierarchy.parent)
             {
-                if (element.parent == target)
+                if (element.hierarchy.parent == target.contentContainer)
                     return element;
             }
             return null;

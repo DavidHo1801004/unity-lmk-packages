@@ -1,0 +1,75 @@
+.lmk-editable-label {
+	flex-direction: row;
+	align-items: center;
+	min-height: 20px;
+}
+
+.lmk-editable-label__label {
+	flex-shrink: 1;
+	margin: 0px;
+	padding: 0px 2px;
+
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	-unity-text-align: middle-left;
+}
+
+/* A small button, shown while the label is hovered. Visibility rather than display, so the label doesn't move. */
+.lmk-editable-label__icon {
+	flex-shrink: 0;
+	width: 16px;
+	height: 16px;
+	margin-left: 2px;
+	padding: 2px;
+	border-radius: 2px;
+
+	visibility: hidden;
+	--unity-image-tint-color: var(--lmk-color-icon);
+}
+
+.lmk-editable-label:hover .lmk-editable-label__icon {
+	visibility: visible;
+}
+
+.lmk-editable-label__icon:hover {
+	background-color: var(--lmk-color-item-hover);
+}
+
+.lmk-editable-label__icon:active {
+	background-color: var(--lmk-color-button-background-active);
+}
+
+.lmk-editable-label__field {
+	flex-grow: 1;
+	flex-shrink: 1;
+	margin: 0px;
+}
+
+/* The text starts 2px in, like the label's: 1px border, 1px padding, no text padding. */
+.lmk-editable-label__field .unity-base-text-field__input {
+	margin: 0px;
+	padding-left: 1px;
+}
+
+.lmk-editable-label__field .unity-base-text-field__input .unity-text-element {
+	margin-left: 0px;
+	padding-left: 0px;
+}
+
+/* Specific enough to beat the default focused text field border. */
+.lmk-editable-label.lmk-editable-label--invalid .lmk-editable-label__field .unity-base-text-field__input {
+	border-width: 1px;
+	border-color: var(--lmk-color-text-error);
+}
+
+/* Title variant. */
+.lmk-editable-label--title {
+	min-height: 24px;
+}
+
+.lmk-editable-label--title .lmk-editable-label__label,
+.lmk-editable-label--title .lmk-editable-label__field .unity-base-text-field__input {
+	font-size: 16px;
+	-unity-font-style: bold;
+}

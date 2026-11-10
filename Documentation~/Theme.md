@@ -35,7 +35,10 @@ Elements keep the palette they were built with when the Editor skin changes; reb
 | `--lmk-color-separator` | Separator lines and labels |
 | `--lmk-color-popup-background` | Popup window background |
 | `--lmk-color-popup-content-background` | Popup content area |
+| `--lmk-color-popup-border` | Popup window border, e.g. `AnchoredPopup` |
 | `--lmk-color-item-hover` | Hovered list items and buttons |
+| `--lmk-color-item-selected` | Selected list or tree rows |
+| `--lmk-color-row-alternate` | Alternate rows in tables and lists |
 | `--lmk-color-header-background` / `-hover` | Foldout headers |
 | `--lmk-color-border` | Header borders |
 | `--lmk-color-content-border` | Foldout content borders |
@@ -43,6 +46,7 @@ Elements keep the palette they were built with when the Editor skin changes; reb
 | `--lmk-color-field-border` / `-hover` | Input field borders |
 | `--lmk-color-button-background` / `-active` / `-hover` | Toolbar buttons (normal, active, hovered) |
 | `--lmk-color-button-border` | Toolbar button borders |
+| `--lmk-color-link` / `-hover` | `LinkLabel` text (normal, hovered) |
 | `--lmk-color-drop-indicator` | Drop position while dragging to reorder |
 
 The values are defined in `Editor/Assets/LMK/LMKThemeDark.uss` and `LMKThemeLight.uss`. Keep both files in sync, and use only these variables (no colour literals) in LMK USS files.
