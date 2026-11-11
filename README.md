@@ -52,7 +52,7 @@ New releases are signed with [Unity package signatures](https://docs.unity3d.com
 - Each package lives on its own branch, `upm/<package>`, with the package at the branch root.
 - Each version is a tag `<package>/<version>`, e.g. `com.lmk.attributes/0.1.0`.
 - Each signed version has a GitHub Release with the same tag and the signed `.tgz`.
-- This branch (`main`) holds this page and the signing workflow.
+- This branch (`main`) holds this page, the signing workflow and the release tools ([`tools/`](tools/RELEASING.md)).
 
 Documentation, changelog and licence are in each package branch.
 

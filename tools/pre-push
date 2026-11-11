@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Git pre-push hook: only release refs may be pushed to the release repository.
+# Install, from the root of a development repo: git show releases/main:tools/pre-push > .git/hooks/pre-push
+#
+# Allowed on the release remote: refs/heads/main, and refs/heads/upm/* / refs/tags/com.lmk.*/* that contain a
+# package (root package.json, no Assets/ folder). Deleting those refs is allowed. Other remotes are unaffected.
+# Replaces Git LFS's own pre-push hook, so it runs "git lfs pre-push" afterwards for every remote.
+
+REMOTE_NAME="$1"
+RELEASE_REMOTE="${LMK_RELEASE_REMOTE:-releases}"
+ZERO="0000000000000000000000000000000000000000"
+
+REFS=$(cat)
+
+if [ "$REMOTE_NAME" = "$RELEASE_REMOTE" ]; then
+    while read -r LOCAL_REF LOCAL_SHA REMOTE_REF REMOTE_SHA; do
+        [ -n "$REMOTE_REF" ] || continue
+        case "$REMOTE_REF" in
+            refs/heads/main) ;;
+            refs/heads/upm/* | refs/tags/com.lmk.*/*)
+                if [ "$LOCAL_SHA" != "$ZERO" ]; then
+                    if ! git cat-file -e "$LOCAL_SHA:package.json" 2>/dev/null || git cat-file -e "$LOCAL_SHA:Assets" 2>/dev/null; then
+                        echo "pre-push: '$LOCAL_REF' isn't a package snapshot (no root package.json, or has Assets/)." >&2
+                        exit 1
+                    fi
+                fi
+                ;;
+            *)
+                echo "pre-push: refusing to push '$REMOTE_REF' to $RELEASE_REMOTE (release refs only)." >&2
+                exit 1
+                ;;
+        esac
+    done <<< "$REFS"
+fi
+
+if command -v git-lfs >/dev/null 2>&1; then
+    printf '%s\n' "$REFS" | git lfs pre-push "$@" || exit $?
+fi
+exit 0

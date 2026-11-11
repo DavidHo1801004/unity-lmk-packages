@@ -1,7 +1,7 @@
 # Sign one released package version and publish it as a GitHub Release, for OpenUPM (trackingMode: githubRelease).
 #
 # Release tags point at package-only snapshot commits that don't contain this workflow, so it can't run on tag push.
-# Tools/release-package.sh dispatches it after pushing a tag, or run it by hand:
+# tools/release-package.sh (on main) dispatches it after pushing a tag, or run it by hand:
 #   gh workflow run sign-release.yml --repo DavidHo1801004/unity-lmk-packages -f tag=com.lmk.editor/0.1.2
 #
 # Needs secrets UPM_SERVICE_ACCOUNT_KEY_ID and UPM_SERVICE_ACCOUNT_KEY_SECRET (service account with the
