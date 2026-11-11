@@ -1,11 +1,12 @@
 # LMK Unity Packages
 
-Editor tools for Unity, published as Unity Package Manager (UPM) packages.
+Editor tools and gameplay libraries for Unity, published as Unity Package Manager (UPM) packages.
 
 | Package | Description | Branch | Latest |
 |---|---|---|---|
 | [`com.lmk.attributes`](../../tree/upm/com.lmk.attributes) | Inspector attributes: `[InlineInstanced]` searchable type picker for `[SerializeReference]` fields, lists and arrays. | `upm/com.lmk.attributes` | 0.2.0 |
 | [`com.lmk.editor`](../../tree/upm/com.lmk.editor) | Shared UI Toolkit editor library: theme, searchable hierarchical dropdown, search syntax, controls. | `upm/com.lmk.editor` | 0.3.0 |
+| [`com.lmk.gameplaytags`](../../tree/upm/com.lmk.gameplaytags) | Hierarchical gameplay tags (`Status.Debuff.Stun`) identified by ID: tag fields, a tag editor, reference tools, package registries and generated constants. | `upm/com.lmk.gameplaytags` | 1.0.0 |
 
 Requires Unity 6000.3 or newer.
 
@@ -36,6 +37,7 @@ Add each package in *Package Manager → + → Add package from git URL*, depend
 ```
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.2.0
+https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.0.0
 ```
 
 ## Package signatures
