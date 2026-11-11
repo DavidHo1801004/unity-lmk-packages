@@ -1,0 +1,32 @@
+/*
+Common elements
+*/
+GameplayTagControlPanel {
+	align-self: stretch;
+	flex-grow: 1;
+}
+
+
+
+/*
+General classes
+*/
+.fill-between {
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: stretch;
+
+	--unity-image: url("/Packages/com.lmk.editor/Editor/Visual Elements/Assets/Sprites/search-interface-symbol-white.png");
+	--unity-image-size: scale-to-fit;
+}
+
+.fill {
+	flex-grow: 1;
+	align-self: stretch;
+}
+
+.fill-background {
+	background-color: var(--lmk-color-popup-content-background);
+	border-width: 1px;
+	border-top-color: var(--lmk-color-border);
+}

@@ -1,0 +1,79 @@
+.gameplay-tag__container {
+	flex-direction: row;
+	margin: 1px 0px 1px 3px;
+}
+
+.gameplay-tag__content-container {
+	flex-direction: row;
+
+	border-radius: 4px;
+
+	transition: background-color;
+	transition-duration: 0.1s;
+}
+.gameplay-tag__content-container:hover {
+	background-color: var(--lmk-color-item-hover);
+}
+
+.gameplay-tag__tag-container-dropdown-icon {
+	min-height: 12px;
+	height: 12px;
+	min-width: 12px;
+	width: 12px;
+	margin: 0px 2px 0px 2px;
+	align-self: center;
+
+	--unity-image: url("Sprites/down-arrow_white_32.png");
+}
+
+#property-label.gameplay-tag__label {
+	width: 40%;
+	min-width: 100px;
+	padding: 2px 0px 0px 0px;
+
+	-unity-text-align: upper-left;
+}
+
+#tag-label.gameplay-tag__tag-label {
+	flex-grow: 1;
+	padding: 0px 4px 0px 4px;
+	margin: 0px;
+	overflow: hidden;
+
+	background-color: var(--lmk-color-header-background-hover);
+	border-radius: 3px;
+	border-width: 1px;
+	border-color: var(--lmk-color-field-border);
+
+	text-overflow: ellipsis;
+	-unity-text-align: middle-left;
+}
+
+#empty-tag-label.gameplay-tag__empty-tag-label {
+	align-self: stretch;
+	flex-grow: 1;
+	padding: 0px 2px 0px 2px;
+
+	background-color: var(--lmk-color-header-background);
+	border-radius: 3px;
+	border-width: 1px;
+	border-color: var(--lmk-color-field-border);
+
+	color: var(--lmk-color-text-muted);
+}
+
+
+/*
+Tag references that don't resolve: deleted, or from a registry that isn't loaded.
+*/
+.gameplay-tag--missing {
+	color: var(--lmk-color-text-error);
+	-unity-font-style: italic;
+}
+
+/*
+Implicit tags: they exist only as parents of added tags.
+*/
+.gameplay-tag--implicit {
+	-unity-font-style: italic;
+}

@@ -1,0 +1,19 @@
+{
+    "name": "LMK.GameplayTags.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:dd06db7bf5968c04fb60ea759182599b",
+        "GUID:9492516da2337774186b76cd876bcea4"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

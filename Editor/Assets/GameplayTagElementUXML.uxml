@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xmlns:lmk="LMK.Editor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+>
+<Style src="GameplayTagElementUSS.uss"/>
+    <ui:VisualElement name="container">
+        <lmk:Switcher name="switcher">
+            <ui:VisualElement name="leaf-tag-container">
+                <ui:Label name="leaf-tag"/>
+            </ui:VisualElement>
+            <ui:Foldout name="branch-tag"/>
+        </lmk:Switcher>
+        <ui:Label name="sources-label"/>
+        <ui:Toggle name="select-box"/>
+    </ui:VisualElement>
+</ui:UXML>

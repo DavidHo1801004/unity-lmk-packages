@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xmlns:lmk="LMK.Editor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+>
+<Style src="GeneralGameplayTagUSS.uss"/>
+<Style src="GameplayTagControlPanelUSS.uss"/>
+    <ui:VisualElement name="search-bar-controls">
+        <lmk:SearchBar name="search-bar" placeholder-text="Search Gameplay Tags"/>
+        <ui:Button name="general-controls" tooltip="Options"/>
+    </ui:VisualElement>
+    <ui:VisualElement class="fill">
+        <ui:ScrollView name="tag-tree-scroll-view" class="fill-background"/>
+        <ui:Label name="empty-data-label" text="No Gameplay Tag Registry"/>
+    </ui:VisualElement>
+    <ui:HelpBox name="help-box-message"/>
+</ui:UXML>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xmlns:lmk="LMK.Editor.UIElements"
+    xmlns:lmk_gt="LMK.Editor.GameplayTags"
+    xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+>
+<Style src="GeneralGameplayTagUSS.uss"/>
+<Style src="GameplayTagSelectionWindowUSS.uss"/>
+    <lmk:NamedSeparator name="window-label" color="#707070" style="margin-bottom: 2px;"/>
+    <ui:Button name="clear-selection" class="gameplay-tag__menu-button" text="Clear Selection"/>
+    <ui:Button name="open-manager-window" class="gameplay-tag__menu-button" text="Manage Gameplay Tags..."/>
+    <lmk:NamedSeparator color="#707070"/>
+    <lmk_gt:GameplayTagControlPanel/>
+</ui:UXML>

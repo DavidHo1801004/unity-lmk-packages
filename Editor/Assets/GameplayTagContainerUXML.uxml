@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xmlns:lmk="LMK.Editor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+>
+<Style src="GameplayTagContainerUSS.uss"/>
+    <ui:VisualElement class="gameplay-tag__container">
+        <ui:Label name="property-label" class="gameplay-tag__label"/>
+        <ui:VisualElement name="main-container" class="gameplay-tag__content-container">
+            <ui:VisualElement name="tag-container" class="gameplay-tag__tag-container">
+                <lmk:Switcher name="tag-container-switcher">
+                    <ui:Label name="empty-tag-label" text="Empty"/>
+                    <ui:VisualElement name="tag-container-content" class="gameplay-tag__tag-container-content"/>
+                </lmk:Switcher>
+            </ui:VisualElement>
+            <ui:Image name="dropdown-icon" class="gameplay-tag__tag-container-dropdown-icon"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

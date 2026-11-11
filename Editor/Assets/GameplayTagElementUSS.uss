@@ -1,0 +1,153 @@
+.unity-label {
+	-unity-text-align: middle-left;
+}
+
+
+
+#container {
+	flex-direction: row;
+}
+
+#switcher {
+	width: 100%;
+	align-content: stretch;
+}
+
+
+
+#leaf-tag-container {
+	height: 100%;
+	width: 100%;
+	padding: 3px 2px 3px 5px;
+	margin: 0px;
+
+	background-color: var(--lmk-color-popup-background);
+	border-width: 1px 0 0 1px;
+	border-color: var(--lmk-color-popup-content-background);
+	
+	transition-property: background-color;
+	transition-duration: 0.1s;
+}
+
+#leaf-tag-container:hover {
+	background-color: var(--lmk-color-header-background-hover);
+
+	-unity-font-style: bold;
+}
+
+#leaf-tag {
+	padding-top: 1px;
+}
+
+
+
+#branch-tag {
+	height: 100%;
+	width: 100%;
+	margin: 0px;
+
+	border-width: 0 0 0 1px;
+	border-color: var(--lmk-color-popup-content-background);
+}
+
+#branch-tag > .unity-foldout__toggle {
+	padding: 3px 2px 3px 4px;
+	margin: 0px;
+
+	background-color: var(--lmk-color-header-background);
+	border-width: 1px 0 0 0;
+	border-color: var(--lmk-color-popup-content-background);
+	
+	transition-property: background-color;
+	transition-duration: 0.1s;
+}
+
+#branch-tag > .unity-foldout__toggle:hover {
+	background-color: var(--lmk-color-header-background-hover);
+
+	-unity-font-style: bold;
+}
+
+#branch-tag > .unity-foldout__content {
+	padding: 0 0 0 14px;
+	margin: 0;
+	
+	background-color: var(--lmk-color-popup-background);
+}
+
+
+
+/*
+Overlay text (tag sources, rename text field)
+*/
+#sources-label {
+	min-width: 16px;
+	position: absolute;
+	top: 3px;
+	right: 5px;
+
+	background-color: var(--lmk-color-popup-background);
+	border-radius: 3px;
+	border-width: 1px;
+	border-color: var(--lmk-color-field-border-hover);
+	padding: 0px 4px 0px 4px;
+
+	color: var(--lmk-color-text-muted);
+	font-size: 11px;
+	-unity-text-align: middle-center;
+	-unity-font-style: bold;
+}
+
+#select-box {
+	top: 3px;
+	left: 3px;
+	position: absolute;
+}
+
+.select-box-active.unity-label,
+.select-box-active > * > .unity-foldout__input {
+	padding-left: 20px;
+}
+
+
+/*
+Implicit tags exist only as parents of declared tags.
+*/
+#container.implicit-tag > #switcher > #leaf-tag-container > #leaf-tag,
+#container.implicit-tag > #switcher > #branch-tag > .unity-foldout__toggle .unity-label {
+	color: var(--lmk-color-text-muted);
+	-unity-font-style: italic;
+}
+
+/*
+Branches with selected sub tags.
+*/
+#branch-tag.descendant-selected > .unity-foldout__toggle {
+	border-left-width: 2px;
+	border-left-color: var(--lmk-color-drop-indicator);
+}
+
+
+
+/*
+Selected row (Gameplay Tag Manager). Kept while hovered, so the selection stays visible.
+*/
+#leaf-tag-container.tag-row--selected,
+#leaf-tag-container.tag-row--selected:hover,
+#branch-tag > .unity-foldout__toggle.tag-row--selected,
+#branch-tag > .unity-foldout__toggle.tag-row--selected:hover {
+	background-color: var(--lmk-color-item-selected);
+}
+
+
+
+/*
+Marker: a strip in the tag's marker colour, at the end of its row. The colour is set from code.
+*/
+.tag-marker {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 4px;
+}

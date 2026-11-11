@@ -1,0 +1,19 @@
+:root {
+	flex-grow: 1;
+
+	border-width: 1px;
+	border-color: var(--lmk-color-content-border);
+	border-radius: 4px;
+}
+
+.gameplay-tag__menu-button {
+	border-width: 0px;
+	border-radius: 1px;
+	background-color: var(--lmk-color-header-background);
+
+	transition: background-color;
+	transition-duration: 0.1s;
+}
+.gameplay-tag__menu-button:hover {
+	background-color: var(--lmk-color-header-background-hover);
+}

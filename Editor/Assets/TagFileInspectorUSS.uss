@@ -1,0 +1,138 @@
+/*
+Inspector of a tag file (*.tags). Colours come from the LMK palette (var(--lmk-color-*)); the status colours
+reuse the package's own add (green) and warning (yellow) colours.
+*/
+.tag-file {
+	--tag-file-new-color: #2cbf62;
+	--tag-file-change-color: #deb91f;
+	--tag-file-indent: 15px;
+
+	padding-top: 2px;
+}
+
+.tag-file__summary {
+	margin: 2px 0px 4px 3px;
+
+	-unity-font-style: bold;
+}
+
+.tag-file__help-box {
+	margin: 0px 0px 4px 0px;
+}
+
+
+
+/*
+Tag table
+*/
+.tag-file__table {
+	border-width: 1px;
+	border-radius: 3px;
+	border-color: var(--lmk-color-content-border);
+	overflow: hidden;
+}
+
+.tag-file__row {
+	flex-direction: row;
+	align-items: center;
+	min-height: 20px;
+	padding-right: 4px;
+}
+.tag-file__row--odd {
+	background-color: var(--lmk-color-header-background);
+}
+.tag-file__row:hover {
+	background-color: var(--lmk-color-item-hover);
+}
+
+/* Name column: a header-only foldout, so branches get the native arrow. */
+.tag-file__name {
+	width: 45%;
+	min-width: 120px;
+	flex-shrink: 0;
+	margin: 0px;
+}
+.tag-file__name > .unity-foldout__toggle {
+	margin: 0px;
+}
+.tag-file__name .unity-foldout__content {
+	display: none;
+}
+.tag-file__name .unity-foldout__text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Leaves keep the arrow's space, so names stay aligned. */
+.tag-file__row--leaf .unity-foldout__checkmark,
+.tag-file__row--leaf .unity-toggle__checkmark {
+	visibility: hidden;
+}
+
+.tag-file__row--parent .unity-foldout__text {
+	-unity-font-style: italic;
+}
+
+.tag-file__status {
+	width: 110px;
+	flex-shrink: 0;
+	padding-left: 6px;
+
+	font-size: 10px;
+	color: var(--lmk-color-text-muted);
+}
+.tag-file__status--new {
+	color: var(--tag-file-new-color);
+}
+.tag-file__status--change {
+	color: var(--tag-file-change-color);
+}
+
+.tag-file__description {
+	flex-grow: 1;
+	flex-shrink: 1;
+	padding-left: 6px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+	color: var(--lmk-color-text-muted);
+}
+
+.tag-file__empty {
+	padding: 4px 6px 4px 6px;
+
+	color: var(--lmk-color-text-muted);
+}
+
+
+
+/*
+Import button, as the Tag Editor's action buttons.
+*/
+.tag-file__actions {
+	flex-direction: row;
+	justify-content: flex-end;
+	margin-top: 6px;
+}
+
+.tag-file__import-button {
+	height: 22px;
+	padding: 2px 8px 2px 8px;
+	margin: 2px 0px 2px 2px;
+
+	background-color: var(--lmk-color-button-background);
+	border-color: var(--lmk-color-button-border);
+
+	transition: background-color, border-width;
+	transition-duration: 0.1s;
+}
+.tag-file__import-button:hover {
+	background-color: var(--lmk-color-button-background-hover);
+	border-color: var(--lmk-color-button-border);
+}
+.tag-file__import-button:active {
+	background-color: var(--lmk-color-button-background-active);
+}
+.tag-file__import-button:focus {
+	border-color: var(--lmk-color-field-border-hover);
+}

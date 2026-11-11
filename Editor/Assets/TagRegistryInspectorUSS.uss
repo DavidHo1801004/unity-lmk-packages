@@ -1,0 +1,52 @@
+/*
+Inspector of a registry file (*.tagregistry). Colours come from the LMK palette (var(--lmk-color-*)).
+*/
+.tag-registry {
+	padding-top: 2px;
+}
+
+.tag-registry__help-box {
+	margin: 0px 0px 4px 0px;
+}
+
+.tag-registry__rows {
+	margin: 2px 0px 6px 3px;
+}
+
+.tag-registry__value {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tag-registry__toggle {
+	margin: 2px 0px 2px 3px;
+}
+
+.tag-registry__actions {
+	flex-direction: row;
+	justify-content: flex-end;
+	margin-top: 6px;
+}
+
+/* As the tag file Inspector's import button. */
+.tag-registry__button {
+	height: 22px;
+	padding: 2px 8px 2px 8px;
+	margin: 2px 0px 2px 2px;
+
+	background-color: var(--lmk-color-button-background);
+	border-color: var(--lmk-color-button-border);
+
+	transition: background-color, border-width;
+	transition-duration: 0.1s;
+}
+.tag-registry__button:hover {
+	background-color: var(--lmk-color-button-background-hover);
+	border-color: var(--lmk-color-button-border);
+}
+.tag-registry__button:active {
+	background-color: var(--lmk-color-button-background-active);
+}
+.tag-registry__button:focus {
+	border-color: var(--lmk-color-field-border-hover);
+}

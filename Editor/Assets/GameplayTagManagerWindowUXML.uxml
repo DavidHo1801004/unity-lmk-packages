@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xmlns:lmk="LMK.Editor.UIElements"
+    xmlns:lmk_gt="LMK.Editor.GameplayTags"
+    xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
+>
+<Style src="GeneralGameplayTagUSS.uss"/>
+<Style src="GameplayTagManagerWindowUSS.uss"/>
+    <lmk:Switcher name="switcher" class="fill">
+        <ui:Button name="create-database-button" text="Create Main Tag Registry"/>
+        <lmk:PanelLayout name="layout" persistence-key="LMK.GameplayTags.ManagerLayout" class="fill">
+            <ui:VisualElement name="tree-panel" class="lmk-panel-layout__fill">
+                <lmk_gt:GameplayTagControlPanel name="control-panel" show-header="false" editable="true" row-selection="true"/>
+            </ui:VisualElement>
+            <lmk:CollapsiblePanel name="inspector" title="Inspector" min-size="200" max-size="640" style="width: 280px;"/>
+        </lmk:PanelLayout>
+    </lmk:Switcher>
+</ui:UXML>
