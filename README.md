@@ -38,7 +38,8 @@ Add each package in *Package Manager → + → Add package from git URL*, depend
 ```
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.2.0
-https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.0.0
+https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.0.0
+https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.1.0
 ```
 
 ## Package signatures
