@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 using static LMK.Editor.GameplayTags.Tests.TestIds;
 
@@ -111,6 +112,51 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.AreNotEqual(0, first);
             Assert.AreNotEqual(0, second);
             Assert.AreNotEqual(first, second);
+        }
+
+        [Test]
+        public void ActiveChanged_TheParameterlessEventOf10KeepsFiring_NextToPreviousAndCurrent()
+        {
+            var first = Activate(MainBuilder());
+            int parameterless = 0;
+            (GameplayTagDatabase previous, GameplayTagDatabase current) seen = default;
+            void OnChanged() => parameterless++;
+            void OnReplaced(GameplayTagDatabase _Previous, GameplayTagDatabase _Current) => seen = (_Previous, _Current);
+
+            GameplayTagDatabase.ActiveChanged += OnChanged;
+            GameplayTagDatabase.ActiveDatabaseChanged += OnReplaced;
+            try
+            {
+                var second = Activate(MainBuilder());
+
+                Assert.AreEqual(1, parameterless);
+                Assert.AreSame(first, seen.previous);
+                Assert.AreSame(second, seen.current);
+            }
+            finally
+            {
+                GameplayTagDatabase.ActiveChanged -= OnChanged;
+                GameplayTagDatabase.ActiveDatabaseChanged -= OnReplaced;
+            }
+
+            Activate(MainBuilder());
+            Assert.AreEqual(1, parameterless, "unsubscribed");
+        }
+
+        [Test]
+        public void Database_IsTheRegistryDatabaseOfTheTagKind()
+        {
+            var database = Activate(MainBuilder());
+            var fire = database.FindByPath(MainRegistry, "Ability.Fire");
+
+            // A tag is a registry row: its path is the row name, its handle the row index.
+            Assert.AreSame(database, RegistryDatabase<GameplayTagDatabase, TagRow>.Active);
+            Assert.AreEqual("GameplayTagDatabase", GameplayTagDatabase.ResourceName);
+            Assert.AreEqual("Ability.Fire", database.GetRowName(fire.Index));
+            Assert.AreEqual(RegistryResolution.Live(fire.Index), ((RegistryDatabase)database).Resolve(MainRegistry, Id(2)));
+            Assert.AreEqual(database.FindByPath(MainRegistry, "Ability"), database.GetParent(fire));
+            Assert.AreEqual(1, database.GetRowData(fire.Index).Depth);
+            Assert.AreEqual(RegistryOrigin.Main, ((RegistryDatabase)database).GetRegistry(0).Origin);
         }
 
         [Test]

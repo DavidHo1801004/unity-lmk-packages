@@ -1,145 +1,123 @@
 using System;
 using System.Collections.Generic;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
     /// <summary>
-    /// Immutable view of every loaded registry. A new snapshot is built whenever a registry changes, and
-    /// swapped in whole, so a snapshot can be read from any thread.
+    /// Immutable view of every loaded tag registry: a <see cref="RegistrySnapshot{TRow}"/> of the tag kind, with
+    /// the tag tree on top. A new snapshot is built whenever a registry changes, and swapped in whole, so a
+    /// snapshot can be read from any thread.
     /// </summary>
     internal sealed class TagRegistrySnapshot
     {
         /// <summary>
-        /// Input of <see cref="Build"/>: one imported registry file.
-        /// </summary>
-        public sealed class Source
-        {
-            public string AssetPath;
-            public TagRegistryData Data;
-            public string FileHash;
-            public bool ChecksumMismatch;
-            public bool UsingLastGood;
-            public IReadOnlyList<string> Errors = Array.Empty<string>();
-            public IReadOnlyList<string> Warnings = Array.Empty<string>();
-        }
-
-
-
-        /// <summary>
-        /// One loaded registry, indexed by ID and by path.
+        /// One loaded registry, indexed by ID, by path and by parent.
         /// </summary>
         public sealed class Registry
         {
-            private readonly Dictionary<TagGuid, TagRegistryRow> rows = new();
-            private readonly Dictionary<TagGuid, string> paths = new();
-            private readonly Dictionary<string, TagGuid> idsByPath = new(StringComparer.Ordinal);
-            private readonly Dictionary<TagGuid, List<TagGuid>> children = new();
-
-            public TagGuid Id => Data.registryId;
-            public string Name => string.IsNullOrEmpty(Data.name) ? Id.ToString() : Data.name;
-            public TagRegistryKind Kind => Data.kind;
-            public string AssetPath { get; }
-            public string FileHash { get; }
+            private readonly Dictionary<RegistryGuid, List<RegistryGuid>> children = new();
 
             /// <summary>
-            /// The registry content. Never modify it: copy it with <see cref="TagRegistryData.Clone"/>.
+            /// The registry as the registry core loaded it.
             /// </summary>
-            public TagRegistryData Data { get; }
+            public RegistrySnapshot<TagRegistryRow>.Registry Core { get; }
+
+            public RegistryGuid Id => Core.Id;
+            public string Name => Core.Name;
+            public RegistryOrigin Origin => Core.Origin;
+            public TagRegistryKind Kind => (TagRegistryKind)Core.Origin;
+            public string AssetPath => Core.AssetPath;
+            public string FileHash => Core.FileHash;
+
+            /// <summary>
+            /// The registry content. Never modify it: copy it with <see cref="RegistryData{TRow}.Clone"/>.
+            /// </summary>
+            public RegistryData<TagRegistryRow> Data => Core.Data;
 
             /// <summary>
             /// Only the main registry is editable, and only when it lives in the project.
             /// </summary>
-            public bool IsReadOnly => Kind != TagRegistryKind.Main || !AssetPath.StartsWith("Assets/", StringComparison.Ordinal);
+            public bool IsReadOnly => Core.IsReadOnly;
 
-            public bool ChecksumMismatch { get; }
+            public bool ChecksumMismatch => Core.ChecksumMismatch;
 
             /// <summary>
             /// Whether the file is currently rejected, and the last version that loaded is used instead.
             /// </summary>
-            public bool UsingLastGood { get; }
+            public bool UsingLastGood => Core.UsingLastGood;
 
-            public IReadOnlyList<string> Errors { get; }
-            public IReadOnlyList<string> Warnings { get; }
+            public IReadOnlyList<string> Errors => Core.Errors;
+            public IReadOnlyList<string> Warnings => Core.Warnings;
 
-            public int Count => rows.Count;
+            public int Count => Core.Count;
 
-            public IEnumerable<TagRegistryRow> Rows => rows.Values;
-
-            internal Registry(Source _Source)
+            /// <summary>
+            /// Every row, once per ID.
+            /// </summary>
+            public IEnumerable<RegistryRow<TagRegistryRow>> Rows
             {
-                AssetPath = _Source.AssetPath ?? string.Empty;
-                FileHash = _Source.FileHash ?? string.Empty;
-                Data = _Source.Data;
-                ChecksumMismatch = _Source.ChecksumMismatch;
-                UsingLastGood = _Source.UsingLastGood;
-                Errors = _Source.Errors ?? Array.Empty<string>();
-                Warnings = _Source.Warnings ?? Array.Empty<string>();
-
-                foreach (var row in Data.rows)
-                    rows[row.id] = row;
-
-                foreach (var row in rows.Values)
+                get
                 {
-                    if (!children.TryGetValue(row.parent, out var list))
-                        children.Add(row.parent, list = new List<TagGuid>());
-
-                    list.Add(row.id);
-                }
-
-                foreach (var list in children.Values)
-                    list.Sort((a, b) => string.CompareOrdinal(rows[a].segment, rows[b].segment));
-
-                foreach (var id in rows.Keys)
-                {
-                    string path = ComputePath(id);
-                    if (path == null) continue;
-
-                    paths[id] = path;
-                    idsByPath[path] = id;
+                    foreach (var id in Core.Ids)
+                        if (Core.TryGetRow(id, out var row))
+                            yield return new RegistryRow<TagRegistryRow>(id, row);
                 }
             }
 
-            public bool TryGetRow(TagGuid _Id, out TagRegistryRow _Row) => rows.TryGetValue(_Id, out _Row);
+            internal Registry(RegistrySnapshot<TagRegistryRow>.Registry _Core)
+            {
+                Core = _Core;
 
-            public bool Contains(TagGuid _Id) => rows.ContainsKey(_Id);
+                foreach (var id in Core.Ids)
+                {
+                    if (!Core.TryGetRow(id, out var row)) continue;
+
+                    if (!children.TryGetValue(row.parent, out var list))
+                        children.Add(row.parent, list = new List<RegistryGuid>());
+
+                    list.Add(id);
+                }
+
+                foreach (var list in children.Values)
+                    list.Sort((a, b) =>
+                    {
+                        Core.TryGetRow(a, out var rowA);
+                        Core.TryGetRow(b, out var rowB);
+                        return string.CompareOrdinal(rowA.segment, rowB.segment);
+                    });
+            }
+
+            public bool TryGetRow(RegistryGuid _Id, out TagRegistryRow _Row) => Core.TryGetRow(_Id, out _Row);
+
+            public bool Contains(RegistryGuid _Id) => Core.Contains(_Id);
 
             /// <summary>
             /// Full path of a row, or <see langword="null"/>.
             /// </summary>
-            public string GetPath(TagGuid _Id) => paths.TryGetValue(_Id, out string path) ? path : null;
+            public string GetPath(RegistryGuid _Id) => Core.GetName(_Id);
 
-            public bool TryFind(string _Path, out TagGuid _Id) => idsByPath.TryGetValue(_Path ?? string.Empty, out _Id);
+            public bool TryFind(string _Path, out RegistryGuid _Id) => Core.TryFind(_Path, out _Id);
 
             /// <summary>
-            /// Direct children of a row, sorted by segment. Use <see cref="TagGuid.Zero"/> for the top level tags.
+            /// Direct children of a row, sorted by segment. Use <see cref="RegistryGuid.Zero"/> for the top level tags.
             /// </summary>
-            public IReadOnlyList<TagGuid> GetChildren(TagGuid _Parent)
-                => children.TryGetValue(_Parent, out var list) ? list : (IReadOnlyList<TagGuid>)Array.Empty<TagGuid>();
-
-            private string ComputePath(TagGuid _Id)
-            {
-                var segments = new List<string>();
-                var current = _Id;
-
-                // Validated registries have no cycles, but never loop forever.
-                for (int steps = 0; !current.IsZero; steps++)
-                {
-                    if (steps > rows.Count || !rows.TryGetValue(current, out var row)) return null;
-
-                    segments.Add(row.segment);
-                    current = row.parent;
-                }
-
-                segments.Reverse();
-                return string.Join(TagPath.SEPARATOR.ToString(), segments);
-            }
+            public IReadOnlyList<RegistryGuid> GetChildren(RegistryGuid _Parent)
+                => children.TryGetValue(_Parent, out var list) ? list : (IReadOnlyList<RegistryGuid>)Array.Empty<RegistryGuid>();
         }
 
 
 
-        private readonly Dictionary<TagGuid, Registry> registriesById = new();
+        private readonly Dictionary<RegistryGuid, Registry> registriesById = new();
+        private GameplayTagNode root;
+
+        /// <summary>
+        /// The snapshot as the registry core built it.
+        /// </summary>
+        public RegistrySnapshot<TagRegistryRow> Core { get; }
 
         /// <summary>
         /// Loaded registries: the main registry first, then by name.
@@ -154,84 +132,44 @@ namespace LMK.Editor.GameplayTags
         /// <summary>
         /// Problems across registries, e.g. two files with the same registry ID.
         /// </summary>
-        public IReadOnlyList<string> Issues { get; }
+        public IReadOnlyList<string> Issues => Core.Issues;
 
         /// <summary>
-        /// Tag tree for the editor UI: one header node per registry, with its tags below.
+        /// Tag tree for the editor UI: one header node per registry, with its tags below. Built on first use.
         /// </summary>
-        public GameplayTagNode Root { get; }
+        public GameplayTagNode Root => root ??= GameplayTagNode.CreateTree(this);
 
         public bool IsEmpty => Registries.Count == 0;
 
-        public static readonly TagRegistrySnapshot Empty = Build(Array.Empty<Source>(), null);
 
 
-
-        private TagRegistrySnapshot(List<Registry> _Registries, Registry _Main, List<string> _Issues)
+        internal TagRegistrySnapshot(RegistrySnapshot<TagRegistryRow> _Core)
         {
-            Registries = _Registries;
-            Main = _Main;
-            Issues = _Issues;
+            Core = _Core;
 
-            foreach (var registry in _Registries)
+            var registries = new List<Registry>(_Core.Registries.Count);
+            foreach (var core in _Core.Registries)
+            {
+                var registry = new Registry(core);
+                registries.Add(registry);
                 registriesById[registry.Id] = registry;
 
-            Root = GameplayTagNode.CreateTree(this);
-        }
-
-        /// <summary>
-        /// Build a snapshot. When several files share a registry ID, the first one by path is used.
-        /// </summary>
-        /// <param name="_MainRegistryPath"> Where the main registry is expected. A main registry elsewhere is still used if there is no other. </param>
-        public static TagRegistrySnapshot Build(IEnumerable<Source> _Sources, string _MainRegistryPath)
-        {
-            var sources = new List<Source>();
-            foreach (var source in _Sources)
-                if (source?.Data != null)
-                    sources.Add(source);
-
-            sources.Sort((a, b) => string.CompareOrdinal(a.AssetPath, b.AssetPath));
-
-            var issues = new List<string>();
-            var registries = new List<Registry>();
-            var seen = new Dictionary<TagGuid, string>();
-
-            foreach (var source in sources)
-            {
-                if (seen.TryGetValue(source.Data.registryId, out string firstPath))
-                {
-                    issues.Add($"\"{source.AssetPath}\" has the same registry ID as \"{firstPath}\" and is ignored.");
-                    continue;
-                }
-
-                seen.Add(source.Data.registryId, source.AssetPath);
-                registries.Add(new Registry(source));
+                if (core == _Core.Main)
+                    Main = registry;
             }
 
-            Registry main = registries.Find(e => e.Kind == TagRegistryKind.Main && e.AssetPath == _MainRegistryPath)
-                         ?? registries.Find(e => e.Kind == TagRegistryKind.Main);
-
-            registries.Sort((a, b) =>
-            {
-                if (a == main) return -1;
-                if (b == main) return 1;
-
-                int compare = string.CompareOrdinal(a.Name, b.Name);
-                return compare != 0 ? compare : a.Id.CompareTo(b.Id);
-            });
-
-            return new TagRegistrySnapshot(registries, main, issues);
+            Registries = registries;
         }
 
 
 
-        public Registry Find(TagGuid _RegistryId)
+        public Registry Find(RegistryGuid _RegistryId)
             => registriesById.TryGetValue(_RegistryId, out var registry) ? registry : null;
 
         /// <summary>
         /// Find a live tag by path, in the main registry first, then in the others.
         /// </summary>
-        public bool TryFindByPath(string _Path, out Registry _Registry, out TagGuid _Id)
+        public bool TryFindByPath(string _Path, out Registry _Registry, out RegistryGuid _Id)
         {
             foreach (var registry in Registries)
             {
@@ -242,26 +180,13 @@ namespace LMK.Editor.GameplayTags
             }
 
             _Registry = null;
-            _Id = TagGuid.Zero;
+            _Id = RegistryGuid.Zero;
             return false;
         }
 
         /// <summary>
-        /// Build the runtime database for this snapshot.
+        /// Build the runtime database for this snapshot. The caller owns it.
         /// </summary>
-        public GameplayTagDatabase BuildDatabase()
-        {
-            var builder = new GameplayTagDatabaseBuilder();
-            foreach (var registry in Registries)
-            {
-                var rows = new List<GameplayTagDatabaseBuilder.Row>(registry.Count);
-                foreach (var row in registry.Rows)
-                    rows.Add(new GameplayTagDatabaseBuilder.Row(row.id, row.parent, row.segment, row.isImplicit));
-
-                builder.AddRegistry(registry.Id, registry.Name, registry.Kind, rows);
-            }
-
-            return builder.Build();
-        }
+        public GameplayTagDatabase BuildDatabase() => TagKind.Instance.BuildTagDatabase(Core);
     }
 }

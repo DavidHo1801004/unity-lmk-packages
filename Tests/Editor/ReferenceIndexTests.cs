@@ -8,6 +8,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 using LMK.GameplayTags.Tests;
 
 namespace LMK.Editor.GameplayTags.Tests
@@ -258,15 +259,15 @@ PrefabInstance:
 
             CollectionAssert.AreEquivalent(new[]
             {
-                new TagKey(new TagGuid(1, 2), new TagGuid(3, 4)),
-                new TagKey(new TagGuid(1, 2), new TagGuid(5, 6)),
-                new TagKey(TagGuid.Zero, new TagGuid(7, 8)),   // registry not overridden: unknown
-                new TagKey(new TagGuid(9, 10), new TagGuid(11, 12)),
+                new TagKey(new RegistryGuid(1, 2), new RegistryGuid(3, 4)),
+                new TagKey(new RegistryGuid(1, 2), new RegistryGuid(5, 6)),
+                new TagKey(RegistryGuid.Zero, new RegistryGuid(7, 8)),   // registry not overridden: unknown
+                new TagKey(new RegistryGuid(9, 10), new RegistryGuid(11, 12)),
             }, tags.Select(TagKey.Of));
 
             CollectionAssert.AreEquivalent(new[] { "Block", "Flow", "Overridden.Tag", "" }, tags.Select(e => e.LastKnownName));
 
-            Assert.IsTrue(new TagKey(TagGuid.Zero, new TagGuid(7, 8)).Matches(new TagGuid(1, 2), new TagGuid(7, 8)));
+            Assert.IsTrue(new TagKey(RegistryGuid.Zero, new RegistryGuid(7, 8)).Matches(new RegistryGuid(1, 2), new RegistryGuid(7, 8)));
         }
 
         [Test]

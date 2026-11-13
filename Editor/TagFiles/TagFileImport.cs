@@ -5,7 +5,9 @@ using System.Linq;
 
 using UnityEditor;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
@@ -64,7 +66,7 @@ namespace LMK.Editor.GameplayTags
         public readonly List<string> Removed = new();
 
         /// <summary> The top-most tags of <see cref="NotInFiles"/>: deleting them deletes the rest. </summary>
-        public readonly List<TagGuid> RemovalRoots = new();
+        public readonly List<RegistryGuid> RemovalRoots = new();
 
         public readonly List<string> Warnings = new();
 
@@ -140,7 +142,7 @@ namespace LMK.Editor.GameplayTags
             var plan = Plan(main, parsed.Entries, _Options.OverwriteDescriptions, false);
             plan.Warnings.AddRange(parsed.Warnings);
 
-            IReadOnlyCollection<TagGuid> remove = Array.Empty<TagGuid>();
+            IReadOnlyCollection<RegistryGuid> remove = Array.Empty<RegistryGuid>();
             if (_Options.RemoveTagsNotInFiles && plan.NotInFiles.Count > 0)
             {
                 var choice = (_ConfirmRemoval ?? ConfirmRemovalDialog)(plan.NotInFiles);
@@ -216,7 +218,7 @@ namespace LMK.Editor.GameplayTags
             return true;
         }
 
-        private static bool TryGetMain(out TagRegistryData _Main, out string _Error)
+        private static bool TryGetMain(out RegistryData<TagRegistryRow> _Main, out string _Error)
         {
             var main = TagRegistryService.Snapshot.Main;
             if (main == null || main.IsReadOnly)
@@ -261,7 +263,7 @@ namespace LMK.Editor.GameplayTags
         /// Work out what importing <paramref name="_Entries"/> into <paramref name="_Main"/> changes.
         /// <paramref name="_Main"/> is not modified.
         /// </summary>
-        public static TagFileImportPlan Plan(TagRegistryData _Main, IReadOnlyList<TagFileEntry> _Entries, bool _OverwriteDescriptions, bool _Remove)
+        public static TagFileImportPlan Plan(RegistryData<TagRegistryRow> _Main, IReadOnlyList<TagFileEntry> _Entries, bool _OverwriteDescriptions, bool _Remove)
         {
             var plan = new TagFileImportPlan();
             var before = ComputePaths(_Main);
@@ -272,7 +274,7 @@ namespace LMK.Editor.GameplayTags
                 for (string path = entry.Path; path.Length > 0; path = TagPath.GetParent(path))
                     keep.Add(path);
 
-            var notInFiles = new HashSet<TagGuid>();
+            var notInFiles = new HashSet<RegistryGuid>();
             foreach (var row in _Main.rows)
                 if (before.TryGetValue(row.id, out string path) && !keep.Contains(path))
                     notInFiles.Add(row.id);
@@ -282,7 +284,7 @@ namespace LMK.Editor.GameplayTags
                 plan.NotInFiles.Add(before[id]);
 
                 int index = _Main.IndexOf(id);
-                if (!notInFiles.Contains(_Main.rows[index].parent))
+                if (!notInFiles.Contains(_Main.rows[index].data.parent))
                     plan.RemovalRoots.Add(id);
             }
 
@@ -290,7 +292,7 @@ namespace LMK.Editor.GameplayTags
             plan.RemovalRoots.Sort((a, b) => string.CompareOrdinal(before[a], before[b]));
 
             var after = _Main.Clone();
-            ApplyTo(after, _Entries, _OverwriteDescriptions, _Remove ? plan.RemovalRoots : Array.Empty<TagGuid>());
+            ApplyTo(after, _Entries, _OverwriteDescriptions, _Remove ? plan.RemovalRoots : Array.Empty<RegistryGuid>());
 
             // Diff by ID, so the plan says exactly what the transaction will do.
             var oldRows = _Main.rows.ToDictionary(e => e.id);
@@ -300,15 +302,15 @@ namespace LMK.Editor.GameplayTags
             {
                 if (!oldRows.TryGetValue(row.id, out var old))
                 {
-                    (row.isImplicit ? plan.ImplicitParentsAdded : plan.Added).Add(newPaths[row.id]);
+                    (row.data.isImplicit ? plan.ImplicitParentsAdded : plan.Added).Add(newPaths[row.id]);
                     continue;
                 }
 
-                if (old.isImplicit && !row.isImplicit) plan.MadeExplicit.Add(newPaths[row.id]);
-                if (old.description != row.description) plan.DescriptionsUpdated.Add(newPaths[row.id]);
+                if (old.data.isImplicit && !row.data.isImplicit) plan.MadeExplicit.Add(newPaths[row.id]);
+                if (old.data.description != row.data.description) plan.DescriptionsUpdated.Add(newPaths[row.id]);
             }
 
-            var remaining = new HashSet<TagGuid>(after.rows.Select(e => e.id));
+            var remaining = new HashSet<RegistryGuid>(after.rows.Select(e => e.id));
             foreach (var row in _Main.rows)
                 if (!remaining.Contains(row.id))
                     plan.Removed.Add(before[row.id]);
@@ -326,7 +328,7 @@ namespace LMK.Editor.GameplayTags
         /// Apply an import to registry content. The entries' paths must be valid.
         /// </summary>
         /// <param name="_Remove"> Tags to delete first, with their subtrees. </param>
-        internal static void ApplyTo(TagRegistryData _Data, IReadOnlyList<TagFileEntry> _Entries, bool _OverwriteDescriptions, IReadOnlyCollection<TagGuid> _Remove)
+        internal static void ApplyTo(RegistryData<TagRegistryRow> _Data, IReadOnlyList<TagFileEntry> _Entries, bool _OverwriteDescriptions, IReadOnlyCollection<RegistryGuid> _Remove)
         {
             foreach (var id in _Remove)
                 TagOperations.RemoveSubtree(_Data, id);
@@ -339,25 +341,25 @@ namespace LMK.Editor.GameplayTags
 
                 int index = _Data.IndexOf(id);
                 var row = _Data.rows[index];
-                row.description = entry.Description;
+                row.data.description = entry.Description;
                 _Data.rows[index] = row;
             }
         }
 
-        private static Dictionary<TagGuid, string> ComputePaths(TagRegistryData _Data)
+        private static Dictionary<RegistryGuid, string> ComputePaths(RegistryData<TagRegistryRow> _Data)
         {
             var rows = _Data.rows.ToDictionary(e => e.id);
-            var paths = new Dictionary<TagGuid, string>(rows.Count);
+            var paths = new Dictionary<RegistryGuid, string>(rows.Count);
 
-            string PathOf(TagGuid _Id, int _Depth)
+            string PathOf(RegistryGuid _Id, int _Depth)
             {
                 if (paths.TryGetValue(_Id, out string known)) return known;
                 if (_Depth > rows.Count || !rows.TryGetValue(_Id, out var row)) return null;
 
-                string parent = row.parent.IsZero ? string.Empty : PathOf(row.parent, _Depth + 1);
+                string parent = row.data.parent.IsZero ? string.Empty : PathOf(row.data.parent, _Depth + 1);
                 if (parent == null) return null;
 
-                return paths[_Id] = TagPath.Combine(parent, row.segment);
+                return paths[_Id] = TagPath.Combine(parent, row.data.segment);
             }
 
             foreach (var id in rows.Keys)

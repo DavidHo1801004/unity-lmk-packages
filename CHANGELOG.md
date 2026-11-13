@@ -3,6 +3,27 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-11-13
+
+Gameplay tags now run on the registry core, `com.lmk.registry` 1.0.0, which other registry kinds such as gameplay attributes share. Data and code written for 1.0.0 keep working: registry files, serialized tags (text and binary), the baked database asset and its GUID, generated constants and their aliases, markers, and the public API.
+
+### Added
+- `GameplayTagQuery`: a serializable tag query (any, all or none of tags, hierarchical or exact, with nested any, all or none of expressions), built from code with `GameplayTagQueryExpression`. It matches any `IGameplayTagSet`, which `GameplayTagContainer` now implements.
+- `GameplayTagDatabase.ActiveDatabaseChanged`, with the previous and the new database.
+- The Tag Editor's toolbar shows the lock provider when one is set.
+
+### Changed
+- Depends on `com.lmk.registry` 1.0.0. `GameplayTag` implements its `IRegistryReference`, and `GameplayTagDatabase` derives from its `RegistryDatabase<GameplayTagDatabase, TagRow>`.
+- Tag IDs are `RegistryGuid`s (`LMK.Runtime.Registry`), with the same serialized layout and text form as `TagGuid`.
+- Loading, staged editing, saving, Undo, markers, locking, the reference index and tools, package registries, mapping of imported assets, builds, project checks and code generation are the registry core's. *Save* in the Tag Editor saves the unsaved edits of every registry kind.
+- Project settings live in `ProjectSettings/LMKRegistrySettings.asset`: the shared ones (lock provider, build policy) under *Project Settings → LMK → Registries*, the tag ones under *LMK → Gameplay Tags*. The 1.0.0 settings file is read once and carried over.
+- *Rebuild Reference Index*, *Generate Registries For Package...*, *Validate Package*, *Pack Package...* and *Map References From Another Project...* are the registry core's commands, for every kind, under *Tools → LMK → Registries* and *Assets → LMK Registries*.
+- The reference index moved to `Library/LMKRegistry/RefIndex` and rebuilds once. Import logs go to `Logs/LMKRegistry/`.
+- `TagProjectChecks` forwards to `RegistryProjectChecks`, which checks every registry kind.
+
+### Deprecated
+- `TagGuid`: use `RegistryGuid`. It converts to and from `RegistryGuid` implicitly.
+
 ## [1.0.0] - 2026-11-11
 
 First release.

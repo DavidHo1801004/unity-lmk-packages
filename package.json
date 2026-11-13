@@ -1,8 +1,8 @@
 {
   "name": "com.lmk.gameplaytags",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "LMK Gameplay Tags",
-  "description": "Hierarchical gameplay tags (e.g. \"Status.Debuff.Stun\") for Unity, identified by ID and stored in registry files, with tag and tag-container fields, a tag manager window, reference tools, package registries, tag file import and export, generated tag constants and CI checks.",
+  "description": "Hierarchical gameplay tags (e.g. \"Status.Debuff.Stun\") for Unity, identified by ID and stored in registry files, with tag and tag-container fields, a tag manager window, reference tools, package registries, tag file import and export, generated tag constants, tag queries and CI checks. Built on com.lmk.registry.",
   "unity": "6000.3",
   "license": "MIT",
   "repository": {
@@ -23,6 +23,7 @@
     "url": "https://github.com/DavidHo1801004"
   },
   "dependencies": {
-    "com.lmk.editor": "0.3.0"
+    "com.lmk.editor": "0.3.0",
+    "com.lmk.registry": "1.0.0"
   }
 }

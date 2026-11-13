@@ -9,7 +9,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 using LMK.Editor.UIElements;
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags.Tests
 {
@@ -75,15 +77,15 @@ namespace LMK.Editor.GameplayTags.Tests
         [Test]
         public void Markers_OnReadOnlyTags_NeedNoLock()
         {
-            var vendor = new TagRegistryData
+            var vendor = new RegistryData<TagRegistryRow>
             {
-                registryId = TagGuid.Parse("b0000000000000000000000000000002"),
+                registryId = RegistryGuid.Parse("b0000000000000000000000000000002"),
                 name = "Vendor",
-                kind = TagRegistryKind.Package,
-                rows = new List<TagRegistryRow> { new(TestIds.Id(1), TagGuid.Zero, "Stun", false) },
+                origin = RegistryOrigin.Package,
+                rows = new List<RegistryRow<TagRegistryRow>> { TagRegistryRow.Create(TestIds.Id(1), RegistryGuid.Zero, "Stun", false) },
             };
             RegistryServiceTests.WriteAndImport(FOLDER + "/Vendor.tagregistry", TagRegistryFile.Write(vendor));
-            TagLockProvider.Current = new RefusingLockProvider();
+            RegistryLockProvider.Current = new RefusingLockProvider();
 
             TagOperations.SetMarker(vendor.registryId, TestIds.Id(1), RED);
             Assert.IsTrue(TagOperations.Save().Success, "only markers changed: the registry lock isn't needed");
@@ -137,10 +139,10 @@ namespace LMK.Editor.GameplayTags.Tests
         public void Toolbar_ItemsInOrder()
         {
             var toolbar = new GameplayTagManagerToolbar(new GameplayTagControlPanel());
+            var items = new[] { "save-button", "discard-button", "search-field", "add-tag-button", "options-button" };
 
-            CollectionAssert.AreEqual(
-                new[] { "save-button", "discard-button", "search-field", "add-tag-button", "options-button" },
-                toolbar.Children().Select(e => e.name));
+            // Since 1.1.0 the tag controls sit in the registry toolbar, after Save and Discard.
+            CollectionAssert.AreEqual(items, toolbar.Query<VisualElement>().ToList().Select(e => e.name).Where(items.Contains));
             Assert.IsInstanceOf<ToolbarSearchField>(toolbar.Q("search-field"));
         }
 
@@ -206,12 +208,12 @@ namespace LMK.Editor.GameplayTags.Tests
         [Test]
         public void Inspector_ReadOnlyTag_OnlyMarkerIsEditable()
         {
-            var vendor = new TagRegistryData
+            var vendor = new RegistryData<TagRegistryRow>
             {
-                registryId = TagGuid.Parse("b0000000000000000000000000000002"),
+                registryId = RegistryGuid.Parse("b0000000000000000000000000000002"),
                 name = "Vendor",
-                kind = TagRegistryKind.Package,
-                rows = new List<TagRegistryRow> { new(TestIds.Id(1), TagGuid.Zero, "Stun", false) },
+                origin = RegistryOrigin.Package,
+                rows = new List<RegistryRow<TagRegistryRow>> { TagRegistryRow.Create(TestIds.Id(1), RegistryGuid.Zero, "Stun", false) },
             };
             RegistryServiceTests.WriteAndImport(FOLDER + "/Vendor.tagregistry", TagRegistryFile.Write(vendor));
             var inspector = new GameplayTagInspectorPanel();

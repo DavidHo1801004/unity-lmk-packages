@@ -6,7 +6,9 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine.TestTools;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 using static LMK.Editor.GameplayTags.Tests.TestIds;
 
@@ -20,7 +22,7 @@ namespace LMK.Editor.GameplayTags.Tests
         private const string FOLDER = "Assets/__GameplayTagTests";
         private const string PACKAGE_PATH = FOLDER + "/Vendor.tagregistry";
 
-        private static readonly TagGuid VendorRegistry = TagGuid.Parse("b0000000000000000000000000000002");
+        private static readonly RegistryGuid VendorRegistry = RegistryGuid.Parse("b0000000000000000000000000000002");
 
         [SetUp]
         public void CreateFolder()
@@ -36,15 +38,15 @@ namespace LMK.Editor.GameplayTags.Tests
             TagRegistryService.Reload();
         }
 
-        private static TagRegistryData VendorData(string _StunSegment = "Stun") => new()
+        private static RegistryData<TagRegistryRow> VendorData(string _StunSegment = "Stun") => new()
         {
             registryId = VendorRegistry,
             name = "Vendor",
-            kind = TagRegistryKind.Package,
-            rows = new List<TagRegistryRow>
+            origin = RegistryOrigin.Package,
+            rows = new List<RegistryRow<TagRegistryRow>>
             {
-                new(Id(1), TagGuid.Zero, "Vendor", true),
-                new(Id(2), Id(1), _StunSegment, false, "Stun from the vendor"),
+                TagRegistryRow.Create(Id(1), RegistryGuid.Zero, "Vendor", true),
+                TagRegistryRow.Create(Id(2), Id(1), _StunSegment, false, "Stun from the vendor"),
             },
         };
 
@@ -90,7 +92,7 @@ namespace LMK.Editor.GameplayTags.Tests
 
             // Same path "Vendor.Stun", new ID.
             var data = VendorData();
-            data.rows[1] = new TagRegistryRow(Id(3), Id(1), "Stun", false);
+            data.rows[1] = TagRegistryRow.Create(Id(3), Id(1), "Stun", false);
             WriteAndImport(PACKAGE_PATH, TagRegistryFile.Write(data));
 
             Assert.AreEqual(TagStatus.Deleted, VendorStun.Resolve().Status);
@@ -118,7 +120,7 @@ namespace LMK.Editor.GameplayTags.Tests
 
             LogAssert.ignoreFailingMessages = true;
             var broken = VendorData();
-            broken.rows.Add(new TagRegistryRow(Id(9), Id(50), "Orphan", false));
+            broken.rows.Add(TagRegistryRow.Create(Id(9), Id(50), "Orphan", false));
             WriteAndImport(PACKAGE_PATH, TagRegistryFile.Write(broken));
 
             var registry = TagRegistryService.Snapshot.Find(VendorRegistry);

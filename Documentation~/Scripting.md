@@ -10,7 +10,7 @@ A serializable reference to one tag. It stores the tag's registry ID, its tag ID
 |---|---|
 | `GameplayTag.None` | The unassigned tag. It matches nothing and isn't a missing reference. |
 | `IsNone` | Whether the tag is unassigned. |
-| `RegistryId`, `Id` | The tag's identity. |
+| `RegistryId`, `Id` | The tag's identity, as `RegistryGuid`s (`LMK.Runtime.Registry`). `GameplayTag` implements the registry core's `IRegistryReference`. |
 | `Path` | The current path if the tag resolves, otherwise `LastKnownName`. |
 | `LastKnownName` | The path when the tag was assigned. Display only. |
 | `IsLive` | Whether the tag resolves to a tag of a loaded registry. |
@@ -48,6 +48,20 @@ The container caches resolved handles, so queries don't resolve tags one by one.
 
 `None` entries can appear in the serialized list: removing a missing tag from a prefab asset sets it to `None`, so prefab overrides keep their list indices. Queries, `Count` and enumeration skip them.
 
+## GameplayTagQuery
+
+A serializable test of a set of tags. It matches any `IGameplayTagSet`, such as a `GameplayTagContainer`.
+
+| Member | Description |
+|---|---|
+| `GameplayTagQuery.Build(expression, description)` | A query from an expression tree. |
+| `MatchAnyTags(container)`, `MatchAllTags(container)`, `MatchNoTags(container)` | One-expression queries. |
+| `Matches(tags)` | Whether the set passes. An empty query matches nothing. |
+| `IsEmpty`, `Description` | Whether there is an expression, and what the query is for. |
+| `ToExpression()`, `ToString()` | The expression tree, and what it tests, e.g. `ALL(ANY(Status.Burning), NONE(Status.Immune))`. |
+
+`GameplayTagQueryExpression` builds the tree: `AnyTags`, `AllTags` and `NoTags` (hierarchical), their `Exact` versions, and `Any`, `All` and `None` of sub-expressions. Without tags or sub-expressions, *any* is false and *all* and *none* are true. Unresolved tags match nothing.
+
 ## Generated constants
 
 `Assets/GameplayTags/Generated/GameplayTags.g.cs` holds one `GameplayTag` constant per tag, in a nested class per registry:
@@ -56,17 +70,18 @@ The container caches resolved handles, so queries don't resolve tags one by one.
 ownedTags.AddTag(Tags.Main.Status_Debuff_Stun);
 ```
 
-A constant stores the tag's IDs, so it keeps working after a rename. A renamed tag keeps its old constant as an `[Obsolete]` alias until *Prune Unused Code Aliases* removes it. A deleted tag loses its constant, so code that uses it stops compiling. The file is in `Assembly-CSharp`: code in an assembly with its own `.asmdef` can't reference it.
+A constant stores the tag's IDs, so it keeps working after a rename. A renamed tag keeps its old constant as an `[Obsolete]` alias until *Prune Unused Code Aliases* removes it. A deleted tag loses its constant, so code that uses it stops compiling. The file is in `Assembly-CSharp` by default: code in an assembly with its own `.asmdef` can't reference it, unless *Project Settings → LMK → Registries* gives the generated code its own assembly.
 
 ## GameplayTagDatabase
 
-The baked lookup data of every registry. In players it's loaded at startup from the build; in the editor it follows the registries as you edit them.
+The baked lookup data of every registry: the registry core's `RegistryDatabase<GameplayTagDatabase, TagRow>`, where a row is a tag and its name is the tag's path. In players it's loaded at startup from the build; in the editor it follows the registries as you edit them.
 
 | Member | Description |
 |---|---|
 | `GameplayTagDatabase.Active` | The database tags resolve against. |
 | `GameplayTagDatabase.Generation` | Changes whenever `Active` changes. 0 means no database is ready yet. |
 | `GameplayTagDatabase.ActiveChanged` | Raised after `Active` changed. |
+| `GameplayTagDatabase.ActiveDatabaseChanged` | Raised after `Active` changed, with the previous and the new database. The previous one is alive until every listener returned. |
 | `Resolve(registry, id)`, `FindByPath(registry, path)` | Look a tag up by ID, or by path for debugging. |
 | `GetPath`, `GetSegment`, `GetParent`, `GetDepth`, `IsImplicit`, `GetChildren` | Data of a live tag, by `TagHandle`. |
 | `GetTag(handle)` | The `GameplayTag` of a handle. |

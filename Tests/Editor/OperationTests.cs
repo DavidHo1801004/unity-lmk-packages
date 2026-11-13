@@ -8,14 +8,16 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags.Tests
 {
     /// <summary>
     /// A lock that is always held by someone else.
     /// </summary>
-    internal sealed class RefusingLockProvider : TagLockProvider
+    internal sealed class RefusingLockProvider : RegistryLockProvider
     {
         public override string Name => "Test";
 
@@ -57,7 +59,7 @@ namespace LMK.Editor.GameplayTags.Tests
             TagCodeGen.OutputPath = CODE;
             previousMarkersPath = TagMarkerStore.FilePath;
             TagMarkerStore.FilePath = MARKERS;
-            TagLockProvider.Current = null;
+            RegistryLockProvider.Current = null;
 
             if (!AssetDatabase.IsValidFolder(FOLDER))
                 AssetDatabase.CreateFolder("Assets", "__GameplayTagTests");
@@ -71,7 +73,7 @@ namespace LMK.Editor.GameplayTags.Tests
         [TearDown]
         public void DeleteMainRegistry()
         {
-            TagLockProvider.Current = null;
+            RegistryLockProvider.Current = null;
             TagOperations.Discard();
             TagRegistryService.MainRegistryPath = previousMainPath;
             TagCodeGen.CancelPending();
@@ -88,7 +90,7 @@ namespace LMK.Editor.GameplayTags.Tests
 
         private protected static TagRegistrySnapshot.Registry Main => TagRegistryService.Snapshot.Main;
 
-        protected static TagGuid Add(string _Path)
+        protected static RegistryGuid Add(string _Path)
         {
             var result = TagOperations.Add(_Path);
             Assert.IsTrue(result.Success, result.Error);
@@ -105,7 +107,7 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.IsFalse(TagOperations.HasPendingChanges);
         }
 
-        protected static TagGuid IdOf(string _Path)
+        protected static RegistryGuid IdOf(string _Path)
         {
             Assert.IsTrue(Main.TryFind(_Path, out var id), $"\"{_Path}\" not found");
             return id;
@@ -286,7 +288,7 @@ namespace LMK.Editor.GameplayTags.Tests
         {
             var a = Add("A");
             string before = FileText;
-            TagLockProvider.Current = new RefusingLockProvider();
+            RegistryLockProvider.Current = new RefusingLockProvider();
 
             var results = new[]
             {
@@ -303,12 +305,12 @@ namespace LMK.Editor.GameplayTags.Tests
         [Test]
         public void OperationsOnOtherRegistries_AreRefused()
         {
-            var vendor = new TagRegistryData
+            var vendor = new RegistryData<TagRegistryRow>
             {
-                registryId = TagGuid.Parse("b0000000000000000000000000000002"),
+                registryId = RegistryGuid.Parse("b0000000000000000000000000000002"),
                 name = "Vendor",
-                kind = TagRegistryKind.Package,
-                rows = new List<TagRegistryRow> { new(TestIds.Id(1), TagGuid.Zero, "Vendor", false) },
+                origin = RegistryOrigin.Package,
+                rows = new List<RegistryRow<TagRegistryRow>> { TagRegistryRow.Create(TestIds.Id(1), RegistryGuid.Zero, "Vendor", false) },
             };
             RegistryServiceTests.WriteAndImport(FOLDER + "/Vendor.tagregistry", TagRegistryFile.Write(vendor));
 
@@ -391,7 +393,7 @@ namespace LMK.Editor.GameplayTags.Tests
             StringAssert.Contains("conflict marker", result.Error);
         }
 
-        private static string PathOf(TagGuid _Id) => Main.GetPath(_Id);
+        private static string PathOf(RegistryGuid _Id) => Main.GetPath(_Id);
     }
 
 
@@ -449,7 +451,7 @@ namespace LMK.Editor.GameplayTags.Tests
         {
             string before = FileText;
             Add("A");
-            TagLockProvider.Current = new RefusingLockProvider();
+            RegistryLockProvider.Current = new RefusingLockProvider();
 
             var result = TagOperations.Save();
 
@@ -527,6 +529,6 @@ namespace LMK.Editor.GameplayTags.Tests
             Object.DestroyImmediate(other);
         }
 
-        private static string PathOf(TagGuid _Id) => Main.GetPath(_Id);
+        private static string PathOf(RegistryGuid _Id) => Main.GetPath(_Id);
     }
 }

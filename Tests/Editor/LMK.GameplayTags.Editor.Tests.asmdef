@@ -4,6 +4,8 @@
     "references": [
         "LMK.GameplayTags.Runtime",
         "LMK.GameplayTags.Editor",
+        "LMK.Registry.Runtime",
+        "LMK.Registry.Editor",
         "LMK.Editor",
         "LMK.GameplayTags.Runtime.Tests",
         "UnityEngine.TestRunner",

@@ -2,6 +2,8 @@ using System;
 
 using UnityEngine;
 
+using LMK.Runtime.Registry;
+
 namespace LMK.Runtime.GameplayTags
 {
     /// <summary>
@@ -9,6 +11,8 @@ namespace LMK.Runtime.GameplayTags
     /// Used for registry IDs and tag IDs. All zero means "none".
     /// </summary>
     /// <remarks>
+    /// <b>Obsolete:</b> tags use <see cref="RegistryGuid"/>, which has the same layout and text form. This type is
+    /// kept so code written against 1.0.0 still compiles; it converts to and from <see cref="RegistryGuid"/>. <br/>
     /// The text form is 32 lowercase hex digits (<see cref="Guid"/> "N" format). <br/>
     /// <see cref="Hi"/> is the first 16 digits and <see cref="Lo"/> the last 16, read as big-endian numbers,
     /// so the text, the serialized fields and generated code always agree. <see cref="Guid.ToByteArray"/>
@@ -16,6 +20,7 @@ namespace LMK.Runtime.GameplayTags
     /// <b>FROZEN LAYOUT:</b> renaming or reordering the serialized fields breaks every saved reference.
     /// </remarks>
     [Serializable]
+    [Obsolete("Use LMK.Runtime.Registry.RegistryGuid. TagGuid converts to and from it implicitly.")]
     public struct TagGuid : IEquatable<TagGuid>, IComparable<TagGuid>
     {
         /// <summary>
@@ -149,6 +154,14 @@ namespace LMK.Runtime.GameplayTags
         public static bool operator ==(TagGuid _A, TagGuid _B) => _A.Equals(_B);
 
         public static bool operator !=(TagGuid _A, TagGuid _B) => !_A.Equals(_B);
+        #endregion
+
+
+
+        #region Conversion
+        public static implicit operator RegistryGuid(TagGuid _Guid) => new(_Guid._hi, _Guid._lo);
+
+        public static implicit operator TagGuid(RegistryGuid _Guid) => new(_Guid.Hi, _Guid.Lo);
         #endregion
     }
 }

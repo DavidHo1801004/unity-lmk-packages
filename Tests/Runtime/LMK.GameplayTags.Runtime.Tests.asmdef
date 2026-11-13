@@ -2,7 +2,8 @@
     "name": "LMK.GameplayTags.Runtime.Tests",
     "rootNamespace": "",
     "references": [
-        "LMK.GameplayTags.Runtime"
+        "LMK.GameplayTags.Runtime",
+        "LMK.Registry.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

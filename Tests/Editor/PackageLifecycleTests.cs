@@ -10,7 +10,9 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine.TestTools;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 using static LMK.Editor.GameplayTags.Tests.TestIds;
 
@@ -28,7 +30,7 @@ namespace LMK.Editor.GameplayTags.Tests
         private const string MANIFEST = "Packages/manifest.json";
         private const string LOCK = "Packages/packages-lock.json";
 
-        private static readonly TagGuid PackageRegistry = TagGuid.Parse("d0000000000000000000000000000001");
+        private static readonly RegistryGuid PackageRegistry = RegistryGuid.Parse("d0000000000000000000000000000001");
 
         private string folder;
         private string registryPath;
@@ -80,20 +82,20 @@ namespace LMK.Editor.GameplayTags.Tests
 
         private void WriteRegistry(bool _WithBurn)
         {
-            var data = new TagRegistryData
+            var data = new RegistryData<TagRegistryRow>
             {
                 registryId = PackageRegistry,
                 name = "Test Package",
-                kind = TagRegistryKind.Package,
-                rows = new List<TagRegistryRow>
+                origin = RegistryOrigin.Package,
+                rows = new List<RegistryRow<TagRegistryRow>>
                 {
-                    new(Id(1), TagGuid.Zero, "TestPackage", true),
-                    new(Id(2), Id(1), "Stun", false),
+                    TagRegistryRow.Create(Id(1), RegistryGuid.Zero, "TestPackage", true),
+                    TagRegistryRow.Create(Id(2), Id(1), "Stun", false),
                 },
             };
 
             if (_WithBurn)
-                data.rows.Add(new TagRegistryRow(Id(3), Id(1), "Burn", false));
+                data.rows.Add(TagRegistryRow.Create(Id(3), Id(1), "Burn", false));
 
             File.WriteAllText(registryPath, TagRegistryFile.Write(data));
         }
@@ -185,7 +187,7 @@ namespace LMK.Editor.GameplayTags.Tests
     /// </summary>
     public sealed class UnityPackageImportTests : TagFieldTestBase
     {
-        private static readonly TagGuid OtherProject = TagGuid.Parse("c0000000000000000000000000000077");
+        private static readonly RegistryGuid OtherProject = RegistryGuid.Parse("c0000000000000000000000000000077");
 
         private string packagePath;
         private string previousLogFolder;
@@ -210,8 +212,8 @@ namespace LMK.Editor.GameplayTags.Tests
         {
             const string ASSET = FOLDER + "/Incoming.asset";
             AssetDatabase.CreateAsset(CreateScriptableObject(
-                GameplayTag.FromId(OtherProject, new TagGuid(7, 1), "A"),
-                GameplayTag.FromId(OtherProject, new TagGuid(7, 2), "Imported.Tag")), ASSET);
+                GameplayTag.FromId(OtherProject, new RegistryGuid(7, 1), "A"),
+                GameplayTag.FromId(OtherProject, new RegistryGuid(7, 2), "Imported.Tag")), ASSET);
             AssetDatabase.SaveAssets();
 
             Directory.CreateDirectory(CODE_FOLDER);
@@ -238,7 +240,7 @@ namespace LMK.Editor.GameplayTags.Tests
             var tags = GetList(AssetDatabase.LoadAssetAtPath<TagSerializationFixture>(ASSET));
             Assert.AreEqual(A, tags[0], "an existing name maps to the main tag");
             Assert.IsTrue(Main.TryFind("Imported.Tag", out var added));
-            Assert.AreEqual(new TagGuid(7, 2), added, "a new name keeps its incoming ID");
+            Assert.AreEqual(new RegistryGuid(7, 2), added, "a new name keeps its incoming ID");
             Assert.IsTrue(tags.All(e => e.IsLive));
         }
     }

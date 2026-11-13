@@ -1,7 +1,9 @@
 {
     "name": "LMK.GameplayTags.Runtime",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:b42367183d370c84394f17e6f8e509e9"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -6,64 +6,21 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
     /// <summary>
-    /// Explicit tag commands, shared by the Tools menu and the Gameplay Tag Manager.
+    /// Explicit tag commands, shared by the Tools menu and the Gameplay Tag Manager. Saving, discarding and the commands
+    /// for every registry kind are the registry core's (<see cref="RegistryCommands"/>).
     /// </summary>
     internal static class GameplayTagCommands
     {
         private const string MENU = "Tools/GASU/Gameplay Tags/";
 
 
-
-        /// <summary>
-        /// Save the staged tag edits. If the main registry changed on disk since they began, offer to discard them
-        /// instead, since saving would overwrite that change.
-        /// </summary>
-        /// <returns> Whether nothing is left unsaved. </returns>
-        public static bool SaveWithDialogs()
-        {
-            if (!TagOperations.HasPendingChanges) return true;
-
-            if (TagOperations.DiskChangedWhilePending)
-            {
-                bool discard = EditorUtility.DisplayDialog(
-                    "Main Tag Registry Changed On Disk",
-                    $"\"{TagRegistryService.MainRegistryPath}\" changed on disk since you began editing, for example through " +
-                    "a pull or a revert. Saving would overwrite that change.\n\nDiscard your unsaved tag changes and load the file?",
-                    "Discard My Changes",
-                    "Cancel");
-
-                if (!discard) return false;
-
-                TagOperations.Discard();
-                return true;
-            }
-
-            var result = TagOperations.Save();
-            if (result.Success) return true;
-
-            EditorUtility.DisplayDialog("Save Gameplay Tags", result.Error, "OK");
-            return false;
-        }
-
-        /// <summary>
-        /// Discard the staged tag edits, after a confirmation.
-        /// </summary>
-        public static void DiscardWithDialog()
-        {
-            if (!TagOperations.HasPendingChanges) return;
-
-            if (EditorUtility.DisplayDialog(
-                    "Discard Gameplay Tag Changes",
-                    "Discard every unsaved change to the gameplay tags and markers? This can't be undone.",
-                    "Discard",
-                    "Cancel"))
-                TagOperations.Discard();
-        }
 
         [MenuItem(MENU + "Import Tag Files...", priority = 20)]
         public static void ImportTagFiles() => TagFileImportWindow.Open();
@@ -122,27 +79,15 @@ namespace LMK.Editor.GameplayTags
                 : $"Gameplay tag code: removed {pruned.Count} unused alias(es): {string.Join(", ", pruned)}.");
         }
 
-        [MenuItem(MENU + "Map Imported Assets", priority = 50)]
+        // Map Imported Assets, Rebuild Reference Index and Generate Registries For Package are the registry core's
+        // commands, for every kind: see the Tools and Assets menus.
         public static void MapImportedAssets() => ProjectAssetImport.MapPendingWithDialog();
-
-        [MenuItem(MENU + "Map Imported Assets", true)]
-        private static bool MapImportedAssetsValidate() => ProjectAssetImport.HasPending;
-
-        private const string GENERATE_MENU = "Assets/Gameplay Tags/Generate Tag Registry For Package...";
-
-        [MenuItem(GENERATE_MENU, false, 2012)]
-        private static void GenerateForSelectedPackage()
-            => GeneratePackageRegistryWithDialog(TagPackage.ForAssetPath(AssetDatabase.GetAssetPath(Selection.activeObject)));
-
-        [MenuItem(GENERATE_MENU, true)]
-        private static bool GenerateForSelectedPackageValidate()
-            => TagPackage.ForAssetPath(AssetDatabase.GetAssetPath(Selection.activeObject)) != null;
 
         /// <summary>
         /// Generate the registry a package without one needs, or regenerate it, after a confirmation.
         /// Regenerating keeps the existing rows, unless the user also removes the ones the package no longer uses.
         /// </summary>
-        public static void GeneratePackageRegistryWithDialog(TagPackage _Package)
+        public static void GeneratePackageRegistryWithDialog(RegistryPackage _Package)
         {
             if (_Package == null) return;
 
@@ -168,9 +113,8 @@ namespace LMK.Editor.GameplayTags
         }
 
         [MenuItem(MENU + "Relink Missing References...", priority = 60)]
-        public static void RelinkMissingReferences() => TagReferenceWindow.ShowRelink();
+        public static void RelinkMissingReferences() => RegistryReferenceWindow.ShowRelink(TagKind.Instance);
 
-        [MenuItem(MENU + "Rebuild Reference Index", priority = 61)]
         public static void RebuildReferenceIndex()
         {
             bool complete = TagReferenceIndex.Rebuild(true);
@@ -211,7 +155,7 @@ namespace LMK.Editor.GameplayTags
         /// <summary>
         /// Plan the deletion of a main registry tag, or <see langword="null"/> if it isn't there.
         /// </summary>
-        internal static DeletePlan PlanDelete(TagGuid _Id, bool _ShowProgress)
+        internal static DeletePlan PlanDelete(RegistryGuid _Id, bool _ShowProgress)
         {
             var main = TagRegistryService.Snapshot.Main;
             if (main == null || !main.Contains(_Id)) return null;
@@ -222,7 +166,7 @@ namespace LMK.Editor.GameplayTags
                 EmptyParents = TagOperations.GetParentsLeftEmpty(_Id),
             };
 
-            var ids = new List<TagGuid> { _Id };
+            var ids = new List<RegistryGuid> { _Id };
             for (int i = 0; i < ids.Count; i++)
                 ids.AddRange(main.GetChildren(ids[i]));
 
@@ -266,11 +210,11 @@ namespace LMK.Editor.GameplayTags
         /// the assets that reference them. Referenced tags can still be deleted.
         /// </summary>
         /// <returns> The result, or <see langword="null"/> if the user cancelled. </returns>
-        public static TagOperationResult? DeleteWithDialog(TagGuid _Id)
+        public static RegistryResult? DeleteWithDialog(RegistryGuid _Id)
         {
             var plan = PlanDelete(_Id, true);
             if (plan == null)
-                return TagOperationResult.Fail("This tag is not in the main registry. Package and generated registries are read-only.");
+                return RegistryResult.Fail("This tag is not in the main registry. Package and generated registries are read-only.");
 
             bool referenced = plan.ReferencingAssets.Count > 0;
             bool removeEmptyParents;
@@ -299,14 +243,7 @@ namespace LMK.Editor.GameplayTags
             return TagOperations.Delete(_Id, removeEmptyParents);
         }
 
-        private static string ListItems(IReadOnlyList<string> _Items, int _Max)
-        {
-            string text = string.Join("\n", _Items.Take(_Max).Select(e => $"  \"{e}\""));
-            if (_Items.Count > _Max)
-                text += $"\n  (and {_Items.Count - _Max} more)";
-
-            return text;
-        }
+        private static string ListItems(IReadOnlyList<string> _Items, int _Max) => RegistryCommands.ListItems(_Items, _Max);
         #endregion
     }
 }

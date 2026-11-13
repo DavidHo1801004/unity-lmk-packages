@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
+using System.Globalization;
 using System.Text;
 
-using UnityEngine;
+using LMK.Runtime.Registry;
 
 namespace LMK.Runtime.GameplayTags
 {
@@ -12,6 +12,11 @@ namespace LMK.Runtime.GameplayTags
     /// Rows whose parent is missing, or that are part of a parent cycle, are skipped with their descendants.
     /// Registry files are validated before they reach the builder, so this only guards against bad input.
     /// </summary>
+    /// <remarks>
+    /// Turns tag rows into registry rows named by their path, and builds them with a
+    /// <see cref="RegistryDatabaseBuilder{TRow}"/>: registries are ordered by ID and rows by path. A path sorts
+    /// before its descendants, so every parent gets a lower index than its children.
+    /// </remarks>
     public sealed class GameplayTagDatabaseBuilder
     {
         /// <summary>
@@ -19,18 +24,18 @@ namespace LMK.Runtime.GameplayTags
         /// </summary>
         public readonly struct Row
         {
-            public readonly TagGuid Id;
+            public readonly RegistryGuid Id;
 
             /// <summary>
-            /// Parent row ID, or <see cref="TagGuid.Zero"/> for a top level tag.
+            /// Parent row ID, or <see cref="RegistryGuid.Zero"/> for a top level tag.
             /// </summary>
-            public readonly TagGuid Parent;
+            public readonly RegistryGuid Parent;
 
             public readonly string Segment;
 
             public readonly bool IsImplicit;
 
-            public Row(TagGuid _Id, TagGuid _Parent, string _Segment, bool _IsImplicit = false)
+            public Row(RegistryGuid _Id, RegistryGuid _Parent, string _Segment, bool _IsImplicit = false)
             {
                 Id = _Id;
                 Parent = _Parent;
@@ -39,15 +44,7 @@ namespace LMK.Runtime.GameplayTags
             }
         }
 
-        private sealed class RegistryInput
-        {
-            public TagGuid id;
-            public string name;
-            public TagRegistryKind kind;
-            public List<Row> rows;
-        }
-
-        private readonly List<RegistryInput> registries = new();
+        private readonly RegistryDatabaseBuilder<TagRow> builder = new(AppendHash) { Link = LinkParent };
 
 
 
@@ -55,18 +52,10 @@ namespace LMK.Runtime.GameplayTags
         /// Add a registry and its rows.
         /// </summary>
         /// <exception cref="ArgumentException"> If the registry ID is zero or already added. </exception>
-        public GameplayTagDatabaseBuilder AddRegistry(TagGuid _Id, string _Name, TagRegistryKind _Kind, IEnumerable<Row> _Rows)
+        public GameplayTagDatabaseBuilder AddRegistry(RegistryGuid _Id, string _Name, TagRegistryKind _Kind, IEnumerable<Row> _Rows)
         {
-            if (_Id.IsZero) throw new ArgumentException("Registry ID can not be zero.", nameof(_Id));
-            if (registries.Exists(e => e.id.Equals(_Id))) throw new ArgumentException($"Registry {_Id} is already added.", nameof(_Id));
-
-            registries.Add(new RegistryInput
-            {
-                id = _Id,
-                name = _Name ?? string.Empty,
-                kind = _Kind,
-                rows = _Rows != null ? new List<Row>(_Rows) : new List<Row>(),
-            });
+            var rows = _Rows != null ? new List<Row>(_Rows) : new List<Row>();
+            builder.AddRegistry(_Id, _Name, (RegistryOrigin)_Kind, ToRegistryRows(rows));
 
             return this;
         }
@@ -74,96 +63,72 @@ namespace LMK.Runtime.GameplayTags
         /// <summary>
         /// Create a new database instance.
         /// </summary>
-        public GameplayTagDatabase Build()
-        {
-            var database = ScriptableObject.CreateInstance<GameplayTagDatabase>();
-            database.name = GameplayTagDatabase.RESOURCE_NAME;
-            BuildInto(database);
-
-            return database;
-        }
+        public GameplayTagDatabase Build() => builder.Build<GameplayTagDatabase>();
 
         /// <summary>
         /// Replace the content of an existing database instance.
         /// </summary>
-        public void BuildInto(GameplayTagDatabase _Database)
+        public void BuildInto(GameplayTagDatabase _Database) => builder.BuildInto(_Database);
+
+
+
+        private static List<RegistryDatabaseBuilder<TagRow>.Row> ToRegistryRows(List<Row> _Rows)
         {
-            if (_Database == null) throw new ArgumentNullException(nameof(_Database));
+            var byId = ValidRowsById(_Rows);
+            var paths = ComputePaths(byId);
+            var result = new List<RegistryDatabaseBuilder<TagRow>.Row>(paths.Count);
 
-            // Deterministic order: registries by ID, rows by path. A path sorts before its descendants,
-            // so every parent gets a lower index than its children.
-            var sortedRegistries = new List<RegistryInput>(registries);
-            sortedRegistries.Sort((a, b) => a.id.CompareTo(b.id));
-
-            var registryRecords = new GameplayTagDatabase.RegistryRecord[sortedRegistries.Count];
-            var rowRecords = new List<GameplayTagDatabase.RowRecord>();
-
-            for (int registryIndex = 0; registryIndex < sortedRegistries.Count; registryIndex++)
+            foreach (var (id, path) in paths)
             {
-                var registry = sortedRegistries[registryIndex];
-                var paths = ComputePaths(registry.rows);
+                var row = byId[id];
 
-                var validRows = new List<(Row row, string path)>(paths.Count);
-                foreach (var row in registry.rows)
-                    if (paths.TryGetValue(row.Id, out string path))
-                        validRows.Add((row, path));
+                int depth = 0;
+                foreach (char c in path)
+                    if (c == TagPath.SEPARATOR)
+                        depth++;
 
-                validRows.Sort((a, b) => string.CompareOrdinal(a.path, b.path));
-
-                int firstRow = rowRecords.Count;
-                var indexById = new Dictionary<TagGuid, int>(validRows.Count);
-
-                foreach (var (row, path) in validRows)
+                result.Add(new RegistryDatabaseBuilder<TagRow>.Row(id, path, new TagRow
                 {
-                    int index = rowRecords.Count;
-                    indexById[row.Id] = index;
-
-                    int depth = 0;
-                    foreach (char c in path)
-                        if (c == TagPath.SEPARATOR)
-                            depth++;
-
-                    rowRecords.Add(new GameplayTagDatabase.RowRecord
-                    {
-                        guid = row.Id,
-                        registry = registryIndex,
-                        parent = row.Parent.IsZero ? -1 : indexById[row.Parent],
-                        depth = depth,
-                        segment = row.Segment,
-                        path = path,
-                        isImplicit = row.IsImplicit,
-                    });
-                }
-
-                registryRecords[registryIndex] = new GameplayTagDatabase.RegistryRecord
-                {
-                    id = registry.id,
-                    name = registry.name,
-                    kind = registry.kind,
-                    firstRow = firstRow,
-                    rowCount = rowRecords.Count - firstRow,
-                };
+                    parentId = row.Parent,
+                    depth = depth,
+                    segment = row.Segment,
+                    isImplicit = row.IsImplicit,
+                }));
             }
 
-            var rowArray = rowRecords.ToArray();
-            _Database.Initialize(registryRecords, rowArray, ComputeHash(registryRecords, rowArray));
+            return result;
         }
 
-
-
-        /// <summary>
-        /// Full path of every row that reaches a root through existing parents, without cycles.
-        /// </summary>
-        private static Dictionary<TagGuid, string> ComputePaths(List<Row> _Rows)
+        private static Dictionary<RegistryGuid, Row> ValidRowsById(List<Row> _Rows)
         {
-            var byId = new Dictionary<TagGuid, Row>(_Rows.Count);
+            var byId = new Dictionary<RegistryGuid, Row>(_Rows.Count);
             foreach (var row in _Rows)
                 if (!row.Id.IsZero && TagPath.IsValidSegment(row.Segment, out _))
                     byId[row.Id] = row; // duplicates: the last one wins, the file parser rejects them first
 
-            var paths = new Dictionary<TagGuid, string>(byId.Count);
-            var invalid = new HashSet<TagGuid>();
-            var chain = new List<TagGuid>();
+            return byId;
+        }
+
+        private static TagRow LinkParent(TagRow _Row, in RegistryDatabaseBuilder<TagRow>.LinkContext _Context)
+        {
+            _Row.parent = _Row.parentId.IsZero ? -1 : _Context.IndexOf(_Row.parentId);
+            _Row.parentId = RegistryGuid.Zero;
+            return _Row;
+        }
+
+        // The core hashes registries, IDs, registry indices and paths.
+        private static void AppendHash(TagRow _Row, StringBuilder _Builder)
+            => _Builder.Append(_Row.parent.ToString(CultureInfo.InvariantCulture)).Append('|').Append(_Row.isImplicit ? '1' : '0');
+
+        /// <summary>
+        /// Full path of every row that reaches a root through existing parents, without cycles.
+        /// </summary>
+        private static Dictionary<RegistryGuid, string> ComputePaths(Dictionary<RegistryGuid, Row> _ById)
+        {
+            var byId = _ById;
+            var paths = new Dictionary<RegistryGuid, string>(byId.Count);
+            var invalid = new HashSet<RegistryGuid>();
+            var chain = new List<RegistryGuid>();
 
             foreach (var start in byId.Keys)
             {
@@ -171,8 +136,8 @@ namespace LMK.Runtime.GameplayTags
 
                 // Walk up until a known path, a root, a missing parent or a cycle.
                 chain.Clear();
-                var visiting = new HashSet<TagGuid>();
-                TagGuid current = start;
+                var visiting = new HashSet<RegistryGuid>();
+                RegistryGuid current = start;
                 string basePath = null;
                 bool valid = true;
 
@@ -209,26 +174,6 @@ namespace LMK.Runtime.GameplayTags
             }
 
             return paths;
-        }
-
-        private static string ComputeHash(GameplayTagDatabase.RegistryRecord[] _Registries, GameplayTagDatabase.RowRecord[] _Rows)
-        {
-            var builder = new StringBuilder();
-            foreach (var registry in _Registries)
-                builder.Append('R').Append(registry.id).Append('|').Append(registry.name).Append('|').Append((int)registry.kind).Append('\n');
-
-            foreach (var row in _Rows)
-                builder.Append(row.guid).Append('|').Append(row.registry).Append('|').Append(row.parent).Append('|')
-                       .Append(row.path).Append('|').Append(row.isImplicit ? '1' : '0').Append('\n');
-
-            using var sha = SHA256.Create();
-            byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
-
-            var hex = new StringBuilder(hash.Length * 2);
-            foreach (byte b in hash)
-                hex.Append(b.ToString("x2"));
-
-            return hex.ToString();
         }
     }
 }

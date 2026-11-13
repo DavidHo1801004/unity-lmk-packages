@@ -4,11 +4,32 @@ using System.Collections.Generic;
 using NUnit.Framework;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
+
+// TagGuid is kept, obsolete, for code written against 1.0.0: these tests keep it working.
+#pragma warning disable CS0618
 
 namespace LMK.Editor.GameplayTags.Tests
 {
     public sealed class TagGuidTests
     {
+        [Test]
+        public void ConvertsToAndFromRegistryGuid_ByValue()
+        {
+            var tagGuid = TagGuid.Parse("0123456789abcdeffedcba9876543210");
+
+            RegistryGuid registryGuid = tagGuid;
+            TagGuid back = registryGuid;
+
+            Assert.AreEqual(tagGuid.Hi, registryGuid.Hi);
+            Assert.AreEqual(tagGuid.Lo, registryGuid.Lo);
+            Assert.AreEqual(tagGuid, back);
+
+            // Code written against 1.0.0 still compiles: TagGuid arguments are accepted where RegistryGuid is asked.
+            var tag = GameplayTag.FromId(tagGuid, TagGuid.Parse("00000000000000000000000000000001"));
+            Assert.AreEqual(registryGuid, tag.RegistryId);
+        }
+
         [Test]
         public void Parse_ReadsHalvesBigEndianFromHexText()
         {

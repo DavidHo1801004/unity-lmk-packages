@@ -9,7 +9,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags.Tests
 {
@@ -285,7 +287,7 @@ namespace LMK.Editor.GameplayTags.Tests
         public void Import_WithoutLock_IsRefused()
         {
             string before = FileText;
-            TagLockProvider.Current = new RefusingLockProvider();
+            RegistryLockProvider.Current = new RefusingLockProvider();
 
             var result = Import("A\n");
 
@@ -404,14 +406,14 @@ namespace LMK.Editor.GameplayTags.Tests
                 Assert.AreEqual(TagFileExport.ExportText(registries[i]), File.ReadAllText(written[i]));
         }
 
-        private static TagGuid WriteVendorRegistry()
+        private static RegistryGuid WriteVendorRegistry()
         {
-            var data = new TagRegistryData
+            var data = new RegistryData<TagRegistryRow>
             {
-                registryId = TagGuid.Parse("b0000000000000000000000000000002"),
+                registryId = RegistryGuid.Parse("b0000000000000000000000000000002"),
                 name = "Vendor",
-                kind = TagRegistryKind.Package,
-                rows = new List<TagRegistryRow> { new(TestIds.Id(1), TagGuid.Zero, "Stun", false) },
+                origin = RegistryOrigin.Package,
+                rows = new List<RegistryRow<TagRegistryRow>> { TagRegistryRow.Create(TestIds.Id(1), RegistryGuid.Zero, "Stun", false) },
             };
             RegistryServiceTests.WriteAndImport(FOLDER + "/Vendor.tagregistry", TagRegistryFile.Write(data));
             return data.registryId;

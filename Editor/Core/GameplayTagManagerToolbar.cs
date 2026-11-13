@@ -3,6 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using LMK.Editor.Registry;
 using LMK.Editor.UIElements;
 using LMK.Editor.Utilities;
 using LMK.Editor.Windows;
@@ -13,7 +14,8 @@ using ToolbarButton = LMK.Editor.UIElements.ToolbarButton;
 namespace LMK.Editor.GameplayTags
 {
     /// <summary>
-    /// Toolbar of the Gameplay Tag Manager, above the tag tree: Save, Discard, search, Add Tag and options.
+    /// Toolbar of the Gameplay Tag Manager, above the tag tree: the registry toolbar (Save, Discard, lock), with search,
+    /// Add Tag and options as its controls.
     /// </summary>
     internal sealed class GameplayTagManagerToolbar : VisualElement
     {
@@ -30,8 +32,7 @@ namespace LMK.Editor.GameplayTags
 
         private readonly GameplayTagControlPanel controlPanel;
 
-        private readonly ToolbarButton saveButton;
-        private readonly ToolbarButton discardButton;
+        private readonly RegistryToolbar registryToolbar;
         private readonly ToolbarButton addTagButton;
         private readonly ToolbarButton optionsButton;
 
@@ -43,30 +44,18 @@ namespace LMK.Editor.GameplayTags
             name = "toolbar";
             AddToClassList(USS_CLASS);
 
-            saveButton = new ToolbarButton(false, () => GameplayTagCommands.SaveWithDialogs())
-            {
-                name = "save-button",
-                text = "Save",
-                tooltip = "Write the tag changes to the main registry, save your markers and generate the tag code.",
-            };
-            Add(saveButton);
-
-            discardButton = new ToolbarButton(false, GameplayTagCommands.DiscardWithDialog)
-            {
-                name = "discard-button",
-                text = "Discard",
-                tooltip = "Drop every unsaved tag change and marker change.",
-            };
-            Add(discardButton);
+            registryToolbar = new RegistryToolbar();
+            registryToolbar.style.flexGrow = 1;
+            Add(registryToolbar);
 
             // Unity's own toolbar search field.
             var search = new ToolbarSearchField { name = "search-field" };
             search.RegisterValueChangedCallback(e => controlPanel.SetFilter(e.newValue));
-            Add(search);
+            registryToolbar.AddControl(search);
 
             addTagButton = new ToolbarButton(false) { name = "add-tag-button", text = "Add Tag", tooltip = "Add a tag to the main registry." };
             addTagButton.clicked += () => ShowAddTag(string.Empty);
-            Add(addTagButton);
+            registryToolbar.AddControl(addTagButton);
 
             optionsButton = new ToolbarButton(false)
             {
@@ -75,20 +64,15 @@ namespace LMK.Editor.GameplayTags
                 tooltip = "Options",
             };
             optionsButton.clicked += () => controlPanel.ShowGeneralMenu(optionsButton);
-            Add(optionsButton);
+            registryToolbar.AddControl(optionsButton);
 
             Refresh();
         }
 
         /// <summary>
-        /// Enable Save and Discard while there are unsaved changes.
+        /// Enable Save and Discard while there are unsaved changes, and show the lock.
         /// </summary>
-        public void Refresh()
-        {
-            bool pending = TagOperations.HasPendingChanges;
-            saveButton.SetEnabled(pending);
-            discardButton.SetEnabled(pending);
-        }
+        public void Refresh() => registryToolbar.Refresh();
 
 
 

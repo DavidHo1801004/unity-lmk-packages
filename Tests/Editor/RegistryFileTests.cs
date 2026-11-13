@@ -3,7 +3,9 @@ using System.Linq;
 
 using NUnit.Framework;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 using static LMK.Editor.GameplayTags.Tests.TestIds;
 
@@ -11,17 +13,17 @@ namespace LMK.Editor.GameplayTags.Tests
 {
     public sealed class RegistryFileTests
     {
-        internal static TagRegistryData SampleData() => new()
+        internal static RegistryData<TagRegistryRow> SampleData() => new()
         {
             registryId = MainRegistry,
             name = "Main",
-            kind = TagRegistryKind.Main,
-            rows = new List<TagRegistryRow>
+            origin = RegistryOrigin.Main,
+            rows = new List<RegistryRow<TagRegistryRow>>
             {
-                new(Id(3), Id(2), "Projectile", false, "Fired projectile abilities"),
-                new(Id(1), TagGuid.Zero, "Ability", true),
-                new(Id(2), Id(1), "Fire", false, "Fire | burn"),
-                new(Id(4), TagGuid.Zero, "Status", false),
+                TagRegistryRow.Create(Id(3), Id(2), "Projectile", false, "Fired projectile abilities"),
+                TagRegistryRow.Create(Id(1), RegistryGuid.Zero, "Ability", true),
+                TagRegistryRow.Create(Id(2), Id(1), "Fire", false, "Fire | burn"),
+                TagRegistryRow.Create(Id(4), RegistryGuid.Zero, "Status", false),
             },
         };
 
@@ -38,15 +40,15 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.IsFalse(result.ChecksumMismatch);
             Assert.AreEqual(original.registryId, result.Data.registryId);
             Assert.AreEqual("Main", result.Data.name);
-            Assert.AreEqual(TagRegistryKind.Main, result.Data.kind);
+            Assert.AreEqual(RegistryOrigin.Main, result.Data.origin);
 
             var parsed = result.Data.rows.ToDictionary(e => e.id);
             foreach (var row in original.rows)
             {
-                Assert.AreEqual(row.parent, parsed[row.id].parent);
-                Assert.AreEqual(row.segment, parsed[row.id].segment);
-                Assert.AreEqual(row.isImplicit, parsed[row.id].isImplicit);
-                Assert.AreEqual(row.description, parsed[row.id].description);
+                Assert.AreEqual(row.data.parent, parsed[row.id].data.parent);
+                Assert.AreEqual(row.data.segment, parsed[row.id].data.segment);
+                Assert.AreEqual(row.data.isImplicit, parsed[row.id].data.isImplicit);
+                Assert.AreEqual(row.data.description, parsed[row.id].data.description);
             }
         }
 
@@ -86,7 +88,7 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.IsTrue(result.IsValid, "a hand edit that parses still loads");
             Assert.IsTrue(result.ChecksumMismatch);
             Assert.IsTrue(result.Warnings.Any(e => e.Contains("Checksum mismatch")));
-            Assert.IsTrue(result.Data.rows.Any(e => e.segment == "Statuz"));
+            Assert.IsTrue(result.Data.rows.Any(e => e.data.segment == "Statuz"));
         }
 
         [Test]
@@ -103,20 +105,20 @@ namespace LMK.Editor.GameplayTags.Tests
         public void OptionalPackageHeader_RoundTrips()
         {
             var data = SampleData();
-            data.kind = TagRegistryKind.Generated;
+            data.origin = RegistryOrigin.Generated;
             data.package = "com.vendor.combat";
 
             var result = TagRegistryFile.Parse(TagRegistryFile.Write(data));
 
             Assert.IsTrue(result.IsValid);
-            Assert.AreEqual(TagRegistryKind.Generated, result.Data.kind);
+            Assert.AreEqual(RegistryOrigin.Generated, result.Data.origin);
             Assert.AreEqual("com.vendor.combat", result.Data.package);
         }
 
 
 
         #region Integrity
-        private static void AssertRejected(TagRegistryData _Data, string _ExpectedError)
+        private static void AssertRejected(RegistryData<TagRegistryRow> _Data, string _ExpectedError)
         {
             var result = TagRegistryFile.Parse(TagRegistryFile.Write(_Data));
 
@@ -128,7 +130,7 @@ namespace LMK.Editor.GameplayTags.Tests
         public void MissingParent_IsRejected()
         {
             var data = SampleData();
-            data.rows.Add(new TagRegistryRow(Id(9), Id(50), "Orphan", false));
+            data.rows.Add(TagRegistryRow.Create(Id(9), Id(50), "Orphan", false));
             AssertRejected(data, "does not exist");
         }
 
@@ -136,8 +138,8 @@ namespace LMK.Editor.GameplayTags.Tests
         public void ParentCycle_IsRejected()
         {
             var data = SampleData();
-            data.rows.Add(new TagRegistryRow(Id(10), Id(11), "LoopA", false));
-            data.rows.Add(new TagRegistryRow(Id(11), Id(10), "LoopB", false));
+            data.rows.Add(TagRegistryRow.Create(Id(10), Id(11), "LoopA", false));
+            data.rows.Add(TagRegistryRow.Create(Id(11), Id(10), "LoopB", false));
             AssertRejected(data, "cycle");
         }
 
@@ -145,7 +147,7 @@ namespace LMK.Editor.GameplayTags.Tests
         public void DuplicateSiblingSegments_AreRejected()
         {
             var data = SampleData();
-            data.rows.Add(new TagRegistryRow(Id(12), Id(1), "Fire", false));
+            data.rows.Add(TagRegistryRow.Create(Id(12), Id(1), "Fire", false));
             AssertRejected(data, "share the parent");
         }
 
@@ -153,7 +155,7 @@ namespace LMK.Editor.GameplayTags.Tests
         public void DuplicateIds_AreRejected()
         {
             var data = SampleData();
-            data.rows.Add(new TagRegistryRow(Id(4), TagGuid.Zero, "Other", false));
+            data.rows.Add(TagRegistryRow.Create(Id(4), RegistryGuid.Zero, "Other", false));
             AssertRejected(data, "Duplicate tag ID");
         }
 
@@ -161,7 +163,7 @@ namespace LMK.Editor.GameplayTags.Tests
         public void InvalidSegment_IsRejected()
         {
             var data = SampleData();
-            data.rows.Add(new TagRegistryRow(Id(13), TagGuid.Zero, "Bad-Name", false));
+            data.rows.Add(TagRegistryRow.Create(Id(13), RegistryGuid.Zero, "Bad-Name", false));
             AssertRejected(data, "invalid character");
         }
 

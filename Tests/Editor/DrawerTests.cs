@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 using LMK.GameplayTags.Tests;
 
 namespace LMK.Editor.GameplayTags.Tests
@@ -199,7 +200,7 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.IsTrue(label.ClassListContains(GameplayTagDrawerHelper.USS_CLASS_MISSING));
             Assert.IsFalse(label.ClassListContains(GameplayTagDrawerHelper.USS_CLASS_IMPLICIT));
 
-            GameplayTagDrawerHelper.ApplyDisplay(label, GameplayTag.FromId(TagGuid.Parse("c0000000000000000000000000000003"), A.Id, "Pkg.Tag"));
+            GameplayTagDrawerHelper.ApplyDisplay(label, GameplayTag.FromId(RegistryGuid.Parse("c0000000000000000000000000000003"), A.Id, "Pkg.Tag"));
             Assert.AreEqual("Pkg.Tag (deleted)", label.text);
             StringAssert.Contains("not loaded", label.tooltip);
         }

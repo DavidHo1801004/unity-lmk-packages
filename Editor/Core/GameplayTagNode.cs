@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
@@ -28,12 +29,12 @@ namespace LMK.Editor.GameplayTags
         /// </summary>
         internal GameplayTagNode Parent { get; private set; }
 
-        internal TagGuid RegistryId { get; private set; }
+        internal RegistryGuid RegistryId { get; private set; }
 
         /// <summary>
         /// Tag ID. Zero for the root and registry headers.
         /// </summary>
-        internal TagGuid Id { get; private set; }
+        internal RegistryGuid Id { get; private set; }
 
         internal string RegistryName { get; private set; } = string.Empty;
 
@@ -108,13 +109,13 @@ namespace LMK.Editor.GameplayTags
                 };
 
                 root.children.Add(header);
-                AddChildren(header, registry, TagGuid.Zero);
+                AddChildren(header, registry, RegistryGuid.Zero);
             }
 
             return root;
         }
 
-        private static void AddChildren(GameplayTagNode _Node, TagRegistrySnapshot.Registry _Registry, TagGuid _ParentId)
+        private static void AddChildren(GameplayTagNode _Node, TagRegistrySnapshot.Registry _Registry, RegistryGuid _ParentId)
         {
             foreach (var id in _Registry.GetChildren(_ParentId))
             {
@@ -144,7 +145,7 @@ namespace LMK.Editor.GameplayTags
         /// <summary>
         /// Find a tag node by registry and tag ID in the subtree of this node.
         /// </summary>
-        internal GameplayTagNode Find(TagGuid _RegistryId, TagGuid _Id)
+        internal GameplayTagNode Find(RegistryGuid _RegistryId, RegistryGuid _Id)
         {
             foreach (var node in GetDescendants())
                 if (!node.IsRegistryHeader && node.RegistryId.Equals(_RegistryId) && node.Id.Equals(_Id))

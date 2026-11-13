@@ -7,7 +7,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags.Tests
 {
@@ -21,11 +23,11 @@ namespace LMK.Editor.GameplayTags.Tests
         protected const string VENDOR = "com.vendor.combat";
         protected const string DEPENDENCY = "com.vendor.core";
 
-        protected static readonly TagGuid ForeignRegistry = TagGuid.Parse("f0000000000000000000000000000001");
-        protected static readonly TagGuid VendorRegistry = TagGuid.Parse("f0000000000000000000000000000002");
-        protected static readonly TagGuid DependencyRegistry = TagGuid.Parse("f0000000000000000000000000000003");
+        protected static readonly RegistryGuid ForeignRegistry = RegistryGuid.Parse("f0000000000000000000000000000001");
+        protected static readonly RegistryGuid VendorRegistry = RegistryGuid.Parse("f0000000000000000000000000000002");
+        protected static readonly RegistryGuid DependencyRegistry = RegistryGuid.Parse("f0000000000000000000000000000003");
 
-        protected static TagGuid G(int _N) => new(0xF000_0000_0000_0000UL, (ulong)_N);
+        protected static RegistryGuid G(int _N) => new(0xF000_0000_0000_0000UL, (ulong)_N);
 
         protected readonly Dictionary<string, string> Installed = new();
 
@@ -86,17 +88,17 @@ namespace LMK.Editor.GameplayTags.Tests
 
         protected static GameplayTag Foreign(int _N, string _Name) => GameplayTag.FromId(ForeignRegistry, G(_N), _Name);
 
-        private protected static void WriteRegistry(string _Path, TagRegistryData _Data)
+        private protected static void WriteRegistry(string _Path, RegistryData<TagRegistryRow> _Data)
             => RegistryServiceTests.WriteAndImport(_Path, TagRegistryFile.Write(_Data));
 
-        private protected static TagRegistryData Registry(TagGuid _Id, TagRegistryKind _Kind, string _Package, params (int Id, int Parent, string Segment)[] _Rows) => new()
+        private protected static RegistryData<TagRegistryRow> Registry(RegistryGuid _Id, RegistryOrigin _Kind, string _Package, params (int Id, int Parent, string Segment)[] _Rows) => new()
         {
             registryId = _Id,
             name = _Package ?? "Registry",
-            kind = _Kind,
-            package = _Kind == TagRegistryKind.Generated ? _Package : string.Empty,
-            version = _Kind == TagRegistryKind.Generated ? "1.0.0" : string.Empty,
-            rows = _Rows.Select(e => new TagRegistryRow(G(e.Id), e.Parent == 0 ? TagGuid.Zero : G(e.Parent), e.Segment, false)).ToList(),
+            origin = _Kind,
+            package = _Kind == RegistryOrigin.Generated ? _Package : string.Empty,
+            version = _Kind == RegistryOrigin.Generated ? "1.0.0" : string.Empty,
+            rows = _Rows.Select(e => TagRegistryRow.Create(G(e.Id), e.Parent == 0 ? RegistryGuid.Zero : G(e.Parent), e.Segment, false)).ToList(),
         };
 
         /// <summary>
@@ -121,7 +123,7 @@ namespace LMK.Editor.GameplayTags.Tests
 
     public sealed class PackageRegistryTests : PackageTestBase
     {
-        private TagPackage Vendor(string _Version = "1.0.0") => new()
+        private RegistryPackage Vendor(string _Version = "1.0.0") => new()
         {
             Name = VENDOR,
             Version = _Version,
@@ -140,7 +142,7 @@ namespace LMK.Editor.GameplayTags.Tests
         {
             string path = GENERATED + "/" + VENDOR + ".tagregistry";
             CreateFolder("Packages");
-            WriteRegistry(path, Registry(VendorRegistry, TagRegistryKind.Generated, VENDOR, (1, 0, "Stun")));
+            WriteRegistry(path, Registry(VendorRegistry, RegistryOrigin.Generated, VENDOR, (1, 0, "Stun")));
             string text = File.ReadAllText(path);
             var stun = GameplayTag.FromId(VendorRegistry, G(1), "Stun");
 
@@ -266,7 +268,7 @@ namespace LMK.Editor.GameplayTags.Tests
         {
             var package = Vendor();
             CreateAsset(package.Root, "Tags", Foreign(2, "Vendor.Stun"));
-            TagLockProvider.Current = new RefusingLockProvider();
+            RegistryLockProvider.Current = new RefusingLockProvider();
 
             var result = PackageRegistryService.Generate(package, false);
 
@@ -278,9 +280,9 @@ namespace LMK.Editor.GameplayTags.Tests
 
 
         #region Pack validation
-        private TagPackage Authored(params string[] _Dependencies)
+        private RegistryPackage Authored(params string[] _Dependencies)
         {
-            var package = new TagPackage
+            var package = new RegistryPackage
             {
                 Name = "com.me.abilities",
                 Version = "1.0.0",
@@ -289,7 +291,7 @@ namespace LMK.Editor.GameplayTags.Tests
             };
 
             WriteRegistry(package.Root + "/Abilities.tagregistry",
-                Registry(VendorRegistry, TagRegistryKind.Package, null, (1, 0, "Abilities"), (2, 1, "Dash")));
+                Registry(VendorRegistry, RegistryOrigin.Package, null, (1, 0, "Abilities"), (2, 1, "Dash")));
 
             return package;
         }
@@ -302,7 +304,7 @@ namespace LMK.Editor.GameplayTags.Tests
             var package = Authored();
             CreateAsset(package.Root, "Ok", Own(2, "Abilities.Dash"), Own(1, "Abilities"));
 
-            CollectionAssert.IsEmpty(TagPackValidation.Validate(package, TagGuid.Zero));
+            CollectionAssert.IsEmpty(TagPackValidation.Validate(package, RegistryGuid.Zero));
             CollectionAssert.IsEmpty(TagPackValidation.Validate(package, VendorRegistry), "same ID as the last pack");
         }
 
@@ -312,7 +314,7 @@ namespace LMK.Editor.GameplayTags.Tests
             var package = Authored();
             CreateAsset(package.Root, "UsesMain", Own(2, "Abilities.Dash"), A);
 
-            var errors = TagPackValidation.Validate(package, TagGuid.Zero);
+            var errors = TagPackValidation.Validate(package, RegistryGuid.Zero);
 
             Assert.AreEqual(1, errors.Count, string.Join("\n", errors));
             StringAssert.Contains("main registry", errors[0]);
@@ -325,13 +327,13 @@ namespace LMK.Editor.GameplayTags.Tests
             Installed[DEPENDENCY] = "1.0.0";
             CreateFolder("Packages");
             WriteRegistry(GENERATED + "/" + DEPENDENCY + ".tagregistry",
-                Registry(DependencyRegistry, TagRegistryKind.Generated, DEPENDENCY, (7, 0, "Core")));
+                Registry(DependencyRegistry, RegistryOrigin.Generated, DEPENDENCY, (7, 0, "Core")));
             var core = GameplayTag.FromId(DependencyRegistry, G(7), "Core");
 
             CreateAsset(package.Root, "Unknown", Own(99, "Abilities.Gone"));
             CreateAsset(package.Root, "Dependency", core);
 
-            var errors = TagPackValidation.Validate(package, TagGuid.Parse("e0000000000000000000000000000009"));
+            var errors = TagPackValidation.Validate(package, RegistryGuid.Parse("e0000000000000000000000000000009"));
 
             Assert.IsTrue(errors.Any(e => e.Contains("Abilities.Gone") && e.Contains("doesn't exist")), "unknown ID");
             Assert.IsTrue(errors.Any(e => e.Contains("\"Core\"") && e.Contains("dependencies")), "undeclared dependency");
@@ -339,7 +341,7 @@ namespace LMK.Editor.GameplayTags.Tests
 
             // Declaring the dependency makes its tags valid.
             package.Dependencies.Add(DEPENDENCY);
-            Assert.IsFalse(TagPackValidation.Validate(package, TagGuid.Zero).Any(e => e.Contains("\"Core\"")));
+            Assert.IsFalse(TagPackValidation.Validate(package, RegistryGuid.Zero).Any(e => e.Contains("\"Core\"")));
         }
 
         [Test]
@@ -349,15 +351,15 @@ namespace LMK.Editor.GameplayTags.Tests
 
             File.WriteAllText(package.Root + "/Abilities.tagregistry", File.ReadAllText(package.Root + "/Abilities.tagregistry").Replace("Dash", "Sprint"));
             AssetDatabase.ImportAsset(package.Root + "/Abilities.tagregistry");
-            Assert.IsTrue(TagPackValidation.Validate(package, TagGuid.Zero).Any(e => e.Contains("checksum")));
+            Assert.IsTrue(TagPackValidation.Validate(package, RegistryGuid.Zero).Any(e => e.Contains("checksum")));
 
             WriteRegistry(package.Root + "/Second.tagregistry",
-                Registry(TagGuid.Parse("e0000000000000000000000000000001"), TagRegistryKind.Package, null, (5, 0, "Other")));
-            Assert.IsTrue(TagPackValidation.Validate(package, TagGuid.Zero).Any(e => e.Contains("2 registries")));
+                Registry(RegistryGuid.Parse("e0000000000000000000000000000001"), RegistryOrigin.Package, null, (5, 0, "Other")));
+            Assert.IsTrue(TagPackValidation.Validate(package, RegistryGuid.Zero).Any(e => e.Contains("2 registries")));
         }
         #endregion
 
-        private static TagGuid IdIn(TagRegistrySnapshot.Registry _Registry, string _Path)
+        private static RegistryGuid IdIn(TagRegistrySnapshot.Registry _Registry, string _Path)
         {
             Assert.IsTrue(_Registry.TryFind(_Path, out var id), $"\"{_Path}\" not found");
             return id;
@@ -419,7 +421,7 @@ namespace LMK.Editor.GameplayTags.Tests
         [Test]
         public void PackageRegistryReferences_AreUnchanged()
         {
-            WriteRegistry(FOLDER + "/Vendor.tagregistry", Registry(VendorRegistry, TagRegistryKind.Package, null, (1, 0, "Vendor")));
+            WriteRegistry(FOLDER + "/Vendor.tagregistry", Registry(VendorRegistry, RegistryOrigin.Package, null, (1, 0, "Vendor")));
             var vendor = GameplayTag.FromId(VendorRegistry, G(1), "Vendor");
             string asset = CreateAsset(incoming, "Incoming", vendor, A);
             string text = File.ReadAllText(asset);
@@ -484,7 +486,7 @@ namespace LMK.Editor.GameplayTags.Tests
         {
             string asset = CreateAsset(incoming, "Incoming", Foreign(1, "A"), Foreign(2, "Later"));
             string text = File.ReadAllText(asset);
-            TagLockProvider.Current = new RefusingLockProvider();
+            RegistryLockProvider.Current = new RefusingLockProvider();
 
             LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("not mapped"));
             var postponed = ProjectAssetImport.Map(new[] { asset }, "test import", false);
@@ -493,7 +495,7 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.AreEqual(text, File.ReadAllText(asset));
             CollectionAssert.AreEqual(new[] { asset }, ProjectAssetImport.PendingAssets);
 
-            TagLockProvider.Current = null;
+            RegistryLockProvider.Current = null;
             var result = ProjectAssetImport.MapPending(false);
 
             Assert.IsTrue(result.Success && !result.Postponed, result.Message);

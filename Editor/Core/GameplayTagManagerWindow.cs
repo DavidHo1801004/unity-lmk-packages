@@ -2,19 +2,22 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using LMK.Editor.Registry;
 using LMK.Editor.UIElements;
 using LMK.Editor.Utilities;
 using LMK.Editor.Styles;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
     /// <summary>
     /// Shows every loaded registry, and edits the main registry: a toolbar (Save, Discard, search, Add Tag,
-    /// options), the tag tree, and an inspector panel for the selected tag. Edits are staged until saved.
-    /// Offers to create the main registry when the project has none.
+    /// options), the tag tree, and an inspector panel for the selected tag. Edits are staged until saved, and Unity
+    /// asks to save or discard them when the window closes (<see cref="RegistryWindow"/>). Offers to create the main
+    /// registry when the project has none.
     /// </summary>
-    internal sealed class GameplayTagManagerWindow : EditorWindow
+    internal sealed class GameplayTagManagerWindow : RegistryWindow
     {
         private const string UXML_PATH = "Packages/com.lmk.gameplaytags/Editor/Assets/GameplayTagManagerWindowUXML.uxml";
 
@@ -24,7 +27,7 @@ namespace LMK.Editor.GameplayTags
         private GameplayTagInspectorPanel inspector;
 
         // A registry to select once the GUI exists.
-        private TagGuid pendingRegistrySelection;
+        private RegistryGuid pendingRegistrySelection;
 
 
 
@@ -37,31 +40,24 @@ namespace LMK.Editor.GameplayTags
         /// <summary>
         /// Open the window and select a registry's header.
         /// </summary>
-        public static void OpenRegistry(TagGuid _RegistryId)
+        public static void OpenRegistry(RegistryGuid _RegistryId)
         {
             var window = GetWindow<GameplayTagManagerWindow>("Gameplay Tags");
             window.pendingRegistrySelection = _RegistryId;
             window.ApplyPendingSelection();
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
-            saveChangesMessage = "The gameplay tags have unsaved changes. Save them?";
-            hasUnsavedChanges = TagOperations.HasPendingChanges;
-
             TagRegistryService.OnSnapshotChanged += RefreshSwitcher;
-            TagOperations.StateChanged += OnStateChanged;
+            base.OnEnable();
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
             TagRegistryService.OnSnapshotChanged -= RefreshSwitcher;
-            TagOperations.StateChanged -= OnStateChanged;
-            TagCodeGen.Flush();
+            base.OnDisable();
         }
-
-        // Generated code is written once the user is done editing here, so a burst of changes costs one recompile.
-        private void OnLostFocus() => TagCodeGen.Flush();
 
         private void CreateGUI()
         {
@@ -106,38 +102,16 @@ namespace LMK.Editor.GameplayTags
             switcher?.SwitchActive(TagRegistryService.Snapshot.Main == null ? 0 : 1);
         }
 
-        private void OnStateChanged()
-        {
-            hasUnsavedChanges = TagOperations.HasPendingChanges;
-            toolbar?.Refresh();
-        }
+        protected override void OnStateChanged() => toolbar?.Refresh();
 
         private void ApplyPendingSelection()
         {
             if (pendingRegistrySelection.IsZero || controlPanel == null) return;
 
             var registryId = pendingRegistrySelection;
-            pendingRegistrySelection = TagGuid.Zero;
+            pendingRegistrySelection = RegistryGuid.Zero;
 
             // A frame later: a window opened just now has no tree yet.
             controlPanel.schedule.Execute(() => controlPanel.SelectRegistry(registryId));
-        }
-
-
-
-        #region Unsaved Changes
-        // Unity asks before closing the window or quitting while hasUnsavedChanges is set.
-        public override void SaveChanges()
-        {
-            if (GameplayTagCommands.SaveWithDialogs())
-                base.SaveChanges();
-        }
-
-        public override void DiscardChanges()
-        {
-            TagOperations.Discard();
-            base.DiscardChanges();
-        }
-        #endregion
-    }
+        }    }
 }

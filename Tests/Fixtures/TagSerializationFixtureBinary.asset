@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cffe41296cb04eab8ef7c3642fca2c9b, type: 3}
+  m_Name: TagSerializationFixtureBinary
+  m_EditorClassIdentifier: 
+  single:
+    _registry:
+      _hi: 7718901663506778943
+      _lo: 9969875621850532700
+    _id:
+      _hi: 4551706360823171711
+      _lo: 10100903309785135041
+    _lastKnownName: Ability.Fire
+  container:
+    _tags:
+    - _registry:
+        _hi: 7718901663506778943
+        _lo: 9969875621850532700
+      _id:
+        _hi: 17357386176853808775
+        _lo: 8676565436284608015
+      _lastKnownName: Status.Burning
+    - _registry:
+        _hi: 0
+        _lo: 0
+      _id:
+        _hi: 0
+        _lo: 0
+      _lastKnownName: 
+    - _registry:
+        _hi: 7718901663506778943
+        _lo: 9969875621850532700
+      _id:
+        _hi: 4551706360823171711
+        _lo: 10100903309785135041
+      _lastKnownName: Ability.Fire

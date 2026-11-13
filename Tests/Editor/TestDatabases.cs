@@ -5,6 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 using Row = LMK.Runtime.GameplayTags.GameplayTagDatabaseBuilder.Row;
 
@@ -69,16 +70,16 @@ namespace LMK.Editor.GameplayTags.Tests
     /// </summary>
     public static class TestIds
     {
-        public static readonly TagGuid MainRegistry = TagGuid.Parse("6b1f0c2a9d7e4b3f8a5c1d0e2f3a4b5c");
-        public static readonly TagGuid PackageRegistry = TagGuid.Parse("a0000000000000000000000000000001");
+        public static readonly RegistryGuid MainRegistry = RegistryGuid.Parse("6b1f0c2a9d7e4b3f8a5c1d0e2f3a4b5c");
+        public static readonly RegistryGuid PackageRegistry = RegistryGuid.Parse("a0000000000000000000000000000001");
 
         /// <summary>
         /// A deterministic, non-zero tag ID.
         /// </summary>
-        public static TagGuid Id(int _N) => new(0x1000_0000_0000_0000UL, (ulong)_N);
+        public static RegistryGuid Id(int _N) => new(0x1000_0000_0000_0000UL, (ulong)_N);
 
         public static Row Row(int _Id, int _Parent, string _Segment, bool _Implicit = false)
-            => new(Id(_Id), _Parent == 0 ? TagGuid.Zero : Id(_Parent), _Segment, _Implicit);
+            => new(Id(_Id), _Parent == 0 ? RegistryGuid.Zero : Id(_Parent), _Segment, _Implicit);
 
         /// <summary>
         /// Main registry: Ability(1) > Fire(2) > Projectile(3), Status(4) > Burning(5), Status > Stun(6).
@@ -96,7 +97,7 @@ namespace LMK.Editor.GameplayTags.Tests
         public static GameplayTagDatabaseBuilder MainBuilder()
             => new GameplayTagDatabaseBuilder().AddRegistry(MainRegistry, "Main", TagRegistryKind.Main, MainRows());
 
-        public static GameplayTag Tag(TagGuid _Registry, int _Id, string _Name)
+        public static GameplayTag Tag(RegistryGuid _Registry, int _Id, string _Name)
             => GameplayTag.FromId(_Registry, Id(_Id), _Name);
 
         public static GameplayTag Main(int _Id, string _Name) => Tag(MainRegistry, _Id, _Name);

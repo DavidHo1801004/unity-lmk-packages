@@ -12,6 +12,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 using LMK.GameplayTags.Tests;
 
 namespace LMK.Editor.GameplayTags.Tests
@@ -29,7 +30,7 @@ namespace LMK.Editor.GameplayTags.Tests
 
             Assert.AreEqual(TagRegistryService.Snapshot.Registries.Count, database.RegistryCount);
             Assert.AreEqual(TagStatus.Live, database.Resolve(A.RegistryId, A.Id).Status);
-            Assert.AreEqual(TagStatus.MissingRegistry, database.Resolve(TagGuid.Parse("d0000000000000000000000000000004"), A.Id).Status);
+            Assert.AreEqual(TagStatus.MissingRegistry, database.Resolve(RegistryGuid.Parse("d0000000000000000000000000000004"), A.Id).Status);
             Assert.AreEqual("A", database.GetPath(database.Resolve(A.RegistryId, A.Id).Handle));
 
             string hash = database.ContentHash;

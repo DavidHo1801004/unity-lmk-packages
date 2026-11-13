@@ -2,6 +2,8 @@ using System;
 
 using UnityEngine;
 
+using LMK.Runtime.Registry;
+
 namespace LMK.Runtime.GameplayTags
 {
     /// <summary>
@@ -18,7 +20,7 @@ namespace LMK.Runtime.GameplayTags
     /// <b>FROZEN LAYOUT:</b> renaming or reordering the serialized fields breaks every saved reference.
     /// </remarks>
     [Serializable]
-    public struct GameplayTag : IEquatable<GameplayTag>
+    public struct GameplayTag : IEquatable<GameplayTag>, IRegistryReference
     {
         /// <summary>
         /// Separator between the segments of a tag path.
@@ -31,10 +33,10 @@ namespace LMK.Runtime.GameplayTags
         public static readonly GameplayTag None = default;
 
         [SerializeField]
-        private TagGuid _registry;
+        private RegistryGuid _registry;
 
         [SerializeField]
-        private TagGuid _id;
+        private RegistryGuid _id;
 
         [SerializeField]
         private string _lastKnownName;
@@ -42,12 +44,12 @@ namespace LMK.Runtime.GameplayTags
         /// <summary>
         /// ID of the registry the tag belongs to. Always explicit, never implied.
         /// </summary>
-        public TagGuid RegistryId => _registry;
+        public RegistryGuid RegistryId => _registry;
 
         /// <summary>
         /// ID of the tag in its registry. Zero for <see cref="None"/>.
         /// </summary>
-        public TagGuid Id => _id;
+        public RegistryGuid Id => _id;
 
         /// <summary>
         /// The path when the tag was assigned. Display and diagnostics only: it never affects resolution.
@@ -103,7 +105,7 @@ namespace LMK.Runtime.GameplayTags
 
 
 
-        internal GameplayTag(TagGuid _Registry, TagGuid _Id, string _LastKnownName)
+        internal GameplayTag(RegistryGuid _Registry, RegistryGuid _Id, string _LastKnownName)
         {
             _registry = _Registry;
             _id = _Id;
@@ -113,14 +115,14 @@ namespace LMK.Runtime.GameplayTags
         /// <summary>
         /// A reference from its IDs. Used by generated code and save data.
         /// </summary>
-        public static GameplayTag FromId(TagGuid _Registry, TagGuid _Id, string _LastKnownName = null)
+        public static GameplayTag FromId(RegistryGuid _Registry, RegistryGuid _Id, string _LastKnownName = null)
             => _Id.IsZero ? None : new GameplayTag(_Registry, _Id, _LastKnownName);
 
         /// <summary>
         /// The live tag currently at <paramref name="_Path"/> in a registry, or <see cref="None"/>. <br/>
         /// <b>Debug and console use only:</b> a path lookup does not survive renames.
         /// </summary>
-        public static GameplayTag FromName(TagGuid _Registry, string _Path)
+        public static GameplayTag FromName(RegistryGuid _Registry, string _Path)
         {
             var database = GameplayTagDatabase.Active;
             return database != null ? database.GetTag(database.FindByPath(_Registry, _Path)) : None;

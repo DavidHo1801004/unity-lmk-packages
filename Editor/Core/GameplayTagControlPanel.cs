@@ -9,7 +9,9 @@ using UnityEngine.UIElements;
 using LMK.Editor.UIElements;
 using LMK.Editor.Utilities;
 using LMK.Editor.Styles;
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
@@ -252,14 +254,14 @@ namespace LMK.Editor.GameplayTags
         /// Select a tag, expand its parents and scroll to it. Only with <see cref="RowSelection"/>.
         /// </summary>
         /// <returns> Whether the tag is in the tree. </returns>
-        internal bool Select(TagGuid _RegistryId, TagGuid _TagId)
+        internal bool Select(RegistryGuid _RegistryId, RegistryGuid _TagId)
             => SelectKey($"{_RegistryId}:{_TagId}");
 
         /// <summary>
         /// Select a registry's header row. Only with <see cref="RowSelection"/>.
         /// </summary>
         /// <returns> Whether the registry is in the tree. </returns>
-        internal bool SelectRegistry(TagGuid _RegistryId)
+        internal bool SelectRegistry(RegistryGuid _RegistryId)
             => SelectKey($"registry:{_RegistryId}");
 
         private bool SelectKey(string _Key)
@@ -371,7 +373,7 @@ namespace LMK.Editor.GameplayTags
                 var registry = TagRegistryService.Snapshot.Find(registryId);
                 if (Editable && registry?.Kind == TagRegistryKind.Generated && !string.IsNullOrEmpty(registry.Data.package))
                 {
-                    var package = TagPackage.From(UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
+                    var package = RegistryPackage.From(UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
                         .FirstOrDefault(e => e.name == registry.Data.package));
 
                     if (package != null)
@@ -395,8 +397,8 @@ namespace LMK.Editor.GameplayTags
                 if (Editable)
                 {
                     var tag = node.Tag;
-                    menu.AddItem("Find References", false, () => TagReferenceWindow.ShowReferences(tag));
-                    menu.AddItem("Replace References...", false, () => TagReferenceWindow.ShowReplace(tag));
+                    menu.AddItem("Find References", false, () => RegistryReferenceWindow.ShowReferences(TagKind.Instance, (tag.RegistryId, tag.Id)));
+                    menu.AddItem("Replace References...", false, () => RegistryReferenceWindow.ShowReplace(TagKind.Instance, (tag.RegistryId, tag.Id)));
                     menu.AddSeparator(null);
                 }
 
@@ -466,7 +468,7 @@ namespace LMK.Editor.GameplayTags
                 Report(result.Value, $"Tag deleted: \"{path}\"");
         }
 
-        private void ExportRegistry(TagGuid _RegistryId)
+        private void ExportRegistry(RegistryGuid _RegistryId)
         {
             var registry = TagRegistryService.Snapshot.Find(_RegistryId);
             string path = TagFileExport.ExportWithDialog(registry);
@@ -562,7 +564,7 @@ namespace LMK.Editor.GameplayTags
         /// Show the result of an operation.
         /// </summary>
         /// <returns> Whether the operation succeeded. </returns>
-        private bool Report(TagOperationResult _Result, string _SuccessMessage)
+        private bool Report(RegistryResult _Result, string _SuccessMessage)
         {
             if (_Result.Success)
                 ShowMessage(_SuccessMessage, HelpBoxMessageType.Info);

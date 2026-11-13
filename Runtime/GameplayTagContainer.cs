@@ -21,7 +21,7 @@ namespace LMK.Runtime.GameplayTags
     /// removal). They are not counted, not enumerated, and match nothing.
     /// </remarks>
     [Serializable]
-    public sealed class GameplayTagContainer : IReadOnlyCollection<GameplayTag>, ISerializationCallbackReceiver
+    public sealed class GameplayTagContainer : IReadOnlyCollection<GameplayTag>, IGameplayTagSet, ISerializationCallbackReceiver
     {
         /// <summary>
         /// Enumerates the stored tags in insertion order, skipping <see cref="GameplayTag.None"/> entries.

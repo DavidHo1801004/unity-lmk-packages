@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UnityEditor;
 
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 using static LMK.Editor.GameplayTags.Tests.TestIds;
 
@@ -69,8 +70,8 @@ namespace LMK.Editor.GameplayTags.Tests
     {
         private const string FIXTURE_PATH = "Packages/com.lmk.gameplaytags/Tests/Fixtures/TagSerializationFixture.asset";
 
-        private static readonly TagGuid FireId = TagGuid.Parse("3f2ae8d1b6c04a7f8c2d9e0b1a4f77c1");
-        private static readonly TagGuid BurningId = TagGuid.Parse("f0e1d2c3b4a5968778695a4b3c2d1e0f");
+        private static readonly RegistryGuid FireId = RegistryGuid.Parse("3f2ae8d1b6c04a7f8c2d9e0b1a4f77c1");
+        private static readonly RegistryGuid BurningId = RegistryGuid.Parse("f0e1d2c3b4a5968778695a4b3c2d1e0f");
 
         [Test]
         public void Fixture_ReadsBackExactly()

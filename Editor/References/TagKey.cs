@@ -1,11 +1,14 @@
 using System;
 
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
     /// <summary>
     /// The identity of a stored tag reference: (registry ID, tag ID), as kept by the reference index.
+    /// The tag form of a <see cref="RegistryKey"/> of the tag kind.
     /// </summary>
     /// <remarks>
     /// A zero <see cref="Registry"/> means the registry is unknown: a prefab instance override that changed only
@@ -14,10 +17,10 @@ namespace LMK.Editor.GameplayTags
     /// </remarks>
     internal readonly struct TagKey : IEquatable<TagKey>
     {
-        public readonly TagGuid Registry;
-        public readonly TagGuid Id;
+        public readonly RegistryGuid Registry;
+        public readonly RegistryGuid Id;
 
-        public TagKey(TagGuid _Registry, TagGuid _Id)
+        public TagKey(RegistryGuid _Registry, RegistryGuid _Id)
         {
             Registry = _Registry;
             Id = _Id;
@@ -25,31 +28,16 @@ namespace LMK.Editor.GameplayTags
 
         public static TagKey Of(GameplayTag _Tag) => new(_Tag.RegistryId, _Tag.Id);
 
+        public static TagKey Of(in RegistryKey _Key) => new(_Key.Registry, _Key.Id);
+
         public bool HasRegistry => !Registry.IsZero;
 
         /// <summary>
-        /// Whether this key refers to the tag (<paramref name="_Registry"/>, <paramref name="_Id"/>).
+        /// Whether this key stands for the tag (registry, ID). A key without a registry matches the ID in any registry.
         /// </summary>
-        public bool Matches(TagGuid _Registry, TagGuid _Id)
-            => Id == _Id && (Registry.IsZero || Registry == _Registry);
+        public bool Matches(RegistryGuid _Registry, RegistryGuid _Id) => Id == _Id && (!HasRegistry || Registry == _Registry);
 
         public bool Matches(GameplayTag _Tag) => Matches(_Tag.RegistryId, _Tag.Id);
-
-        /// <summary>
-        /// Whether the key resolves to no live tag in <paramref name="_Snapshot"/>: the tag was deleted, or its
-        /// registry isn't loaded.
-        /// </summary>
-        public bool IsMissingIn(TagRegistrySnapshot _Snapshot)
-        {
-            if (HasRegistry)
-                return _Snapshot.Find(Registry)?.Contains(Id) != true;
-
-            foreach (var registry in _Snapshot.Registries)
-                if (registry.Contains(Id))
-                    return false;
-
-            return true;
-        }
 
         public bool Equals(TagKey _Other) => Registry == _Other.Registry && Id == _Other.Id;
 
@@ -58,24 +46,5 @@ namespace LMK.Editor.GameplayTags
         public override int GetHashCode() => HashCode.Combine(Registry, Id);
 
         public override string ToString() => $"{Registry}:{Id}";
-
-        /// <summary>
-        /// Parse the <see cref="ToString"/> form.
-        /// </summary>
-        public static bool TryParse(string _Text, out TagKey _Key)
-        {
-            _Key = default;
-            if (string.IsNullOrEmpty(_Text)) return false;
-
-            int colon = _Text.IndexOf(':');
-            if (colon < 0
-                || !TagGuid.TryParse(_Text.Substring(0, colon), out var registry)
-                || !TagGuid.TryParse(_Text.Substring(colon + 1), out var id)
-                || id.IsZero)
-                return false;
-
-            _Key = new TagKey(registry, id);
-            return true;
-        }
     }
 }

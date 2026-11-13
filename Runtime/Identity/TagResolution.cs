@@ -1,5 +1,7 @@
 using System;
 
+using LMK.Runtime.Registry;
+
 namespace LMK.Runtime.GameplayTags
 {
     /// <summary>
@@ -64,6 +66,12 @@ namespace LMK.Runtime.GameplayTags
 
         public static TagResolution Live(TagHandle _Handle)
             => new(TagStatus.Live, _Handle);
+
+        /// <summary>
+        /// The tag form of a registry resolution: a live row's index is the tag's handle.
+        /// </summary>
+        public static TagResolution From(RegistryResolution _Resolution)
+            => new((TagStatus)_Resolution.Status, _Resolution.IsLive ? new TagHandle(_Resolution.Row) : TagHandle.None);
 
 
 

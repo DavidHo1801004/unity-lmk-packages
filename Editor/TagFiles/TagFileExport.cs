@@ -26,11 +26,11 @@ namespace LMK.Editor.GameplayTags
             var entries = new List<TagFileEntry>();
             foreach (var row in _Registry.Rows)
             {
-                if (row.isImplicit && string.IsNullOrEmpty(row.description)) continue;
+                if (row.data.isImplicit && string.IsNullOrEmpty(row.data.description)) continue;
 
                 string path = _Registry.GetPath(row.id);
                 if (path != null)
-                    entries.Add(new TagFileEntry(path, row.description));
+                    entries.Add(new TagFileEntry(path, row.data.description));
             }
 
             var header = new[]

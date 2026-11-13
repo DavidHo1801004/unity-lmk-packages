@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 using LMK.Editor.UIElements;
+using LMK.Editor.Registry;
 using LMK.Runtime.GameplayTags;
 
 using ToolbarButton = LMK.Editor.UIElements.ToolbarButton;
@@ -204,48 +205,15 @@ namespace LMK.Editor.GameplayTags
         }
 
         /// <summary>
-        /// A colour field, empty (transparent) when the tag has no marker, and a button to remove it.
+        /// The registry core's marker field: a colour field, empty (transparent) when the tag has no marker, and a
+        /// button to remove it.
         /// </summary>
         private VisualElement CreateMarkerValue(GameplayTagNode _Node)
         {
-            var value = new VisualElement();
+            var value = new RegistryMarkerField(TagKind.Instance, _Node.RegistryId, _Node.Id);
             value.AddToClassList(USS_CLASS + "__inline");
-
-            bool hasMarker = TagOperations.TryGetMarker(_Node.RegistryId, _Node.Id, out var color);
-
-            var field = new ColorField { name = "marker-field", showAlpha = true, tooltip = "Your colour for this tag, shown on its row. Only you see it." };
-            field.SetValueWithoutNotify(hasMarker ? color : Color.clear);
-            field.AddToClassList(USS_CLASS + "__marker-field");
-            value.Add(field);
-
-            var clear = new ToolbarButton(false) { name = "marker-clear-button", text = "Clear", tooltip = "Remove the marker." };
-            clear.AddToClassList(USS_CLASS + "__button");
-            clear.style.display = hasMarker ? DisplayStyle.Flex : DisplayStyle.None;
-            value.Add(clear);
-
-            var registryId = _Node.RegistryId;
-            var id = _Node.Id;
-
-            field.RegisterValueChangedCallback(e =>
-            {
-                // A new marker starts transparent: a picked colour is shown opaque. Clear removes the marker.
-                var newColor = e.newValue;
-                if (newColor.a <= 0f)
-                {
-                    newColor.a = 1f;
-                    field.SetValueWithoutNotify(newColor);
-                }
-
-                TagOperations.SetMarker(registryId, id, newColor);
-                clear.style.display = DisplayStyle.Flex;
-            });
-
-            clear.clicked += () =>
-            {
-                TagOperations.SetMarker(registryId, id, Color.clear);
-                field.SetValueWithoutNotify(Color.clear);
-                clear.style.display = DisplayStyle.None;
-            };
+            value.Field.AddToClassList(USS_CLASS + "__marker-field");
+            value.ClearButton.AddToClassList(USS_CLASS + "__button");
 
             return value;
         }
@@ -291,7 +259,7 @@ namespace LMK.Editor.GameplayTags
         /// </summary>
         private static void Defer(Action _Edit) => EditorApplication.delayCall += () => _Edit();
 
-        private void Notify(TagOperationResult _Result, string _SuccessMessage)
+        private void Notify(RegistryResult _Result, string _SuccessMessage)
         {
             if (_Result.Success)
                 Report?.Invoke(_SuccessMessage, HelpBoxMessageType.Info);

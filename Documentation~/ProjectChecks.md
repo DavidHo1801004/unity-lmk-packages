@@ -1,13 +1,13 @@
 # Project checks
 
-`LMK.Editor.GameplayTags.TagProjectChecks` checks your project's tags the way a build would, so a CI job, or a test you run before pushing, catches broken tags early.
+`LMK.Editor.Registry.RegistryProjectChecks` checks your project's registries the way a build would, for every registry kind (gameplay tags, and any other kind you use), so a CI job, or a test you run before pushing, catches broken tags early. `LMK.Editor.GameplayTags.TagProjectChecks`, from gameplay tags 1.0.0, has the same members and forwards to it.
 
 ## The checks
 
 | Check | Fails when |
 |---|---|
 | `CheckRegistryIntegrity()` | A registry in `Assets/` or in a package you author (embedded or local) doesn't parse, is inconsistent, or has a checksum that doesn't match its rows. |
-| `CheckBuildContent(warnings)` | A tag reference in an enabled build scene, or in Resources content, doesn't resolve, and *Project Settings → LMK → Gameplay Tags → Missing Tags In Builds* is *Fail*. Under *Warn*, those references go to `warnings` instead. |
+| `CheckBuildContent(warnings)` | A reference in an enabled build scene, or in Resources content, doesn't resolve, and its kind's build policy is *Fail* (*Project Settings → LMK → Gameplay Tags → Missing Tags In Builds*, or *LMK → Registries* for every kind). Under *Warn*, those references go to `warnings` instead. |
 | `CheckAuthoredPackages()` | An embedded or local package fails pack validation (see the README's *Packages* section). Assets in a package's `Tests/` folder are skipped. |
 
 Each returns a list of problems, empty when the check passes. `CheckBuildContent` opens each build scene in turn, then restores the scenes that were open; an untitled scene is replaced by an empty one. When it runs interactively, it first asks to save modified scenes.
@@ -19,7 +19,7 @@ Add a test assembly to your project, for example `Assets/Tests/Editor/Project.Te
 ```json
 {
     "name": "Project.Tests.Editor",
-    "references": [ "LMK.GameplayTags.Editor", "UnityEngine.TestRunner", "UnityEditor.TestRunner" ],
+    "references": [ "LMK.Registry.Editor", "UnityEngine.TestRunner", "UnityEditor.TestRunner" ],
     "includePlatforms": [ "Editor" ],
     "overrideReferences": true,
     "precompiledReferences": [ "nunit.framework.dll" ],
@@ -34,24 +34,24 @@ and a test class next to it:
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using LMK.Editor.GameplayTags;
+using LMK.Editor.Registry;
 
-public sealed class GameplayTagProjectChecks
+public sealed class ProjectChecks
 {
     [Test]
-    public void Registries_AreIntact() => AssertNone(TagProjectChecks.CheckRegistryIntegrity());
+    public void Registries_AreIntact() => AssertNone(RegistryProjectChecks.CheckRegistryIntegrity());
 
     [Test]
     public void BuildContent_ReferencesResolve()
     {
         var warnings = new List<string>();
-        AssertNone(TagProjectChecks.CheckBuildContent(warnings));
+        AssertNone(RegistryProjectChecks.CheckBuildContent(warnings));
         foreach (string warning in warnings)
             Debug.LogWarning(warning);
     }
 
     [Test]
-    public void AuthoredPackages_PassPackValidation() => AssertNone(TagProjectChecks.CheckAuthoredPackages());
+    public void AuthoredPackages_PassPackValidation() => AssertNone(RegistryProjectChecks.CheckAuthoredPackages());
 
     private static void AssertNone(List<string> _Failures)
         => Assert.IsEmpty(_Failures, "\n- " + string.Join("\n- ", _Failures));
@@ -69,7 +69,7 @@ Unity -batchmode -projectPath . -runTests -testPlatform EditMode -testResults re
 Without a test assembly, run every check at once:
 
 ```
-Unity -batchmode -projectPath . -executeMethod LMK.Editor.GameplayTags.TagProjectChecks.RunFromCommandLine
+Unity -batchmode -projectPath . -executeMethod LMK.Editor.Registry.RegistryProjectChecks.RunFromCommandLine
 ```
 
 The results go to the log (`-logFile <path>` to choose where). The editor exits with code 0 when every check passed, and 1 otherwise. Don't add `-quit`: the method exits the editor itself.
@@ -80,7 +80,7 @@ A registry's ID must never change, since every reference stores it. Unity can't 
 
 ```bash
 base="origin/main"
-git diff --name-status -M "$base" HEAD -- '*.tagregistry' | while IFS=$'\t' read -r change old new; do
+git diff --name-status -M "$base" HEAD -- '*.tagregistry' '*.attrregistry' | while IFS=$'\t' read -r change old new; do
     case "$change" in M*) new="$old" ;; R*) ;; *) continue ;; esac
     before=$(git show "$base:$old" | awk '/^registry[ \t]/ { print $2; exit }')
     after=$(git show "HEAD:$new" | awk '/^registry[ \t]/ { print $2; exit }')

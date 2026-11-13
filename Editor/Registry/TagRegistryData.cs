@@ -1,22 +1,21 @@
 using System;
-using System.Collections.Generic;
 
-using LMK.Runtime.GameplayTags;
+using LMK.Editor.Registry;
+using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
 {
     /// <summary>
-    /// One tag row of a registry file.
+    /// One tag row of a registry file, after its ID: the columns parent, segment, flags and description.
+    /// The content of a file is a <see cref="RegistryData{TRow}"/> of these rows.
     /// </summary>
     [Serializable]
     internal struct TagRegistryRow
     {
-        public TagGuid id;
-
         /// <summary>
         /// Parent row ID, or zero for a top level tag. Never changes once the row exists.
         /// </summary>
-        public TagGuid parent;
+        public RegistryGuid parent;
 
         public string segment;
 
@@ -27,67 +26,18 @@ namespace LMK.Editor.GameplayTags
 
         public string description;
 
-        public TagRegistryRow(TagGuid _Id, TagGuid _Parent, string _Segment, bool _IsImplicit, string _Description = null)
+        public TagRegistryRow(RegistryGuid _Parent, string _Segment, bool _IsImplicit, string _Description = null)
         {
-            id = _Id;
             parent = _Parent;
             segment = _Segment;
             isImplicit = _IsImplicit;
             description = _Description ?? string.Empty;
         }
-    }
-
-
-
-    /// <summary>
-    /// Content of one registry file: its header and its rows.
-    /// </summary>
-    [Serializable]
-    internal sealed class TagRegistryData
-    {
-        public TagGuid registryId;
 
         /// <summary>
-        /// Display name, e.g. "Main" or the package name.
+        /// A registry row with its ID.
         /// </summary>
-        public string name = string.Empty;
-
-        public TagRegistryKind kind;
-
-        /// <summary>
-        /// For <see cref="TagRegistryKind.Generated"/> registries: the package they were generated for. The
-        /// registry is loaded only while that package is installed.
-        /// </summary>
-        public string package = string.Empty;
-
-        /// <summary>
-        /// For <see cref="TagRegistryKind.Generated"/> registries: the package version they were generated from.
-        /// Another installed version offers to regenerate.
-        /// </summary>
-        public string version = string.Empty;
-
-        public List<TagRegistryRow> rows = new();
-
-        public TagRegistryData Clone()
-        {
-            return new TagRegistryData
-            {
-                registryId = registryId,
-                name = name,
-                kind = kind,
-                package = package,
-                version = version,
-                rows = new List<TagRegistryRow>(rows),
-            };
-        }
-
-        public int IndexOf(TagGuid _Id)
-        {
-            for (int i = 0; i < rows.Count; i++)
-                if (rows[i].id.Equals(_Id))
-                    return i;
-
-            return -1;
-        }
+        public static RegistryRow<TagRegistryRow> Create(RegistryGuid _Id, RegistryGuid _Parent, string _Segment, bool _IsImplicit, string _Description = null)
+            => new(_Id, new TagRegistryRow(_Parent, _Segment, _IsImplicit, _Description));
     }
 }
