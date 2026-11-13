@@ -6,7 +6,8 @@ Editor tools and gameplay libraries for Unity, published as Unity Package Manage
 |---|---|---|---|
 | [`com.lmk.attributes`](../../tree/upm/com.lmk.attributes) | Inspector attributes: `[InlineInstanced]` searchable type picker for `[SerializeReference]` fields, lists and arrays. | `upm/com.lmk.attributes` | 0.2.0 |
 | [`com.lmk.editor`](../../tree/upm/com.lmk.editor) | Shared UI Toolkit editor library: theme, searchable hierarchical dropdown, search syntax, controls. | `upm/com.lmk.editor` | 0.3.0 |
-| [`com.lmk.gameplaytags`](../../tree/upm/com.lmk.gameplaytags) | Hierarchical gameplay tags (`Status.Debuff.Stun`) identified by ID: tag fields, a tag editor, reference tools, package registries and generated constants. | `upm/com.lmk.gameplaytags` | 1.0.0 |
+| [`com.lmk.gameplaytags`](../../tree/upm/com.lmk.gameplaytags) | Hierarchical gameplay tags (`Status.Debuff.Stun`) identified by ID: tag fields, a tag editor, reference tools, package registries and generated constants, and tag queries. Built on `com.lmk.registry`. | `upm/com.lmk.gameplaytags` | 1.1.0 |
+| [`com.lmk.registry`](../../tree/upm/com.lmk.registry) | Shared core for ID-based registries: stable identity, registry files, a baked runtime database, staged editing with Undo, locking, reference tools, package registries, build checks and generated constants. | `upm/com.lmk.registry` | 1.0.0 |
 
 Requires Unity 6000.3 or newer.
 
