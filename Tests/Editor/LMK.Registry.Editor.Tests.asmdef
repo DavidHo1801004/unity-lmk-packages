@@ -1,0 +1,27 @@
+{
+    "name": "LMK.Registry.Editor.Tests",
+    "rootNamespace": "",
+    "references": [
+        "LMK.Registry.Runtime",
+        "LMK.Registry.Editor",
+        "LMK.Registry.Runtime.Tests",
+        "LMK.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

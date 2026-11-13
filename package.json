@@ -1,0 +1,28 @@
+{
+  "name": "com.lmk.registry",
+  "version": "1.0.0",
+  "displayName": "LMK Registry",
+  "description": "Shared core for ID-based registries in Unity: stable (registry, row) identity, registry files, a baked runtime database, staged editing with Undo, locking, package registries, reference tools, build checks and generated constants. Used by com.lmk.gameplaytags and com.lmk.abilitysystem.",
+  "unity": "6000.3",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidHo1801004/unity-lmk-packages.git"
+  },
+  "documentationUrl": "https://github.com/DavidHo1801004/unity-lmk-packages/blob/upm/com.lmk.registry/README.md",
+  "changelogUrl": "https://github.com/DavidHo1801004/unity-lmk-packages/blob/upm/com.lmk.registry/CHANGELOG.md",
+  "licensesUrl": "https://github.com/DavidHo1801004/unity-lmk-packages/blob/upm/com.lmk.registry/LICENSE.md",
+  "keywords": [
+    "registry",
+    "identifiers",
+    "editor",
+    "ui toolkit"
+  ],
+  "author": {
+    "name": "David Ho",
+    "url": "https://github.com/DavidHo1801004"
+  },
+  "dependencies": {
+    "com.lmk.editor": "0.3.0"
+  }
+}

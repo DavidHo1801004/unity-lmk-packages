@@ -1,0 +1,88 @@
+/*
+Registry editor UI shared by every kind: toolbar, marker field and registry file Inspector.
+Colours come from the LMK palette (var(--lmk-color-*)).
+*/
+
+/* Toolbar */
+.registry-toolbar {
+	flex-direction: row;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.registry-toolbar__controls {
+	flex-direction: row;
+	align-items: center;
+	flex-grow: 1;
+}
+
+.registry-toolbar__lock {
+	margin: 0px 4px 0px 4px;
+	-unity-font-style: italic;
+	color: var(--lmk-color-text-muted);
+}
+
+/* Marker field */
+.registry-marker {
+	flex-direction: row;
+	align-items: center;
+}
+
+.registry-marker__field {
+	flex-grow: 1;
+	margin: 0px;
+}
+
+.registry-marker__clear {
+	margin-left: 2px;
+}
+
+/* Registry file Inspector */
+.registry-inspector {
+	padding-top: 2px;
+}
+
+.registry-inspector__help-box {
+	margin: 0px 0px 4px 0px;
+}
+
+.registry-inspector__rows {
+	margin: 2px 0px 6px 3px;
+}
+
+.registry-inspector__value {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.registry-inspector__toggle {
+	margin: 2px 0px 2px 3px;
+}
+
+.registry-inspector__actions {
+	flex-direction: row;
+	justify-content: flex-end;
+	margin-top: 6px;
+}
+
+.registry-inspector__button {
+	height: 22px;
+	padding: 2px 8px 2px 8px;
+	margin: 2px 0px 2px 2px;
+
+	background-color: var(--lmk-color-button-background);
+	border-color: var(--lmk-color-button-border);
+
+	transition: background-color, border-width;
+	transition-duration: 0.1s;
+}
+.registry-inspector__button:hover {
+	background-color: var(--lmk-color-button-background-hover);
+	border-color: var(--lmk-color-button-border);
+}
+.registry-inspector__button:active {
+	background-color: var(--lmk-color-button-background-active);
+}
+.registry-inspector__button:focus {
+	border-color: var(--lmk-color-field-border-hover);
+}

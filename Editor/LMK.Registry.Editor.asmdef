@@ -1,0 +1,19 @@
+{
+    "name": "LMK.Registry.Editor",
+    "rootNamespace": "",
+    "references": [
+        "LMK.Registry.Runtime",
+        "LMK.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
