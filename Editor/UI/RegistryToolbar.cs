@@ -41,7 +41,7 @@ namespace LMK.Editor.Registry
             {
                 name = "save-button",
                 text = "Save",
-                tooltip = "Write every registry change, save your markers and generate the code.",
+                tooltip = "Write every registry change and generate the code.",
             };
             Add(saveButton);
 
@@ -49,7 +49,7 @@ namespace LMK.Editor.Registry
             {
                 name = "discard-button",
                 text = "Discard",
-                tooltip = "Drop every unsaved registry change and marker change.",
+                tooltip = "Drop every unsaved registry change.",
             };
             Add(discardButton);
 

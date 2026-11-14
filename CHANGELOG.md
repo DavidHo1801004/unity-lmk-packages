@@ -3,6 +3,12 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-11-14
+
+### Removed
+- Markers: `RegistryMarker`, `RegistryMarkerStore`, `RegistryMarkerField`, and `RegistryKind.Markers`, `TryGetMarker`, `SetMarker`, `MarkersPath`, `DefaultMarkersPath` and `MarkersChanged`. Markers are now a gameplay tags feature (`com.lmk.gameplaytags` 1.2.0). `RegistryKind.HasPendingChanges` and `RegistrySession.Save` cover registry content only.
+- `com.lmk.abilitysystem` 0.1.0 uses the removed marker API: keep it on `com.lmk.registry` 1.1.0 until a later ability system release.
+
 ## [1.1.0] - 2026-11-14
 
 ### Added

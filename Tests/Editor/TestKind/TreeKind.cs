@@ -17,7 +17,6 @@ namespace LMK.Editor.Registry.Tests
         {
             id = _Id;
             extension = _Extension;
-            MarkersPath = $"Temp/RegistryCoreTests/{_Id}/Markers.json";
         }
 
         public override string Id => id;

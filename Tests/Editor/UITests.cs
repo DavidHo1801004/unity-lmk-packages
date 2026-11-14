@@ -71,30 +71,6 @@ namespace LMK.Editor.Registry.Tests
 
 
 
-        #region Markers
-        [Test]
-        public void MarkerField_StagesTheColour_AndClearRemovesIt()
-        {
-            var registry = a.MainRegistryId;
-            var row = Add(a, "Fire").Id;
-            var field = new RegistryMarkerField(a, registry, row);
-            Assert.AreEqual(DisplayStyle.None, field.ClearButton.style.display.value);
-
-            field.SetColor(new Color(1f, 0f, 0f, 0f));
-
-            Assert.IsTrue(a.TryGetMarker(registry, row, out var color));
-            Assert.AreEqual(1f, color.a, "a picked colour is opaque");
-            Assert.AreEqual(DisplayStyle.Flex, field.ClearButton.style.display.value);
-
-            field.ClearMarker();
-
-            Assert.IsFalse(a.TryGetMarker(registry, row, out _));
-            Assert.AreEqual(DisplayStyle.None, field.ClearButton.style.display.value);
-        }
-        #endregion
-
-
-
         #region Drawers
         [Test]
         public void Drawer_RemovesMissingReferences_FromFieldsAndLists()

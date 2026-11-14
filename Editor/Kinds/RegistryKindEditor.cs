@@ -14,7 +14,7 @@ namespace LMK.Editor.Registry
     /// <summary>
     /// What a domain package writes to add a registry kind: its row format and rules, how rows are named, and
     /// how its runtime database is built. The core does the rest: loading every registry file of the kind,
-    /// snapshots and the editor database, staged editing with Undo, locking, saving and markers.
+    /// snapshots and the editor database, staged editing with Undo, locking and saving.
     /// </summary>
     /// <typeparam name="TRow"> The kind's file row: every column after <c>guid</c>. Keep it value-like. </typeparam>
     /// <typeparam name="TAsset"> The kind's imported registry asset. </typeparam>
@@ -275,13 +275,8 @@ namespace LMK.Editor.Registry
         // Cache of the pending checks and of the parsed staged content, valid for one state revision.
         private int pendingCacheRevision = -1;
         private bool pendingData;
-        private bool pendingMarkers;
         private int stagedCacheRevision = -1;
         private RegistryData<TRow> stagedCache;
-
-        // The markers saved on disk, as last loaded or saved, and the file they belong to.
-        private List<RegistryMarker> savedMarkers;
-        private string savedMarkersPath;
 
         private string SessionKey(string _Name) => $"LMK.Registry.{Id}.{_Name}:{MainRegistryPath}";
 
@@ -297,20 +292,6 @@ namespace LMK.Editor.Registry
         {
             get => SessionState.GetString(SessionKey("DataHash"), string.Empty);
             set => SessionState.SetString(SessionKey("DataHash"), value);
-        }
-
-        private List<RegistryMarker> SavedMarkers
-        {
-            get
-            {
-                if (savedMarkers == null || savedMarkersPath != MarkersPath)
-                {
-                    savedMarkers = RegistryMarkerStore.Load(MarkersPath);
-                    savedMarkersPath = MarkersPath;
-                }
-
-                return savedMarkers;
-            }
         }
 
         /// <summary>
@@ -334,18 +315,6 @@ namespace LMK.Editor.Registry
 
                 UpdatePendingCache(state);
                 return pendingData;
-            }
-        }
-
-        internal override bool HasPendingMarkers
-        {
-            get
-            {
-                var state = CurrentState;
-                if (state == null) return false;
-
-                UpdatePendingCache(state);
-                return pendingMarkers;
             }
         }
 
@@ -374,7 +343,6 @@ namespace LMK.Editor.Registry
 
             pendingCacheRevision = _State.revision;
             pendingData = RegistryFile.HashText(_State.text) != DataHash;
-            pendingMarkers = !RegistryMarkerStore.AreEqual(_State.markers, SavedMarkers);
         }
 
         private void InvalidatePendingCache() => pendingCacheRevision = -1;
@@ -446,7 +414,6 @@ namespace LMK.Editor.Registry
             RegistryAssets.EnsureFolder(Path.GetDirectoryName(MainRegistryPath)?.Replace('\\', '/'));
 
             var state = RegistryStagingState.FindOrCreate(Id);
-            bool keepMarkers = state.path == MainRegistryPath;
 
             Undo.ClearUndo(state);
             state.path = MainRegistryPath;
@@ -457,8 +424,6 @@ namespace LMK.Editor.Registry
                 origin = RegistryOrigin.Main,
             };
             state.text = RegistryFile.Write(data, this);
-            if (!keepMarkers)
-                state.markers = new List<RegistryMarker>(SavedMarkers);
             state.revision = RegistrySession.NextRevision();
 
             RegistryFile.WriteAtomic(MainRegistryPath, state.text);
@@ -511,7 +476,7 @@ namespace LMK.Editor.Registry
         /// <summary>
         /// Make the state belong to the current main registry. Without staged registry edits, it follows the
         /// file: if the file changed since it was loaded or saved, the registry content is loaded again and the
-        /// undo history dropped. Staged markers are kept.
+        /// undo history dropped.
         /// </summary>
         private RegistryStagingState SyncState()
         {
@@ -519,13 +484,13 @@ namespace LMK.Editor.Registry
 
             if (state.path != MainRegistryPath)
             {
-                LoadFromDisk(state, false);
+                LoadFromDisk(state);
                 return state;
             }
 
             UpdatePendingCache(state);
             if (!pendingData && ReadDiskHash() != DiskHash)
-                LoadFromDisk(state, true);
+                LoadFromDisk(state);
 
             return state;
         }
@@ -533,8 +498,7 @@ namespace LMK.Editor.Registry
         /// <summary>
         /// Load the registry content from disk, and clear the kind's undo history.
         /// </summary>
-        /// <param name="_KeepMarkers"> Keep the staged markers, or load the saved ones. </param>
-        private void LoadFromDisk(RegistryStagingState _State, bool _KeepMarkers)
+        private void LoadFromDisk(RegistryStagingState _State)
         {
             string text = File.Exists(MainRegistryPath) ? File.ReadAllText(MainRegistryPath) : null;
             var parsed = text != null ? RegistryFile.Parse(text, this) : null;
@@ -548,9 +512,6 @@ namespace LMK.Editor.Registry
             else if (parsed == null || !samePath)
                 _State.text = string.Empty;
             // An invalid file keeps the content loaded before, like the loading service.
-
-            if (!_KeepMarkers || !samePath)
-                _State.markers = new List<RegistryMarker>(SavedMarkers);
 
             _State.revision = RegistrySession.NextRevision();
 
@@ -603,17 +564,6 @@ namespace LMK.Editor.Registry
             return MainRegistryPath;
         }
 
-        internal override void SaveMarkers()
-        {
-            var state = CurrentState;
-            if (state == null) return;
-
-            RegistryMarkerStore.Save(MarkersPath, state.markers);
-            savedMarkers = new List<RegistryMarker>(state.markers);
-            savedMarkersPath = MarkersPath;
-            InvalidatePendingCache();
-        }
-
         internal override void AfterSave()
         {
             var state = CurrentState;
@@ -621,7 +571,6 @@ namespace LMK.Editor.Registry
                 ReloadStaged(state);
 
             RaiseStateChanged();
-            RaiseMarkersChanged();
         }
 
         internal override void DiscardStaged()
@@ -629,12 +578,10 @@ namespace LMK.Editor.Registry
             var state = RegistryStagingState.Find(Id);
             if (state == null) return;
 
-            savedMarkers = null;
-            LoadFromDisk(state, false);
+            LoadFromDisk(state);
             ReloadStaged(state);
 
             RaiseStateChanged();
-            RaiseMarkersChanged();
         }
 
         internal override void OnUndoRedo()
@@ -646,7 +593,6 @@ namespace LMK.Editor.Registry
             ReloadStaged(state);
 
             RaiseStateChanged();
-            RaiseMarkersChanged();
         }
 
         internal override void OnMainRegistryImported()
@@ -658,7 +604,7 @@ namespace LMK.Editor.Registry
             UpdatePendingCache(state);
             if (!pendingData)
             {
-                LoadFromDisk(state, true);
+                LoadFromDisk(state);
                 appliedRevision = state.revision;
             }
 
@@ -1173,70 +1119,6 @@ namespace LMK.Editor.Registry
 
         private static string Capitalized(string _Text)
             => string.IsNullOrEmpty(_Text) ? _Text : char.ToUpperInvariant(_Text[0]) + _Text[1..];
-        #endregion
-
-
-
-        #region Markers
-        /// <summary>
-        /// The markers to show: staged ones, or the saved ones before anything was staged.
-        /// </summary>
-        public override IReadOnlyList<RegistryMarker> Markers => CurrentState?.markers ?? SavedMarkers;
-
-        /// <summary>
-        /// The marker colour of a row, if it has one.
-        /// </summary>
-        public override bool TryGetMarker(RegistryGuid _Registry, RegistryGuid _Row, out Color _Color)
-        {
-            foreach (var marker in Markers)
-            {
-                if (!marker.Is(_Registry, _Row)) continue;
-
-                _Color = marker.color;
-                return true;
-            }
-
-            _Color = Color.clear;
-            return false;
-        }
-
-        /// <summary>
-        /// Stage a row's marker colour, for a row of any registry of the kind. A fully transparent colour removes
-        /// the marker. Markers are per user, so no lock is needed. Consecutive changes within one editor event
-        /// (dragging in the colour picker) share one undo step.
-        /// </summary>
-        public override void SetMarker(RegistryGuid _Registry, RegistryGuid _Row, Color _Color)
-        {
-            // Stored as saved, so a saved marker compares equal to the staged one.
-            _Color = (Color32)_Color;
-
-            var state = SyncState();
-            int index = state.markers.FindIndex(e => e.Is(_Registry, _Row));
-            bool remove = _Color.a <= 0f;
-
-            if (remove ? index < 0 : index >= 0 && state.markers[index].color == _Color) return;
-
-            string undoName = $"Set {DisplayName} Marker";
-            Undo.RecordObject(state, undoName);
-            Undo.SetCurrentGroupName(undoName);
-
-            if (remove) state.markers.RemoveAt(index);
-            else if (index >= 0) state.markers[index] = new RegistryMarker(_Registry, _Row, _Color);
-            else state.markers.Add(new RegistryMarker(_Registry, _Row, _Color));
-
-            // The registries didn't change: keep the parsed content, which only depends on the text.
-            bool cacheValid = stagedCacheRevision == state.revision;
-            state.revision = RegistrySession.NextRevision();
-            if (cacheValid) stagedCacheRevision = state.revision;
-            Undo.FlushUndoRecordObjects();
-
-            // The registries didn't change, so they are already up to date with this revision.
-            appliedRevision = state.revision;
-
-            RaiseStateChanged();
-            RaiseMarkersChanged();
-            RegistrySession.RaiseStateChanged();
-        }
         #endregion
     }
 }

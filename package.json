@@ -1,6 +1,6 @@
 {
   "name": "com.lmk.registry",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "displayName": "LMK Registry",
   "description": "Shared core for ID-based registries in Unity: stable (registry, row) identity, registry files, a baked runtime database, staged editing with Undo, locking, package registries, reference tools, build checks and generated constants. Used by com.lmk.gameplaytags and com.lmk.abilitysystem.",
   "unity": "6000.3",

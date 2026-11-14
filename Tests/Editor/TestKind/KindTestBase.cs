@@ -20,7 +20,7 @@ namespace LMK.Editor.Registry.Tests
     public abstract class KindTestBase
     {
         protected const string FOLDER = "Assets/__RegistryCoreTests";
-        private const string MARKERS_FOLDER = "Temp/RegistryCoreTests";
+        private const string TEMP_FOLDER = "Temp/RegistryCoreTests";
 
         protected TreeKind a;
         protected TreeKindB b;
@@ -91,8 +91,8 @@ namespace LMK.Editor.Registry.Tests
 
             if (AssetDatabase.IsValidFolder(FOLDER))
                 AssetDatabase.DeleteAsset(FOLDER);
-            if (Directory.Exists(MARKERS_FOLDER))
-                Directory.Delete(MARKERS_FOLDER, true);
+            if (Directory.Exists(TEMP_FOLDER))
+                Directory.Delete(TEMP_FOLDER, true);
         }
 
 

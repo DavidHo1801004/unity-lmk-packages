@@ -67,7 +67,7 @@ namespace LMK.Editor.Registry
 
 
         /// <summary>
-        /// Write every staged edit: each changed main registry, the markers, then the generated files.
+        /// Write every staged edit: each changed main registry, then the generated files.
         /// Refused as a whole, before anything is written, if any registry changed on disk since its edits began,
         /// is invalid, or if the lock is not available for every file.
         /// </summary>
@@ -77,7 +77,6 @@ namespace LMK.Editor.Registry
             if (kinds.Count == 0) return RegistryResult.Ok();
 
             var dataKinds = kinds.Where(e => e.HasPendingData).ToList();
-            var markerKinds = kinds.Where(e => e.HasPendingMarkers).ToList();
 
             foreach (var kind in dataKinds)
             {
@@ -93,9 +92,6 @@ namespace LMK.Editor.Registry
             }
 
             var written = dataKinds.Select(e => e.WriteStaged()).ToList();
-
-            foreach (var kind in markerKinds)
-                kind.SaveMarkers();
 
             foreach (string path in written)
                 AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
@@ -115,7 +111,7 @@ namespace LMK.Editor.Registry
         }
 
         /// <summary>
-        /// Drop every staged edit of every kind: load the main registries and the markers from disk again, and
+        /// Drop every staged edit of every kind: load the main registries from disk again, and
         /// clear their undo history.
         /// </summary>
         public static void Discard()

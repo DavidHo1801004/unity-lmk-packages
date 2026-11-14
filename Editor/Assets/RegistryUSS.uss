@@ -1,5 +1,5 @@
 /*
-Registry editor UI shared by every kind: toolbar, marker field and registry file Inspector.
+Registry editor UI shared by every kind: toolbar and registry file Inspector.
 Colours come from the LMK palette (var(--lmk-color-*)).
 */
 
@@ -20,21 +20,6 @@ Colours come from the LMK palette (var(--lmk-color-*)).
 	margin: 0px 4px 0px 4px;
 	-unity-font-style: italic;
 	color: var(--lmk-color-text-muted);
-}
-
-/* Marker field */
-.registry-marker {
-	flex-direction: row;
-	align-items: center;
-}
-
-.registry-marker__field {
-	flex-grow: 1;
-	margin: 0px;
-}
-
-.registry-marker__clear {
-	margin-left: 2px;
 }
 
 /* Registry file Inspector */

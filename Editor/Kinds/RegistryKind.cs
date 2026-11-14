@@ -13,7 +13,6 @@ namespace LMK.Editor.Registry
     public abstract class RegistryKind
     {
         private string mainRegistryPath;
-        private string markersPath;
 
         /// <summary>
         /// Stable identifier, used in session keys, the reference index and settings, e.g. "tags". Never change it.
@@ -41,26 +40,12 @@ namespace LMK.Editor.Registry
         protected virtual string MainRegistryFileName => "Main";
 
         /// <summary>
-        /// Where the user's markers are saved, under <c>UserSettings/</c> by default.
-        /// </summary>
-        protected virtual string DefaultMarkersPath => $"UserSettings/LMKRegistry/{Id}/Markers.json";
-
-        /// <summary>
         /// Where the main registry lives. Tests may change it.
         /// </summary>
         public string MainRegistryPath
         {
             get => mainRegistryPath ??= $"{RootFolder}/{MainRegistryFileName}.{FileExtension}";
             set => mainRegistryPath = value;
-        }
-
-        /// <summary>
-        /// Where the user's markers are saved. Tests may change it.
-        /// </summary>
-        public string MarkersPath
-        {
-            get => markersPath ??= DefaultMarkersPath;
-            set => markersPath = value;
         }
 
         /// <summary>
@@ -236,16 +221,9 @@ namespace LMK.Editor.Registry
         /// </summary>
         public event Action StateChanged;
 
-        /// <summary>
-        /// Called after a marker changed. Marker edits don't reload the registries.
-        /// </summary>
-        public event Action MarkersChanged;
-
         protected void RaiseSnapshotChanged() => SnapshotChanged?.Invoke();
 
         protected void RaiseStateChanged() => StateChanged?.Invoke();
-
-        protected void RaiseMarkersChanged() => MarkersChanged?.Invoke();
         #endregion
 
 
@@ -285,13 +263,11 @@ namespace LMK.Editor.Registry
         public abstract void Reload();
 
         /// <summary>
-        /// Whether there are staged edits that are not saved: registry content or markers.
+        /// Whether there are staged registry edits that are not saved.
         /// </summary>
-        public bool HasPendingChanges => HasPendingData || HasPendingMarkers;
+        public bool HasPendingChanges => HasPendingData;
 
         internal abstract bool HasPendingData { get; }
-
-        internal abstract bool HasPendingMarkers { get; }
 
         /// <summary>
         /// Whether the main registry changed on disk since the staged content was loaded or saved, while that
@@ -308,8 +284,6 @@ namespace LMK.Editor.Registry
         /// Write the staged registry. Returns the path written.
         /// </summary>
         internal abstract string WriteStaged();
-
-        internal abstract void SaveMarkers();
 
         /// <summary>
         /// Reload the published state after a save, without touching the staged content.
@@ -369,21 +343,6 @@ namespace LMK.Editor.Registry
 
 
         #region Editor UI
-        /// <summary>
-        /// The markers to show: staged ones, or the saved ones before anything was staged.
-        /// </summary>
-        public abstract IReadOnlyList<RegistryMarker> Markers { get; }
-
-        /// <summary>
-        /// The marker colour of a row, if it has one.
-        /// </summary>
-        public abstract bool TryGetMarker(RegistryGuid _Registry, RegistryGuid _Row, out UnityEngine.Color _Color);
-
-        /// <summary>
-        /// Stage a row's marker colour. A fully transparent colour removes the marker.
-        /// </summary>
-        public abstract void SetMarker(RegistryGuid _Registry, RegistryGuid _Row, UnityEngine.Color _Color);
-
         /// <summary>
         /// Every live row of every loaded registry, with the registry's name.
         /// </summary>

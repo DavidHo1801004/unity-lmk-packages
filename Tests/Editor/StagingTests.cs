@@ -346,37 +346,5 @@ namespace LMK.Editor.Registry.Tests
             Assert.IsTrue(a.Snapshot.Find(data.registryId).IsReadOnly);
         }
         #endregion
-
-
-
-        #region Markers
-        [Test]
-        public void Markers_AreStaged_SavedWithoutLock_AndDiscarded()
-        {
-            var registry = a.Snapshot.Main.Id;
-            var row = Add(a, "Fire").Id;
-            RegistrySession.Save();
-
-            a.SetMarker(registry, row, Color.red);
-            Assert.IsTrue(a.TryGetMarker(registry, row, out var color));
-            Assert.AreEqual((Color)(Color32)Color.red, color);
-            Assert.IsTrue(a.HasPendingChanges);
-            Assert.IsFalse(File.Exists(a.MarkersPath), "staged, not written");
-
-            var provider = new RecordingLockProvider { refuse = true };
-            RegistryLockProvider.Current = provider;
-            string savedText = FileText(a);
-
-            Assert.IsTrue(RegistrySession.Save().Success, "markers are per user: no lock");
-            Assert.IsTrue(File.Exists(a.MarkersPath));
-            Assert.AreEqual(savedText, FileText(a), "a marker-only save writes no registry");
-            Assert.IsEmpty(provider.requests);
-
-            a.SetMarker(registry, row, Color.clear);
-            Assert.IsFalse(a.TryGetMarker(registry, row, out _));
-            RegistrySession.Discard();
-            Assert.IsTrue(a.TryGetMarker(registry, row, out _), "discard restores the saved marker");
-        }
-        #endregion
     }
 }

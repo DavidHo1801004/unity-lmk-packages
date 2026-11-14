@@ -63,7 +63,7 @@ namespace LMK.Editor.Registry
             string names = string.Join(" and ", RegistrySession.PendingKinds.Select(e => e.DisplayName));
             if (EditorUtility.DisplayDialog(
                     "Discard Registry Changes",
-                    $"Discard every unsaved change to {names}, markers included? This can't be undone.",
+                    $"Discard every unsaved change to {names}? This can't be undone.",
                     "Discard",
                     "Cancel"))
                 RegistrySession.Discard();

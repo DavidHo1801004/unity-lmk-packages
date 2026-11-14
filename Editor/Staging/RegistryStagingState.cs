@@ -5,8 +5,7 @@ using UnityEngine;
 namespace LMK.Editor.Registry
 {
     /// <summary>
-    /// Staged content of one kind's main registry and of the user's markers for that kind, and the target of
-    /// Undo for the kind's operations. Operations change only this state. <see cref="RegistrySession.Save"/>
+    /// Staged content of one kind's main registry, and the target of Undo for the kind's operations. Operations change only this state. <see cref="RegistrySession.Save"/>
     /// writes it to disk, and <see cref="RegistrySession.Discard"/> reloads it from disk.
     /// </summary>
     /// <remarks>
@@ -33,11 +32,6 @@ namespace LMK.Editor.Registry
         /// Staged content of the main registry, as its file text. Empty while the kind has no main registry.
         /// </summary>
         public string text = string.Empty;
-
-        /// <summary>
-        /// Staged markers of this user, for rows of every registry of the kind.
-        /// </summary>
-        public List<RegistryMarker> markers = new();
 
         /// <summary>
         /// Unique per change. Undo and redo restore it, which tells whether an undo touched this state.
