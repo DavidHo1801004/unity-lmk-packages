@@ -1,0 +1,18 @@
+{
+    "name": "LMK.AbilitySystem.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:dd06db7bf5968c04fb60ea759182599b",
+        "GUID:7a3a24ffd93b30945b651382ad3a0712",
+        "GUID:b42367183d370c84394f17e6f8e509e9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

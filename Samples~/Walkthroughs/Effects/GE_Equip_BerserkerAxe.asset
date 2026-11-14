@@ -1,0 +1,153 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9f1ae4379ea0d0419cc4d65f2dedfde, type: 3}
+  m_Name: GE_Equip_BerserkerAxe
+  m_EditorClassIdentifier: LMK.AbilitySystem.Runtime::LMK.Runtime.AbilitySystem.GameplayEffect
+  durationPolicy: 2
+  durationMagnitude:
+    rid: 4261159815954038808
+  period:
+    value: 0
+    curve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  executePeriodicEffectOnApplication: 0
+  periodicInhibitionPolicy: 0
+  modifiers:
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 517
+      _lastKnownName: Combat.AttackPower
+    op: 0
+    magnitude:
+      rid: 4261159815954038809
+    evaluationChannel: 0
+    sourceTags:
+      requireTags:
+        _tags: []
+      ignoreTags:
+        _tags: []
+      query:
+        _nodes: []
+        _description: 
+    targetTags:
+      requireTags:
+        _tags: []
+      ignoreTags:
+        _tags: []
+      query:
+        _nodes: []
+        _description: 
+  executions: []
+  components:
+  - rid: 4261159815954038810
+  - rid: 4261159815954038811
+  stacking:
+    type: 0
+    limitCount: 0
+    durationRefreshPolicy: 0
+    periodResetPolicy: 0
+    expirationPolicy: 0
+    overflowEffects: []
+    denyOverflowApplication: 0
+    clearStackOnOverflow: 0
+  cues: []
+  suppressStackingCues: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 4261159815954038808
+      type: {class: ScalableFloatMagnitude, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        value:
+          value: 0
+          curve:
+            serializedVersion: 2
+            m_Curve: []
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+    - rid: 4261159815954038809
+      type: {class: AttributeBasedMagnitude, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        capture:
+          attribute:
+            _registry:
+              _hi: 7804028007160479744
+              _lo: 1
+            _id:
+              _hi: 7804028007160479744
+              _lo: 514
+            _lastKnownName: Vitals.MaxHealth
+          source: 1
+          snapshot: 0
+        calculationType: 0
+        finalChannel: 0
+        coefficient: 0.1
+        preMultiplyAdd: 0
+        postMultiplyAdd: 0
+    - rid: 4261159815954038810
+      type: {class: AbilitiesComponent, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        abilities:
+        - ability: {fileID: 11400000, guid: 01a96afe87ebcd743b93380e1e4d30ec, type: 2}
+          level:
+            value: 1
+            curve:
+              serializedVersion: 2
+              m_Curve: []
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          inputId: -1
+          removalPolicy: 0
+    - rid: 4261159815954038811
+      type: {class: TargetTagRequirementsComponent, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        application:
+          requireTags:
+            _tags: []
+          ignoreTags:
+            _tags: []
+          query:
+            _nodes: []
+            _description: 
+        ongoing:
+          requireTags:
+            _tags: []
+          ignoreTags:
+            _tags:
+            - _registry:
+                _hi: 7804027938441003008
+                _lo: 1
+              _id:
+                _hi: 7804027938441003008
+                _lo: 371
+              _lastKnownName: Status.Disarmed
+          query:
+            _nodes: []
+            _description: 
+        removal:
+          requireTags:
+            _tags: []
+          ignoreTags:
+            _tags: []
+          query:
+            _nodes: []
+            _description: 

@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9f1ae4379ea0d0419cc4d65f2dedfde, type: 3}
+  m_Name: GE_Fireball_Damage
+  m_EditorClassIdentifier: LMK.AbilitySystem.Runtime::LMK.Runtime.AbilitySystem.GameplayEffect
+  durationPolicy: 0
+  durationMagnitude:
+    rid: 4261159815954038794
+  period:
+    value: 0
+    curve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  executePeriodicEffectOnApplication: 0
+  periodicInhibitionPolicy: 0
+  modifiers: []
+  executions:
+  - calculation:
+      rid: 4261159815954038795
+    calculationModifiers: []
+    conditionalEffects: []
+  components:
+  - rid: 4261159815954038796
+  stacking:
+    type: 0
+    limitCount: 0
+    durationRefreshPolicy: 0
+    periodResetPolicy: 0
+    expirationPolicy: 0
+    overflowEffects: []
+    denyOverflowApplication: 0
+    clearStackOnOverflow: 0
+  cues:
+  - cueTags:
+      _tags:
+      - _registry:
+          _hi: 7804027938441003008
+          _lo: 1
+        _id:
+          _hi: 7804027938441003008
+          _lo: 338
+        _lastKnownName: GameplayCue.Hit.Fire
+    magnitudeAttribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 519
+      _lastKnownName: Meta.IncomingDamage
+    minLevel: 0
+    maxLevel: 0
+  suppressStackingCues: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 4261159815954038794
+      type: {class: ScalableFloatMagnitude, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        value:
+          value: 0
+          curve:
+            serializedVersion: 2
+            m_Curve: []
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+    - rid: 4261159815954038795
+      type: {class: DamageExecution, ns: LMK.Samples.AbilitySystem.Walkthroughs, asm: LMK.AbilitySystem.Samples.Walkthroughs}
+      data:
+        relevantAttributes:
+        - attribute:
+            _registry:
+              _hi: 7804028007160479744
+              _lo: 1
+            _id:
+              _hi: 7804028007160479744
+              _lo: 517
+            _lastKnownName: Combat.AttackPower
+          source: 0
+          snapshot: 1
+        - attribute:
+            _registry:
+              _hi: 7804028007160479744
+              _lo: 1
+            _id:
+              _hi: 7804028007160479744
+              _lo: 518
+            _lastKnownName: Combat.Armor
+          source: 1
+          snapshot: 0
+    - rid: 4261159815954038796
+      type: {class: AssetTagsComponent, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        tags:
+          _tags:
+          - _registry:
+              _hi: 7804027938441003008
+              _lo: 1
+            _id:
+              _hi: 7804027938441003008
+              _lo: 289
+            _lastKnownName: Damage.Fire

@@ -1,0 +1,190 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17cf5f511312cf04f969c31adf52a98f, type: 3}
+  m_Name: AS_Character
+  m_EditorClassIdentifier: LMK.AbilitySystem.Runtime::LMK.Runtime.AbilitySystem.AttributeSetDefinition
+  entries:
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 514
+      _lastKnownName: Vitals.MaxHealth
+    overrideDefault: 0
+    initialValue:
+      value: 0
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 513
+      _lastKnownName: Vitals.Health
+    overrideDefault: 0
+    initialValue:
+      value: 0
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 516
+      _lastKnownName: Vitals.MaxMana
+    overrideDefault: 0
+    initialValue:
+      value: 0
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 515
+      _lastKnownName: Vitals.Mana
+    overrideDefault: 0
+    initialValue:
+      value: 0
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 517
+      _lastKnownName: Combat.AttackPower
+    overrideDefault: 0
+    initialValue:
+      value: 0
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 518
+      _lastKnownName: Combat.Armor
+    overrideDefault: 1
+    initialValue:
+      value: 5
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 519
+      _lastKnownName: Meta.IncomingDamage
+    overrideDefault: 0
+    initialValue:
+      value: 0
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+  behaviours:
+  - rid: 4261159815954038784
+  - rid: 4261159815954038785
+  references:
+    version: 2
+    RefIds:
+    - rid: 4261159815954038784
+      type: {class: TransferMetaAttribute, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        from:
+          _registry:
+            _hi: 7804028007160479744
+            _lo: 1
+          _id:
+            _hi: 7804028007160479744
+            _lo: 519
+          _lastKnownName: Meta.IncomingDamage
+        to:
+          _registry:
+            _hi: 7804028007160479744
+            _lo: 1
+          _id:
+            _hi: 7804028007160479744
+            _lo: 513
+          _lastKnownName: Vitals.Health
+        mode: 0
+        eventTag:
+          _registry:
+            _hi: 7804027938441003008
+            _lo: 1
+          _id:
+            _hi: 7804027938441003008
+            _lo: 323
+          _lastKnownName: Event.Damage.Taken
+    - rid: 4261159815954038785
+      type: {class: SendEventOnThreshold, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        attribute:
+          _registry:
+            _hi: 7804028007160479744
+            _lo: 1
+          _id:
+            _hi: 7804028007160479744
+            _lo: 513
+          _lastKnownName: Vitals.Health
+        comparison: 0
+        threshold: 0
+        eventTag:
+          _registry:
+            _hi: 7804027938441003008
+            _lo: 1
+          _id:
+            _hi: 7804027938441003008
+            _lo: 321
+          _lastKnownName: Event.Death
+        once: 1

@@ -1,0 +1,102 @@
+.attribute-manager__registry {
+    min-width: 140px;
+    margin-left: 4px;
+}
+
+.attribute-manager__search {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: auto;
+    min-width: 80px;
+}
+
+.attribute-manager__create {
+    align-items: center;
+    padding: 24px 12px;
+}
+
+.attribute-manager__create > Label {
+    margin-bottom: 8px;
+}
+
+.attribute-manager__list {
+    padding: 4px 0;
+}
+
+.attribute-manager__group > .unity-foldout__toggle {
+    -unity-font-style: bold;
+}
+
+.attribute-manager__item {
+    flex-direction: row;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 3px;
+}
+
+.attribute-manager__item:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.attribute-manager__item--selected,
+.attribute-manager__item--selected:hover {
+    background-color: rgba(58, 121, 187, 0.55);
+}
+
+.attribute-manager__marker {
+    width: 4px;
+    height: 14px;
+    margin-right: 5px;
+    border-radius: 2px;
+}
+
+.attribute-manager__summary {
+    flex-grow: 1;
+    -unity-text-align: middle-right;
+    opacity: 0.6;
+    font-size: 11px;
+    margin-left: 8px;
+}
+
+.attribute-manager__details {
+    padding: 8px 10px;
+}
+
+.attribute-manager__title {
+    -unity-font-style: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.attribute-manager__bound {
+    flex-direction: row;
+}
+
+.attribute-manager__bound-kind {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.attribute-manager__bound-value {
+    width: 40%;
+    flex-shrink: 0;
+}
+
+.attribute-manager__description TextInput,
+.attribute-manager__description .unity-text-field__input {
+    min-height: 48px;
+    white-space: normal;
+}
+
+.attribute-manager__info {
+    margin-top: 8px;
+    opacity: 0.7;
+    font-size: 11px;
+}
+
+.attribute-manager__actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 10px;
+}

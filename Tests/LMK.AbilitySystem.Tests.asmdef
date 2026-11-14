@@ -1,0 +1,32 @@
+{
+    "name": "LMK.AbilitySystem.Tests",
+    "rootNamespace": "",
+    "references": [
+        "LMK.AbilitySystem.Runtime",
+        "LMK.AbilitySystem.Editor",
+        "LMK.AbilitySystem.Runtime.Tests",
+        "LMK.Attributes.Runtime",
+        "LMK.Attributes.Editor",
+        "LMK.Registry.Runtime",
+        "LMK.Registry.Editor",
+        "LMK.GameplayTags.Runtime",
+        "LMK.GameplayTags.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

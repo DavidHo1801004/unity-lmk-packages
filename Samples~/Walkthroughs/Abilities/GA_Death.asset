@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2c6b56a364a5f44e8a64247464d12b0, type: 3}
+  m_Name: GA_Death
+  m_EditorClassIdentifier: LMK.AbilitySystem.Runtime::LMK.Runtime.AbilitySystem.GameplayAbility
+  abilityTags:
+    _tags: []
+  cancelAbilitiesWithTag:
+    _tags:
+    - _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 257
+      _lastKnownName: Ability
+  blockAbilitiesWithTag:
+    _tags: []
+  activationOwnedTags:
+    _tags:
+    - _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 354
+      _lastKnownName: State.Dead
+  activationRequiredTags:
+    _tags: []
+  activationBlockedTags:
+    _tags: []
+  sourceRequiredTags:
+    _tags: []
+  sourceBlockedTags:
+    _tags: []
+  targetRequiredTags:
+    _tags: []
+  targetBlockedTags:
+    _tags: []
+  costEffect: {fileID: 0}
+  cooldownEffect: {fileID: 0}
+  instancingPolicy: 0
+  retriggerInstancedAbility: 0
+  triggers:
+  - tag:
+      _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 321
+      _lastKnownName: Event.Death
+    source: 0
+  netExecutionPolicy: 0
+  logic:
+    rid: 4261159815954038806
+  references:
+    version: 2
+    RefIds:
+    - rid: 4261159815954038806
+      type: {class: DeathLogic, ns: LMK.Samples.AbilitySystem.Walkthroughs, asm: LMK.AbilitySystem.Samples.Walkthroughs}
+      data:
+        deadEffect: {fileID: 11400000, guid: 3cda4858597d30c4e8cc8ab36eb19174, type: 2}

@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2c6b56a364a5f44e8a64247464d12b0, type: 3}
+  m_Name: GA_Fireball
+  m_EditorClassIdentifier: LMK.AbilitySystem.Runtime::LMK.Runtime.AbilitySystem.GameplayAbility
+  abilityTags:
+    _tags:
+    - _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 258
+      _lastKnownName: Ability.Fireball
+    - _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 259
+      _lastKnownName: Ability.Interruptible
+  cancelAbilitiesWithTag:
+    _tags: []
+  blockAbilitiesWithTag:
+    _tags: []
+  activationOwnedTags:
+    _tags:
+    - _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 353
+      _lastKnownName: State.Casting
+  activationRequiredTags:
+    _tags: []
+  activationBlockedTags:
+    _tags:
+    - _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 372
+      _lastKnownName: Status.Stun
+    - _registry:
+        _hi: 7804027938441003008
+        _lo: 1
+      _id:
+        _hi: 7804027938441003008
+        _lo: 354
+      _lastKnownName: State.Dead
+  sourceRequiredTags:
+    _tags: []
+  sourceBlockedTags:
+    _tags: []
+  targetRequiredTags:
+    _tags: []
+  targetBlockedTags:
+    _tags: []
+  costEffect: {fileID: 11400000, guid: 00512a749a882dd40a22f90b0b76079f, type: 2}
+  cooldownEffect: {fileID: 11400000, guid: dfb4a439905d1a94886509a51df96236, type: 2}
+  instancingPolicy: 0
+  retriggerInstancedAbility: 0
+  triggers: []
+  netExecutionPolicy: 0
+  logic:
+    rid: 4261159815954038817
+  references:
+    version: 2
+    RefIds:
+    - rid: 4261159815954038817
+      type: {class: FireballLogic, ns: LMK.Samples.AbilitySystem.Walkthroughs, asm: LMK.AbilitySystem.Samples.Walkthroughs}
+      data:
+        castTime: 0.4
+        castAnimation: Cast
+        baseDamage:
+          value: 20
+          curve:
+            serializedVersion: 2
+            m_Curve: []
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+        damageEffect: {fileID: 11400000, guid: 31a85a2ee39886449ad4ea246432ae71, type: 2}
+        burnEffect: {fileID: 11400000, guid: ac1fedd140441db4aa6d48aadc56c304, type: 2}
+        projectilePrefab: {fileID: 4884640433731705053, guid: 75f410f2f849ec845a38935227a3b27b, type: 3}
+        targeting:
+          rid: 4261159815954038818
+    - rid: 4261159815954038818
+      type: {class: NearestEnemyTargeting, ns: LMK.Samples.AbilitySystem.Walkthroughs, asm: LMK.AbilitySystem.Samples.Walkthroughs}
+      data:
+        range: 25

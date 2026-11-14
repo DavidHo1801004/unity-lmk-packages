@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9f1ae4379ea0d0419cc4d65f2dedfde, type: 3}
+  m_Name: GE_Burn
+  m_EditorClassIdentifier: LMK.AbilitySystem.Runtime::LMK.Runtime.AbilitySystem.GameplayEffect
+  durationPolicy: 1
+  durationMagnitude:
+    rid: 4261159815954038797
+  period:
+    value: 1
+    curve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  executePeriodicEffectOnApplication: 0
+  periodicInhibitionPolicy: 0
+  modifiers:
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 519
+      _lastKnownName: Meta.IncomingDamage
+    op: 0
+    magnitude:
+      rid: 4261159815954038798
+    evaluationChannel: 0
+    sourceTags:
+      requireTags:
+        _tags: []
+      ignoreTags:
+        _tags: []
+      query:
+        _nodes: []
+        _description: 
+    targetTags:
+      requireTags:
+        _tags: []
+      ignoreTags:
+        _tags: []
+      query:
+        _nodes: []
+        _description: 
+  executions: []
+  components:
+  - rid: 4261159815954038799
+  stacking:
+    type: 1
+    limitCount: 3
+    durationRefreshPolicy: 0
+    periodResetPolicy: 1
+    expirationPolicy: 0
+    overflowEffects: []
+    denyOverflowApplication: 0
+    clearStackOnOverflow: 0
+  cues:
+  - cueTags:
+      _tags:
+      - _registry:
+          _hi: 7804027938441003008
+          _lo: 1
+        _id:
+          _hi: 7804027938441003008
+          _lo: 340
+        _lastKnownName: GameplayCue.Status.Burning
+    magnitudeAttribute:
+      _registry:
+        _hi: 0
+        _lo: 0
+      _id:
+        _hi: 0
+        _lo: 0
+      _lastKnownName: 
+    minLevel: 0
+    maxLevel: 0
+  suppressStackingCues: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 4261159815954038797
+      type: {class: ScalableFloatMagnitude, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        value:
+          value: 6
+          curve:
+            serializedVersion: 2
+            m_Curve: []
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+    - rid: 4261159815954038798
+      type: {class: ScalableFloatMagnitude, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        value:
+          value: 4
+          curve:
+            serializedVersion: 2
+            m_Curve: []
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+    - rid: 4261159815954038799
+      type: {class: TargetTagsComponent, ns: LMK.Runtime.AbilitySystem, asm: LMK.AbilitySystem.Runtime}
+      data:
+        tags:
+          _tags:
+          - _registry:
+              _hi: 7804027938441003008
+              _lo: 1
+            _id:
+              _hi: 7804027938441003008
+              _lo: 369
+            _lastKnownName: Status.Burning
+          - _registry:
+              _hi: 7804027938441003008
+              _lo: 1
+            _id:
+              _hi: 7804027938441003008
+              _lo: 370
+            _lastKnownName: Status.Debuff

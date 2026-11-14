@@ -1,0 +1,19 @@
+{
+    "name": "LMK.AbilitySystem.Samples.Walkthroughs",
+    "rootNamespace": "LMK.Samples.AbilitySystem.Walkthroughs",
+    "references": [
+        "LMK.AbilitySystem.Runtime",
+        "LMK.GameplayTags.Runtime",
+        "LMK.Registry.Runtime",
+        "LMK.Attributes.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
