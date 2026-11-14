@@ -16,102 +16,6 @@ using LMK.Runtime.Registry;
 namespace LMK.Editor.GameplayTags.Tests
 {
     /// <summary>
-    /// Tag markers: per user, staged like registry edits, saved to a file under <c>Temp/</c> here.
-    /// </summary>
-    public sealed class MarkerTests : OperationTestBase
-    {
-        private static readonly Color RED = new(1f, 0f, 0f, 1f);
-
-        [Test]
-        public void SetMarker_IsStaged_SaveWritesTheFile()
-        {
-            var a = Add("A");
-            Save();
-
-            TagOperations.SetMarker(Main.Id, a, RED);
-
-            Assert.IsTrue(TagOperations.TryGetMarker(Main.Id, a, out var color));
-            Assert.AreEqual(RED, color);
-            Assert.IsTrue(TagOperations.HasPendingChanges);
-            Assert.IsFalse(File.Exists(MARKERS), "staged: nothing written");
-
-            Save();
-
-            var saved = TagMarkerStore.Load();
-            Assert.AreEqual(1, saved.Count);
-            Assert.IsTrue(saved[0].Is(Main.Id, a));
-            Assert.AreEqual(RED, saved[0].color);
-        }
-
-        [Test]
-        public void Discard_DropsStagedMarkers()
-        {
-            var a = Add("A");
-            Save();
-
-            TagOperations.SetMarker(Main.Id, a, RED);
-            TagOperations.Discard();
-
-            Assert.IsFalse(TagOperations.TryGetMarker(Main.Id, a, out _));
-            Assert.IsFalse(TagOperations.HasPendingChanges);
-        }
-
-        [Test]
-        public void TransparentColour_RemovesTheMarker_UndoRestoresIt()
-        {
-            var a = Add("A");
-            TagOperations.SetMarker(Main.Id, a, RED);
-            Save();
-
-            Undo.IncrementCurrentGroup();
-            TagOperations.SetMarker(Main.Id, a, Color.clear);
-            Assert.IsFalse(TagOperations.TryGetMarker(Main.Id, a, out _));
-
-            Undo.PerformUndo();
-
-            Assert.IsTrue(TagOperations.TryGetMarker(Main.Id, a, out var color));
-            Assert.AreEqual(RED, color);
-            Assert.IsFalse(TagOperations.HasPendingChanges, "back to the saved markers");
-        }
-
-        [Test]
-        public void Markers_OnReadOnlyTags_NeedNoLock()
-        {
-            var vendor = new RegistryData<TagRegistryRow>
-            {
-                registryId = RegistryGuid.Parse("b0000000000000000000000000000002"),
-                name = "Vendor",
-                origin = RegistryOrigin.Package,
-                rows = new List<RegistryRow<TagRegistryRow>> { TagRegistryRow.Create(TestIds.Id(1), RegistryGuid.Zero, "Stun", false) },
-            };
-            RegistryServiceTests.WriteAndImport(FOLDER + "/Vendor.tagregistry", TagRegistryFile.Write(vendor));
-            RegistryLockProvider.Current = new RefusingLockProvider();
-
-            TagOperations.SetMarker(vendor.registryId, TestIds.Id(1), RED);
-            Assert.IsTrue(TagOperations.Save().Success, "only markers changed: the registry lock isn't needed");
-
-            Assert.IsTrue(TagMarkerStore.Load().Single().Is(vendor.registryId, TestIds.Id(1)));
-        }
-
-        [Test]
-        public void MarkerStrip_ShowsTheColour()
-        {
-            var a = Add("A");
-            var tree = new GameplayTagTreeElement(TagRegistryService.Snapshot.Root, new GameplayTagTreeOptions());
-            var marker = tree.Find($"{Main.Id}:{a}").Row.Q("marker");
-            Assert.AreEqual(DisplayStyle.None, marker.style.display.value, "no marker by default");
-
-            TagOperations.SetMarker(Main.Id, a, RED);
-            tree.SyncMarkers();
-
-            Assert.AreEqual(DisplayStyle.Flex, marker.style.display.value);
-            Assert.AreEqual(RED, marker.style.backgroundColor.value);
-        }
-    }
-
-
-
-    /// <summary>
     /// The Gameplay Tag Manager's toolbar, tree selection and inspector panel, built without a window.
     /// </summary>
     public sealed class ManagerUiTests : OperationTestBase
@@ -177,13 +81,13 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.AreEqual("B", inspector.Q<EditableLabel>("tag-title").value);
             Assert.AreEqual(Main.Name, inspector.Q<LinkLabel>("registry-link").text);
             CollectionAssert.AreEqual(
-                new[] { "Is Explicit", "Parent", "Description", "Marker" },
+                new[] { "Is Explicit", "Parent", "Description", "Markers" },
                 inspector.Query<FieldRow>().ToList().Select(e => e.Label));
             Assert.AreEqual("Yes", inspector.Q<Label>("explicit-value").text);
             Assert.IsNull(inspector.Q("make-explicit-button"));
             Assert.AreEqual("A", inspector.Q<LinkLabel>("parent-value").text);
             Assert.AreEqual("Text", inspector.Q<TextField>("description-field").value);
-            Assert.AreEqual(Color.clear, inspector.Q<ColorField>("marker-field").value, "no marker: empty");
+            Assert.IsNotNull(inspector.Q<TagMarkerField>("marker-field").Q<Label>("marker-empty"), "no markers by default: None");
         }
 
         [Test]
@@ -222,7 +126,7 @@ namespace LMK.Editor.GameplayTags.Tests
 
             Assert.IsFalse(inspector.Q<EditableLabel>("tag-title").Editable);
             Assert.IsFalse(inspector.Q<TextField>("description-field").enabledSelf);
-            Assert.IsTrue(inspector.Q<ColorField>("marker-field").enabledSelf);
+            Assert.IsTrue(inspector.Q<TagMarkerField>("marker-field").AddButton.enabledSelf, "markers are the user's own: any tag can have them");
         }
 
         [Test]
@@ -236,6 +140,81 @@ namespace LMK.Editor.GameplayTags.Tests
 
             inspector.SetNode(TagRegistryService.Snapshot.Root.Children.First(e => e.RegistryId.Equals(Main.Id)));
             Assert.IsNull(inspector.Q<EditableLabel>());
+        }
+
+        [Test]
+        public void MovePreview_UnderABranch_IsSortedAmongTheChildren()
+        {
+            Add("T.A");
+            Add("T.C");
+            Add("M.B.Leaf");
+            var tree = new GameplayTagTreeElement(TagRegistryService.Snapshot.Root, new GameplayTagTreeOptions());
+            var target = tree.Find($"{Main.Id}:{IdOf("T")}");
+
+            target.ShowMovePreview(NodeOf("M.B"));
+
+            var preview = target.MovePreview;
+            Assert.IsNotNull(preview);
+            Assert.IsTrue(preview.ClassListContains(GameplayTagNodeElement.USS_CLASS_MOVE_PREVIEW));
+            Assert.IsFalse(preview.ClassListContains(GameplayTagNodeElement.USS_CLASS_MOVE_PREVIEW_NESTED));
+            Assert.AreEqual(PickingMode.Ignore, preview.pickingMode);
+
+            var shown = preview.parent.Children().OfType<GameplayTagNodeElement>().Select(e => e.TagNode.ShortTag);
+            CollectionAssert.AreEqual(new[] { "A", "B", "C" }, shown);
+            Assert.IsTrue(preview.ChildTagElements.Any(e => e.TagNode.ShortTag == "Leaf"), "the subtree moves with it");
+            Assert.AreNotSame(preview, tree.Find(NodeOf("M.B").Key), "Find skips the preview");
+
+            target.HideMovePreview();
+            Assert.IsNull(target.MovePreview);
+            Assert.AreEqual(2, target.ChildTagElements.Count());
+        }
+
+        [Test]
+        public void MovePreview_UnderALeaf_IsNested()
+        {
+            Add("Leaf");
+            Add("M.B");
+            var tree = new GameplayTagTreeElement(TagRegistryService.Snapshot.Root, new GameplayTagTreeOptions());
+            var target = tree.Find($"{Main.Id}:{IdOf("Leaf")}");
+
+            target.ShowMovePreview(NodeOf("M.B"));
+
+            Assert.AreSame(target, target.MovePreview.parent);
+            Assert.IsTrue(target.MovePreview.ClassListContains(GameplayTagNodeElement.USS_CLASS_MOVE_PREVIEW_NESTED));
+
+            target.HideMovePreview();
+            Assert.IsNull(target.Q(className: GameplayTagNodeElement.USS_CLASS_MOVE_PREVIEW));
+        }
+
+        [Test]
+        public void MoveSource_ShowsAsASingleLeaf_UntilTheDragEnds()
+        {
+            Add("A.B");
+            var tree = new GameplayTagTreeElement(TagRegistryService.Snapshot.Root, new GameplayTagTreeOptions());
+            var a = tree.Find($"{Main.Id}:{IdOf("A")}");
+            var label = a.Q<Label>("leaf-tag");
+
+            a.SetMoveSource(true);
+
+            Assert.IsTrue(a.ClassListContains(GameplayTagNodeElement.USS_CLASS_MOVE_SOURCE));
+            Assert.AreEqual("A" + GameplayTagNodeElement.MOVE_SOURCE_SUFFIX, label.text);
+
+            a.SetMoveSource(false);
+
+            Assert.IsFalse(a.ClassListContains(GameplayTagNodeElement.USS_CLASS_MOVE_SOURCE));
+            Assert.AreEqual("A", label.text);
+        }
+
+        [Test]
+        public void MoveManipulator_FindsTheRowOwner_NotItsParent()
+        {
+            Add("A.B");
+            var tree = new GameplayTagTreeElement(TagRegistryService.Snapshot.Root, new GameplayTagTreeOptions());
+            var b = tree.Find($"{Main.Id}:{IdOf("A.B")}");
+
+            Assert.AreSame(b, GameplayTagMoveManipulator.FindRowOwner(b.Row));
+            Assert.AreSame(b, GameplayTagMoveManipulator.FindRowOwner(b.Row.Q<Label>()));
+            Assert.IsNull(GameplayTagMoveManipulator.FindRowOwner(b), "between rows");
         }
 
         private static GameplayTagNode NodeOf(string _Path)

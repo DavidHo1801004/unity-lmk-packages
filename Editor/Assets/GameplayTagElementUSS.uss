@@ -141,13 +141,38 @@ Selected row (Gameplay Tag Manager). Kept while hovered, so the selection stays 
 
 
 
+
+
+
 /*
-Marker: a strip in the tag's marker colour, at the end of its row. The colour is set from code.
+Moving a tag by drag and drop (Gameplay Tag Manager): the dragged tag shows as a single "Name..." leaf row,
+tinted yellow; the drop target is outlined; and a copy of the tag and its sub tags, tinted blue, shows where it
+would go. The tints are translucent, so they suit both editor skins.
 */
-.tag-marker {
-	position: absolute;
-	top: 0px;
-	bottom: 0px;
-	right: 0px;
-	width: 4px;
+.tag-move-source #leaf-tag-container,
+.tag-move-source #leaf-tag-container:hover,
+.tag-move-source #leaf-tag-container.tag-row--selected,
+.tag-move-source #leaf-tag-container.tag-row--selected:hover {
+	background-color: rgba(222, 204, 140, 0.35);
+}
+
+#leaf-tag-container.tag-row--drop-target,
+#branch-tag > .unity-foldout__toggle.tag-row--drop-target {
+	border-width: 1px;
+	border-color: var(--lmk-color-drop-indicator);
+}
+
+.tag-move-preview {
+	opacity: 0.8;
+}
+
+/* Rows only: tinting the foldout content too would stack the tint on nested rows. */
+.tag-move-preview #leaf-tag-container,
+.tag-move-preview #branch-tag > .unity-foldout__toggle {
+	background-color: rgba(140, 176, 222, 0.35);
+}
+
+/* Under a leaf, which has no foldout content to indent it. */
+.tag-move-preview--nested {
+	margin-left: 14px;
 }

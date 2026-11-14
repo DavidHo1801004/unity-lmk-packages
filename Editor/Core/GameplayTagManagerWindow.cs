@@ -31,7 +31,7 @@ namespace LMK.Editor.GameplayTags
 
 
 
-        [MenuItem("Tools/GASU/Gameplay Tag Editor", priority = 0)]
+        [MenuItem("Tools/LMK/Gameplay Tags/Gameplay Tag Editor", priority = 0)]
         public static void Open()
         {
             GetWindow<GameplayTagManagerWindow>("Gameplay Tags");

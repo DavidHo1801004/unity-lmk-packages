@@ -1,0 +1,92 @@
+/*
+A tag's markers at the end of its row (TagMarkerStrip). Colours, widths and positions are set from code.
+*/
+.tag-marker-strip {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	right: 4px;
+
+	flex-direction: row;
+	align-items: center;
+	overflow: visible;
+}
+
+/* Clips the markers when they scroll. */
+.tag-marker-strip__viewport {
+	flex-grow: 1;
+	height: 14px;
+	overflow: hidden;
+}
+
+.tag-marker-strip__content {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+
+	flex-direction: row;
+}
+
+/* A marker as a chip with its name: a rounded rectangle, like the Inspector's marker chips. */
+.tag-marker-strip__item {
+	flex-shrink: 0;
+	height: 14px;
+	padding: 0px;
+	border-radius: 3px;
+	justify-content: center;
+}
+
+/* A marker as a thin strip: its name only shows when it expands on hover. */
+.tag-marker-strip__item--strip {
+	border-radius: 2px;
+}
+
+.tag-marker-strip__item--strip > .tag-marker-strip__label {
+	display: none;
+}
+
+.tag-marker-strip__label {
+	margin: 0px;
+	padding: 0px;
+
+	font-size: 10px;
+	-unity-font-style: normal;
+	-unity-text-align: middle-center;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+/*
+A hovered strip, expanded with its name: a ring in the row's colour keeps it apart from its neighbours, and a
+border a shade darker than the marker outlines it.
+*/
+.tag-marker-strip__ring {
+	position: absolute;
+	top: 1px;
+	bottom: 1px;
+
+	border-width: 2px;
+	border-radius: 5px;
+	overflow: hidden;
+
+	transition-property: left, width;
+	transition-duration: 0.1s;
+	transition-timing-function: ease-out;
+}
+
+.tag-marker-strip__expanded {
+	flex-grow: 1;
+	border-width: 1px;
+	border-radius: 3px;
+	justify-content: center;
+	overflow: hidden;
+}
+
+/* Marks a side with more markers, when they scroll. */
+.tag-marker-strip__fade {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	width: 10px;
+}

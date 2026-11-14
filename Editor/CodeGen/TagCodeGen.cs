@@ -54,7 +54,7 @@ namespace LMK.Editor.GameplayTags
             RegistrySummaryNoun = "Tags",
             AliasComment = new[]
             {
-                "Old names of renamed tags. Tools > GASU > Gameplay Tags > Prune Unused Code Aliases removes",
+                "Old names of renamed tags. Tools > LMK > Gameplay Tags > Prune Unused Code Aliases removes",
                 "the ones no script uses.",
             },
             AssemblyReferences = new[] { "LMK.GameplayTags.Runtime", "LMK.Registry.Runtime" },

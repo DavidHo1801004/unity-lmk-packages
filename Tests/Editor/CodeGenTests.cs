@@ -356,6 +356,23 @@ namespace LMK.Editor.GameplayTags.Tests
         }
 
         [Test]
+        public void Move_LeavesAnObsoleteAlias()
+        {
+            var id = Add("Old.Moved");
+            var target = Add("New");
+            Save();
+
+            Assert.IsTrue(TagOperations.Move(id, target).Success);
+            Save();
+
+            var members = TagCodeGen.ParseGenerated(Code).ToList();
+            var alias = members.Single(e => e.Name == "Old_Moved");
+            Assert.IsTrue(alias.IsAlias, "the old constant still compiles");
+            Assert.AreEqual(id, alias.TagId);
+            Assert.IsTrue(members.Any(e => e.Name == "New_Moved" && !e.IsAlias));
+        }
+
+        [Test]
         public void DeletedTag_ConstantRemoved()
         {
             Add("A");
@@ -365,7 +382,8 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.IsTrue(TagOperations.Delete(IdOf("A"), true).Success);
             Save();
 
-            CollectionAssert.AreEquivalent(new[] { "B" }, TagCodeGen.ParseGenerated(Code).Select(e => e.Name));
+            // Only the main registry's constants: the project may hold package registries of its own.
+            CollectionAssert.AreEquivalent(new[] { "B" }, TagCodeGen.ParseGenerated(Code).Where(e => e.RegistryId == Main.Id).Select(e => e.Name));
         }
 
         [Test]
@@ -389,7 +407,8 @@ namespace LMK.Editor.GameplayTags.Tests
 
             // Only this test's main registry: the project's own Main.tagregistry is also loaded, and skipped.
             int registryClasses = Regex.Matches(Code, @"\bRegistryId = new ").Count;
-            int expected = 1 + TagRegistryService.Snapshot.Registries.Count(e => e.Kind != TagRegistryKind.Main);
+            // The project's other package registries count too, unless their code generation is turned off.
+            int expected = 1 + TagRegistryService.Snapshot.Registries.Count(e => e.Kind != TagRegistryKind.Main && GameplayTagSettings.instance.IsCodeGenerated(e.Id));
             Assert.AreEqual(expected, registryClasses);
         }
     }

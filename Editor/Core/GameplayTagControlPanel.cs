@@ -20,7 +20,7 @@ namespace LMK.Editor.GameplayTags
     /// Shows every loaded registry. With <see cref="Editable"/>, its context menus stage edits of the main registry
     /// through <see cref="TagOperations"/>.
     /// </summary>
-    [UxmlElement("GameplayTagControlPanel", libraryPath = "GASU/Gameplay Tag Control Panel", visibility = LibraryVisibility.Visible)]
+    [UxmlElement("GameplayTagControlPanel", libraryPath = "LMK/Gameplay Tag Control Panel", visibility = LibraryVisibility.Visible)]
     public partial class GameplayTagControlPanel : VisualElement
     {
         private const string UXML_PATH = "Packages/com.lmk.gameplaytags/Editor/Assets/GameplayTagControlPanelUXML.uxml";
@@ -28,6 +28,18 @@ namespace LMK.Editor.GameplayTags
         private const string USS_CLASS_NO_HEADER = "gameplay-tag-control-panel--no-header";
 
         private const string RENAME_FIELD_CLASS = "tag-rename-field";
+
+        /// <summary>
+        /// The search syntax of tag trees, for search field tooltips. <c>@</c> and <c>#</c> are
+        /// <see cref="SearchQuery"/>'s namespace and tooltip fields, which tags fill with markers and descriptions.
+        /// </summary>
+        internal const string SEARCH_HELP =
+            "a b: both terms\n" +
+            "a|b: either term\n" +
+            "-a: exclude term\n" +
+            "\"a b\": exact phrase\n" +
+            "@a: marker\n" +
+            "#a: description";
 
         private event Action<TagElementSelectCallback, bool> OnSelectBoxCallback;
         private event Action OnTagTreeRedrawn;
@@ -153,6 +165,7 @@ namespace LMK.Editor.GameplayTags
             header = content.Q("search-bar-controls");
 
             searchBar = content.Q<SearchBar>();
+            searchBar.tooltip = SEARCH_HELP;
             searchBar.RegisterValueChangedCallback(e => SetFilter(e.newValue));
 
             generalControlsButton = content.Q<Button>("general-controls");
@@ -174,14 +187,14 @@ namespace LMK.Editor.GameplayTags
         private void OnAttachToPanel(AttachToPanelEvent _Event)
         {
             TagRegistryService.OnSnapshotChanged += OnSnapshotChanged;
-            TagOperations.MarkersChanged += OnMarkersChanged;
+            TagMarkers.Changed += OnMarkersChanged;
             RefreshTagTree();
         }
 
         private void OnDetachFromPanel(DetachFromPanelEvent _Event)
         {
             TagRegistryService.OnSnapshotChanged -= OnSnapshotChanged;
-            TagOperations.MarkersChanged -= OnMarkersChanged;
+            TagMarkers.Changed -= OnMarkersChanged;
         }
 
 
@@ -189,7 +202,16 @@ namespace LMK.Editor.GameplayTags
         #region Display Update
         private void OnSnapshotChanged() => RefreshTagTree();
 
-        private void OnMarkersChanged() => TagTree?.SyncMarkers();
+        /// <summary>
+        /// Show the new markers, and filter again when the filter searches markers (<c>@</c> terms).
+        /// </summary>
+        internal void OnMarkersChanged()
+        {
+            TagTree?.SyncMarkers();
+
+            if (filter.IndexOf('@') >= 0)
+                TagTree?.SetFilter(filter);
+        }
 
         internal void RefreshTagTree()
         {
@@ -201,6 +223,14 @@ namespace LMK.Editor.GameplayTags
 
             TagTree = new GameplayTagTreeElement(snapshot.Root, treeOptions);
             tagTreeScrollView.Add(TagTree);
+
+            // Drag a tag onto another tag, or onto its registry header, to move it.
+            if (Editable)
+            {
+                var mover = new GameplayTagMoveManipulator();
+                mover.Moved += MoveTag;
+                TagTree.AddManipulator(mover);
+            }
 
             if (!string.IsNullOrWhiteSpace(filter))
                 TagTree.SetFilter(filter);
@@ -423,6 +453,10 @@ namespace LMK.Editor.GameplayTags
             menu.AddItem("Expand All", false, () => TagTree?.SetExpanded(true));
             menu.AddSeparator(null);
 
+            // Markers are the user's own, so every tag tree offers them.
+            menu.AddItem("Manage Markers...", false, TagMarkerManagerWindow.Open);
+            menu.AddSeparator(null);
+
             if (Editable)
             {
                 menu.AddItem("Import Tag Files...", false, GameplayTagCommands.ImportTagFiles);
@@ -466,6 +500,26 @@ namespace LMK.Editor.GameplayTags
 
             if (result.HasValue)
                 Report(result.Value, $"Tag deleted: \"{path}\"");
+        }
+
+        /// <summary>
+        /// Move a dropped tag under <paramref name="_Target"/>, or to the top level when it is a registry header,
+        /// then select it where it went.
+        /// </summary>
+        private void MoveTag(GameplayTagNode _Tag, GameplayTagNode _Target)
+        {
+            var registryId = _Tag.RegistryId;
+            var id = _Tag.Id;
+            var newParent = _Target.IsRegistryHeader ? RegistryGuid.Zero : _Target.Id;
+            string oldPath = _Tag.FullTag;
+            string newPath = _Target.IsRegistryHeader ? _Tag.ShortTag : TagPath.Combine(_Target.FullTag, _Tag.ShortTag);
+
+            // Run outside the event: the operation reloads the registries and rebuilds this tree.
+            EditorApplication.delayCall += () =>
+            {
+                if (Report(TagOperations.Move(id, newParent), $"Tag moved: \"{oldPath}\" to \"{newPath}\""))
+                    Select(registryId, id);
+            };
         }
 
         private void ExportRegistry(RegistryGuid _RegistryId)

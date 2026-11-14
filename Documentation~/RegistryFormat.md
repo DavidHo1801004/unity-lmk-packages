@@ -38,7 +38,7 @@ One row per tag, sorted by tag ID: `guid | parent | segment | flags | descriptio
 - **flags:** `implicit` for a tag that exists only as the parent of added tags, `-` otherwise.
 - **description:** free text, to the end of the line.
 
-Renaming a tag changes only its segment, so a rename is a one-line diff. Deleting a tag removes its row and the rows of its descendants.
+Renaming a tag changes only its segment, so a rename is a one-line diff. Moving a tag changes only its parent, also a one-line diff, plus the `implicit` flag of a parent it leaves without children. Deleting a tag removes its row and the rows of its descendants.
 
 ## Validation
 

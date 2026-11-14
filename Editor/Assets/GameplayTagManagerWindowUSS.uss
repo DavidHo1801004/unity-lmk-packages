@@ -29,9 +29,11 @@
 	padding: 10px 20px 10px 20px;
 }
 
+/* Clipped, so a toolbar wider than the panel never draws over the Inspector panel. */
 #tree-panel {
 	flex-direction: column;
 	min-width: 160px;
+	overflow: hidden;
 	border-width: 1px;
 	border-color: var(--lmk-color-border);
 }
@@ -47,9 +49,27 @@ Toolbar above the tag tree: Save, Discard, search, Add Tag, options.
 	align-items: center;
 	height: 22px;
 
+	overflow: hidden;
+
 	background-color: var(--lmk-color-header-background);
 	border-bottom-width: 1px;
 	border-color: var(--lmk-color-border);
+}
+
+/*
+When the panel is narrow, the search field shrinks first, down to its minimum width. Past that, the buttons at
+the end are cut off. The registry toolbar doesn't shrink by default, so its overflow would draw over the
+Inspector panel.
+*/
+.gameplay-tag-toolbar > .registry-toolbar,
+.gameplay-tag-toolbar .registry-toolbar__controls {
+	flex-shrink: 1;
+	min-width: 0px;
+	overflow: hidden;
+}
+
+.gameplay-tag-toolbar .toolbar-button {
+	flex-shrink: 0;
 }
 
 .gameplay-tag-toolbar > .toolbar-button {
@@ -143,9 +163,17 @@ Inspector panel
 	color: var(--lmk-color-text-muted);
 }
 
-/* Spaced from the subheading. */
+/* Between the subheading and the fields. */
+.tag-inspector__separator {
+	margin: 2px 0px 2px 0px;
+}
+
+#details-separator.tag-inspector__separator > .named_separator__separator {
+	background-color: var(--lmk-color-border);
+}
+
 .tag-inspector__rows {
-	margin-top: 14px;
+	margin-top: 0px;
 }
 
 .tag-inspector__inline {
@@ -178,8 +206,134 @@ Inspector panel
 	-unity-text-align: upper-left;
 }
 
-.tag-inspector__marker-field {
+/*
+Markers row: a chip per marker (colour and text set from code), with × to remove it, and + to add one.
+*/
+/* A box like a tag container field (GameplayTagContainerUSS): the chips, then + at the bottom. */
+.tag-marker-field {
+	flex-direction: row;
 	flex-grow: 1;
+	justify-content: space-between;
+	min-height: 20px;
+	padding: 2px;
+
+	background-color: var(--lmk-color-field-background);
+	border-radius: 4px;
+	border-width: 1px;
+	border-color: var(--lmk-color-field-border);
+}
+
+.tag-marker-field__chips {
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.tag-marker-field__empty {
+	height: 15px;
+	margin: 0px 0px 2px 0px;
+	padding: 0px 2px 0px 2px;
+
+	color: var(--lmk-color-text-placeholder);
+	-unity-text-align: middle-left;
+}
+
+/* Drawn like a tag in a tag container field (GameplayTagContainerUSS): a remove button joined to the name. */
+.tag-marker-field__chip {
+	flex-direction: row;
+	margin: 1px;
+}
+
+.tag-marker-field__chip-remove {
+	width: 15px;
+	height: 15px;
+	padding: 0px 2px 2px 2px;
+	margin: 0px;
+
+	border-width: 0px 1px 0px 0px;
+	border-color: var(--lmk-color-content-border);
+	border-radius: 3px 0px 0px 3px;
+	background-color: #6E3D32;
+
+	-unity-text-align: middle-center;
+
+	transition-property: background-color;
+	transition-duration: 0.1s;
+}
+
+.tag-marker-field__chip-remove:hover,
+.tag-marker-field__chip-remove:active {
+	background-color: #913421;
+}
+
+/* Its colour, and a text colour that reads on it, are set from code. */
+.tag-marker-field__chip-label {
+	height: 15px;
+	padding: 0px 4px 1px 4px;
+	margin: 0px;
+	overflow: hidden;
+
+	border-radius: 0px 3px 3px 0px;
+
+	text-overflow: ellipsis;
+	-unity-text-align: middle-left;
+}
+
+/* At the bottom of the box, under the chips. */
+.tag-marker-field__add {
+	align-self: stretch;
+	width: 20px;
+	height: auto;
+	margin: 0px;
+	padding: 0px;
+	flex-shrink: 0;
+	flex-grow: 0;
+}
+
+/* New Marker popup */
+#new-marker-popup {
+	padding: 4px;
+}
+
+#new-marker-popup > .unity-base-field {
+	margin: 0px 0px 4px 0px;
+}
+
+#new-marker-popup > .unity-base-field > .unity-label {
+	min-width: 50px;
+}
+
+.tag-marker-field__swatches {
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin: 0px 0px 6px 50px;
+}
+
+.tag-marker-field__swatch {
+	width: 18px;
+	height: 18px;
+	margin: 0px 4px 0px 0px;
+	border-width: 2px;
+	border-radius: 9px;
+	border-color: rgba(0, 0, 0, 0);
+}
+
+.tag-marker-field__swatch:hover {
+	border-color: var(--lmk-color-field-border-hover);
+}
+
+.tag-marker-field__swatch--picked,
+.tag-marker-field__swatch--picked:hover {
+	border-color: var(--lmk-color-link);
+}
+
+#new-marker-error {
+	margin: 0px 0px 4px 2px;
+	color: var(--lmk-color-text-error);
+	white-space: normal;
+}
+
+#new-marker-add {
+	align-self: flex-end;
 	margin: 0px;
 }
 

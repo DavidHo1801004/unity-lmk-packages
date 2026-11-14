@@ -3,6 +3,21 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-11-14
+
+### Added
+- Move tags of the main registry, with their sub tags, under another tag or to the top level: drag a tag onto another tag or onto the main registry's header in the Tag Editor, where a blue-tinted preview shows where it will go. Only the tag's parent changes, so references follow, and the old constant name stays as an `[Obsolete]` alias. An implicit parent left without children becomes explicit. Tags can't be moved to another registry. Staged, with Undo.
+- Named markers: define a marker once (a name and a colour) and put it on tags of any registry, several per tag. The Inspector panel's *Markers* row shows them as chips, with **×** to remove one and **+** to add one or make a new one.
+- Tag rows show their markers after the tag's name, which they never cover: as named chips when there's room, otherwise as thin strips that expand on hover to show their name. When even the strips don't fit, Shift + scroll wheel scrolls them sideways. This replaces the single colour strip.
+- *Manage Markers...* (options menu, the Inspector's **+** menu, *Tools → LMK → Gameplay Tags*): rename, recolour, delete and add markers, and drag them into the order rows show them in.
+- Search tag trees by marker: `@wip` shows the tags with a marker whose name contains "wip", and `-@wip` the others. Search fields show the syntax in their tooltip.
+
+### Changed
+- Markers belong to gameplay tags, no longer to the registry core. They aren't staged any more: every change is saved at once, and *Save* and *Discard* don't affect them. Undo and Redo still do.
+- `UserSettings/LMKGameplayTags/Markers.json` has a new layout (version 2). A file from 1.1.0 or earlier is converted when it first loads: each colour becomes a marker named "Marker 1", "Marker 2" and so on.
+- Menus moved from *Tools → GASU* to *Tools → LMK*, next to the other LMK packages: *Tools → LMK → Gameplay Tags*, with the Gameplay Tag Editor at the top. The control panel is under *LMK* in the UI Builder library. The comment above generated code aliases names the new menu.
+- The Inspector panel has a separator between the tag's registry line and its fields.
+
 ## [1.1.0] - 2026-11-13
 
 Gameplay tags now run on the registry core, `com.lmk.registry` 1.0.0, which other registry kinds such as gameplay attributes share. Data and code written for 1.0.0 keep working: registry files, serialized tags (text and binary), the baked database asset and its GUID, generated constants and their aliases, markers, and the public API.

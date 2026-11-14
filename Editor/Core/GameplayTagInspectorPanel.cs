@@ -15,7 +15,8 @@ namespace LMK.Editor.GameplayTags
 {
     /// <summary>
     /// Details of the tag selected in the Gameplay Tag Manager: its name (editable), its registry, and the rows
-    /// Explicit, Parent, Description and Marker. Edits are staged through <see cref="TagOperations"/>.
+    /// Explicit, Parent, Description and Markers. Edits are staged through <see cref="TagOperations"/>; markers are
+    /// written at once (<see cref="TagMarkers"/>).
     /// </summary>
     /// <remarks>
     /// Tags of read-only registries show their name, explicit state and description disabled. Markers are per
@@ -67,12 +68,17 @@ namespace LMK.Editor.GameplayTags
             Add(CreateTitle(_Node));
             Add(CreateSubheading(_Node));
 
+            // A line between the tag's identity and its fields.
+            var separator = new NamedSeparator { name = "details-separator" };
+            separator.AddToClassList(USS_CLASS + "__separator");
+            Add(separator);
+
             var rows = new FieldRowGroup { RowSpacing = 4 };
             rows.AddToClassList(USS_CLASS + "__rows");
             rows.Add(new FieldRow("Is Explicit", CreateExplicitValue(_Node)));
             rows.Add(new FieldRow("Parent", CreateParentValue(_Node)));
             rows.Add(new FieldRow("Description", CreateDescriptionValue(_Node)) { AlignTop = true });
-            rows.Add(new FieldRow("Marker", CreateMarkerValue(_Node)));
+            rows.Add(new FieldRow("Markers", CreateMarkerValue(_Node)) { AlignTop = true });
             Add(rows);
         }
 
@@ -205,18 +211,9 @@ namespace LMK.Editor.GameplayTags
         }
 
         /// <summary>
-        /// The registry core's marker field: a colour field, empty (transparent) when the tag has no marker, and a
-        /// button to remove it.
+        /// The tag's markers: a chip per marker with × to remove it, and + to add one.
         /// </summary>
-        private VisualElement CreateMarkerValue(GameplayTagNode _Node)
-        {
-            var value = new RegistryMarkerField(TagKind.Instance, _Node.RegistryId, _Node.Id);
-            value.AddToClassList(USS_CLASS + "__inline");
-            value.Field.AddToClassList(USS_CLASS + "__marker-field");
-            value.ClearButton.AddToClassList(USS_CLASS + "__button");
-
-            return value;
-        }
+        private VisualElement CreateMarkerValue(GameplayTagNode _Node) => new TagMarkerField(_Node.RegistryId, _Node.Id);
         #endregion
 
 

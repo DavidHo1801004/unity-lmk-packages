@@ -18,7 +18,7 @@ namespace LMK.Editor.GameplayTags
     /// </summary>
     internal static class GameplayTagCommands
     {
-        private const string MENU = "Tools/GASU/Gameplay Tags/";
+        private const string MENU = "Tools/LMK/Gameplay Tags/";
 
 
 

@@ -59,6 +59,7 @@ namespace LMK.Editor.GameplayTags.Tests
             TagCodeGen.OutputPath = CODE;
             previousMarkersPath = TagMarkerStore.FilePath;
             TagMarkerStore.FilePath = MARKERS;
+            TagMarkers.Reload();
             RegistryLockProvider.Current = null;
 
             if (!AssetDatabase.IsValidFolder(FOLDER))
@@ -78,6 +79,7 @@ namespace LMK.Editor.GameplayTags.Tests
             TagRegistryService.MainRegistryPath = previousMainPath;
             TagCodeGen.CancelPending();
             TagCodeGen.OutputPath = previousCodePath;
+            TagMarkers.Reload();
             TagMarkerStore.FilePath = previousMarkersPath;
 
             if (Directory.Exists(CODE_FOLDER))
@@ -527,6 +529,177 @@ namespace LMK.Editor.GameplayTags.Tests
 
             Assert.AreEqual(before, FileText);
             Object.DestroyImmediate(other);
+        }
+
+        private static string PathOf(RegistryGuid _Id) => Main.GetPath(_Id);
+    }
+
+
+
+    /// <summary>
+    /// Moving a tag changes only its parent ID, within the main registry.
+    /// </summary>
+    public sealed class MoveTests : OperationTestBase
+    {
+        [Test]
+        public void Move_UnderAnotherTag_SubtreeAndReferencesFollow_IdIsKept()
+        {
+            Add("A.B.C");
+            Add("X");
+            var b = Ref("A.B");
+            var c = Ref("A.B.C");
+
+            var result = TagOperations.Move(b.Id, IdOf("X"));
+
+            Assert.IsTrue(result.Success, result.Error);
+            Assert.AreEqual(b.Id, result.Id);
+            Assert.AreEqual("X.B", b.Path);
+            Assert.AreEqual("X.B.C", c.Path);
+            Assert.AreEqual(b.Id, IdOf("X.B"));
+            Assert.AreEqual(c.Id, IdOf("X.B.C"));
+            Assert.IsTrue(TagOperations.HasPendingChanges, "staged");
+
+            Save();
+            AssertFileValid();
+        }
+
+        [Test]
+        public void Move_ToTopLevel()
+        {
+            var b = Ref(PathOf(Add("A.B")));
+            Add("A.C");
+
+            Assert.IsTrue(TagOperations.Move(b.Id, RegistryGuid.Zero).Success);
+
+            Assert.AreEqual("B", b.Path);
+            Assert.IsTrue(Main.TryGetRow(b.Id, out var row) && row.parent.IsZero);
+        }
+
+        [Test]
+        public void Move_ImplicitTag_StaysImplicit()
+        {
+            Add("A.B.C");
+            Add("X");
+            var b = IdOf("A.B");
+
+            Assert.IsTrue(TagOperations.Move(b, IdOf("X")).Success);
+
+            Assert.IsTrue(Main.TryGetRow(b, out var row) && row.isImplicit, "it still has a child");
+            Assert.AreEqual("X.B.C", PathOf(IdOf("X.B.C")));
+        }
+
+        [Test]
+        public void Move_LastChildOfAnImplicitParent_MakesTheParentExplicit()
+        {
+            Add("A.B");
+            Add("X");
+            var a = IdOf("A");
+
+            Assert.IsTrue(TagOperations.Move(IdOf("A.B"), IdOf("X")).Success);
+
+            Assert.IsTrue(Main.TryGetRow(a, out var row), "the parent left empty stays, with its ID");
+            Assert.IsFalse(row.isImplicit);
+        }
+
+        [Test]
+        public void Move_ImplicitParentWithOtherChildren_StaysImplicit()
+        {
+            Add("A.B");
+            Add("A.C");
+            Add("X");
+
+            Assert.IsTrue(TagOperations.Move(IdOf("A.B"), IdOf("X")).Success);
+
+            Assert.IsTrue(Main.TryGetRow(IdOf("A"), out var row) && row.isImplicit);
+        }
+
+        [Test]
+        public void Move_IntoItselfOrItsSubtree_IsRejected()
+        {
+            Add("A.B.C");
+
+            var self = TagOperations.Move(IdOf("A"), IdOf("A"));
+            var descendant = TagOperations.Move(IdOf("A"), IdOf("A.B.C"));
+
+            Assert.IsFalse(self.Success);
+            Assert.IsFalse(descendant.Success);
+            StringAssert.Contains("own sub tags", descendant.Error);
+            Assert.AreEqual("A.B.C", PathOf(IdOf("A.B.C")));
+            Assert.IsNotNull(TagOperations.CheckMove(IdOf("A"), IdOf("A.B")));
+        }
+
+        [Test]
+        public void Move_NameTakenUnderTheNewParent_IsRejected()
+        {
+            Add("A.B");
+            Add("X.B");
+
+            var result = TagOperations.Move(IdOf("A.B"), IdOf("X"));
+
+            Assert.IsFalse(result.Success);
+            StringAssert.Contains("already has a sub tag named \"B\"", result.Error);
+            Assert.IsNotNull(TagOperations.CheckMove(IdOf("A.B"), IdOf("X")));
+
+            Add("B");
+            StringAssert.Contains("top level", TagOperations.Move(IdOf("A.B"), RegistryGuid.Zero).Error);
+        }
+
+        [Test]
+        public void Move_ToTheCurrentParent_IsANoOp_ButNotAValidDropTarget()
+        {
+            Add("A.B");
+            Save();
+
+            Assert.IsTrue(TagOperations.Move(IdOf("A.B"), IdOf("A")).Success);
+            Assert.IsFalse(TagOperations.HasPendingChanges, "nothing changed");
+            Assert.IsNotNull(TagOperations.CheckMove(IdOf("A.B"), IdOf("A")));
+            Assert.IsNull(TagOperations.CheckMove(IdOf("A.B"), RegistryGuid.Zero));
+        }
+
+        [Test]
+        public void Move_AcrossRegistries_IsRejected()
+        {
+            var vendor = new RegistryData<TagRegistryRow>
+            {
+                registryId = RegistryGuid.Parse("b0000000000000000000000000000002"),
+                name = "Vendor",
+                origin = RegistryOrigin.Package,
+                rows = new List<RegistryRow<TagRegistryRow>> { TagRegistryRow.Create(TestIds.Id(1), RegistryGuid.Zero, "Stun", false) },
+            };
+            RegistryServiceTests.WriteAndImport(FOLDER + "/Vendor.tagregistry", TagRegistryFile.Write(vendor));
+            var a = Add("A");
+
+            var into = TagOperations.Move(a, TestIds.Id(1));
+            var outOf = TagOperations.Move(TestIds.Id(1), RegistryGuid.Zero);
+
+            Assert.IsFalse(into.Success);
+            StringAssert.Contains("another registry", into.Error);
+            Assert.IsFalse(outOf.Success, "package registries are read-only");
+            Assert.IsNotNull(TagOperations.CheckMove(TestIds.Id(1), RegistryGuid.Zero));
+        }
+
+        [Test]
+        public void UndoRedo_Move()
+        {
+            Add("A.B");
+            Add("X");
+            Save();
+            var b = Ref("A.B");
+            var a = IdOf("A");
+
+            Undo.IncrementCurrentGroup();
+            Assert.IsTrue(TagOperations.Move(b.Id, IdOf("X")).Success);
+
+            Undo.PerformUndo();
+            Assert.AreEqual("A.B", b.Path);
+            Assert.IsTrue(Main.TryGetRow(a, out var row) && row.isImplicit, "the parent is implicit again");
+            Assert.IsFalse(TagOperations.HasPendingChanges, "back to the saved content");
+
+            Undo.PerformRedo();
+            Assert.AreEqual("X.B", b.Path);
+
+            Save();
+            AssertFileValid();
         }
 
         private static string PathOf(RegistryGuid _Id) => Main.GetPath(_Id);

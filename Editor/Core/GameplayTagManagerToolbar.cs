@@ -49,7 +49,7 @@ namespace LMK.Editor.GameplayTags
             Add(registryToolbar);
 
             // Unity's own toolbar search field.
-            var search = new ToolbarSearchField { name = "search-field" };
+            var search = new ToolbarSearchField { name = "search-field", tooltip = GameplayTagControlPanel.SEARCH_HELP };
             search.RegisterValueChangedCallback(e => controlPanel.SetFilter(e.newValue));
             registryToolbar.AddControl(search);
 

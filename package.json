@@ -1,6 +1,6 @@
 {
   "name": "com.lmk.gameplaytags",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "displayName": "LMK Gameplay Tags",
   "description": "Hierarchical gameplay tags (e.g. \"Status.Debuff.Stun\") for Unity, identified by ID and stored in registry files, with tag and tag-container fields, a tag manager window, reference tools, package registries, tag file import and export, generated tag constants, tag queries and CI checks. Built on com.lmk.registry.",
   "unity": "6000.3",

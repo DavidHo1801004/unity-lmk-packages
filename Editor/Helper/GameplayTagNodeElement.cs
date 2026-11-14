@@ -31,7 +31,17 @@ namespace LMK.Editor.GameplayTags
 
         private const string USS_CLASS_ROW_SELECTED = "tag-row--selected";
 
-        private const string USS_CLASS_MARKER = "tag-marker";
+
+        private const string USS_CLASS_DROP_TARGET = "tag-row--drop-target";
+
+        internal const string USS_CLASS_MOVE_SOURCE = "tag-move-source";
+
+        // Appended to the name of the dragged tag.
+        internal const string MOVE_SOURCE_SUFFIX = "...";
+
+        internal const string USS_CLASS_MOVE_PREVIEW = "tag-move-preview";
+
+        internal const string USS_CLASS_MOVE_PREVIEW_NESTED = USS_CLASS_MOVE_PREVIEW + "--nested";
 
         private const string IMPLICIT_TOOLTIP = "Implicit tag: exists only as the parent of added tags.";
 
@@ -43,9 +53,15 @@ namespace LMK.Editor.GameplayTags
         private readonly GameplayTagTreeOptions options;
 
         private readonly Foldout foldout;
+        private readonly Switcher switcher;
         private readonly Label label;
         private readonly Toggle selectBox;
-        private readonly VisualElement marker;
+        private readonly Label nameLabel;
+        private TagMarkerStrip markerStrip;
+
+        // The move preview shown under this tag while a drag hovers it, and the foldout value before it opened.
+        private GameplayTagNodeElement movePreview;
+        private bool expandedBeforePreview;
 
         // Normalized search fields, built on first search.
         private string searchName;
@@ -78,6 +94,16 @@ namespace LMK.Editor.GameplayTags
         /// </summary>
         internal bool DescendantSelected { get; private set; }
 
+        /// <summary>
+        /// Whether the tag has children, so it shows a foldout rather than a leaf label.
+        /// </summary>
+        internal bool IsBranch => TagNode.ChildCount > 0;
+
+        /// <summary>
+        /// The preview shown by <see cref="ShowMovePreview"/>, or <see langword="null"/>.
+        /// </summary>
+        internal GameplayTagNodeElement MovePreview => movePreview;
+
 
 
         public GameplayTagNodeElement(GameplayTagNode _NodeData, GameplayTagTreeOptions _Options)
@@ -90,7 +116,7 @@ namespace LMK.Editor.GameplayTags
             bool isBranch = _NodeData.ChildCount > 0;
 
             // Main tag label display
-            var switcher = root.Q<Switcher>("switcher");
+            switcher = root.Q<Switcher>("switcher");
             switcher.OnAttachedToPanel += () => switcher.SwitchActive(isBranch ? 1 : 0);
 
             label = root.Q<Label>("leaf-tag");
@@ -108,10 +134,8 @@ namespace LMK.Editor.GameplayTags
             Row.AddToClassList(USS_CLASS_ROW);
             Row.RegisterCallback<ClickEvent>(OnRowClicked);
 
-            // Marker strip at the end of the row, in the tag's marker colour. Tags only.
-            marker = new VisualElement { name = "marker", pickingMode = PickingMode.Ignore };
-            marker.AddToClassList(USS_CLASS_MARKER);
-            Row.Add(marker);
+            // The tag's markers at the end of its row, after its name. Tags only; made when it has markers.
+            nameLabel = isBranch ? foldoutToggle.Q<Label>() : label;
             SyncMarker();
 
             // Update foldout value.
@@ -177,19 +201,114 @@ namespace LMK.Editor.GameplayTags
             }
         }
 
+        #region Move Preview
+        /// <summary>
+        /// Show a see-through copy of <paramref name="_Moved"/> and its subtree among this tag's children, where a
+        /// move would put it, and highlight this row as the drop target. A collapsed branch opens until
+        /// <see cref="HideMovePreview"/>.
+        /// </summary>
+        internal void ShowMovePreview(GameplayTagNode _Moved)
+        {
+            HideMovePreview();
+            if (_Moved == null) return;
+
+            // A tree element of its own, never linked as a child item: hierarchy events and Find skip it.
+            movePreview = new GameplayTagNodeElement(_Moved, new GameplayTagTreeOptions());
+            movePreview.AddToClassList(USS_CLASS_MOVE_PREVIEW);
+            movePreview.pickingMode = PickingMode.Ignore;
+            movePreview.Query<VisualElement>().ForEach(e => e.pickingMode = PickingMode.Ignore);
+
+            if (IsBranch)
+            {
+                // Opened without writing the remembered foldout state.
+                expandedBeforePreview = foldout.value;
+                foldout.SetValueWithoutNotify(true);
+
+                // Before the first child that sorts after it, as the snapshot sorts children.
+                var content = foldout.contentContainer;
+                int index = content.childCount;
+                for (int i = 0; i < content.childCount; i++)
+                {
+                    if (content[i] is GameplayTagNodeElement child && string.CompareOrdinal(child.TagNode.ShortTag, _Moved.ShortTag) > 0)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                content.Insert(index, movePreview);
+            }
+            else
+            {
+                movePreview.AddToClassList(USS_CLASS_MOVE_PREVIEW_NESTED);
+                Add(movePreview);
+            }
+
+            Row.AddToClassList(USS_CLASS_DROP_TARGET);
+        }
+
+        /// <summary>
+        /// Remove the preview of <see cref="ShowMovePreview"/>, and close a branch it opened.
+        /// </summary>
+        internal void HideMovePreview()
+        {
+            if (movePreview == null) return;
+
+            movePreview.RemoveFromHierarchy();
+            movePreview = null;
+
+            if (IsBranch)
+                foldout.SetValueWithoutNotify(expandedBeforePreview);
+
+            Row.RemoveFromClassList(USS_CLASS_DROP_TARGET);
+        }
+
+        /// <summary>
+        /// While this tag is dragged, show it as a single leaf row, "Name...", tinted: a branch hides its sub tags.
+        /// </summary>
+        internal void SetMoveSource(bool _IsSource)
+        {
+            EnableInClassList(USS_CLASS_MOVE_SOURCE, _IsSource);
+            label.text = _IsSource ? TagNode.ShortTag + MOVE_SOURCE_SUFFIX : TagNode.ShortTag;
+
+            if (IsBranch)
+                switcher.SwitchActive(_IsSource ? 0 : 1);
+        }
+        #endregion
+
+        /// <summary>
+        /// The strip showing the tag's markers, or <see langword="null"/> while it has none.
+        /// </summary>
+        internal TagMarkerStrip MarkerStrip => markerStrip;
+
         private void SyncMarker()
         {
-            var color = Color.clear;
-            bool hasMarker = !TagNode.IsRegistryHeader && TagOperations.TryGetMarker(TagNode.RegistryId, TagNode.Id, out color);
-            marker.style.display = hasMarker ? DisplayStyle.Flex : DisplayStyle.None;
-            marker.style.backgroundColor = hasMarker ? color : StyleKeyword.Null;
+            var markers = TagNode.IsRegistryHeader || TagNode.IsRoot
+                ? Array.Empty<TagMarkerDefinition>()
+                : TagMarkers.GetMarkers(TagNode.RegistryId, TagNode.Id);
+
+            if (markers.Count == 0)
+            {
+                markerStrip?.Release();
+                markerStrip = null;
+                return;
+            }
+
+            if (markerStrip == null)
+            {
+                markerStrip = new TagMarkerStrip(Row, nameLabel);
+                Row.Add(markerStrip);
+            }
+
+            markerStrip.SetMarkers(markers);
         }
 
 
 
         /// <summary>
-        /// Normalized text of <paramref name="_Field"/>, computed once. The name field is the full tag,
-        /// the tooltip field is the developer comment.
+        /// Normalized text of <paramref name="_Field"/>. The name field is the full tag, and the tooltip field
+        /// (<c>#</c> terms) the description, both computed once. The namespace field (<c>@</c> terms) holds the
+        /// names of the tag's markers, one per line, read each time since markers change without a rebuild.
         /// </summary>
         public string GetSearchField(SearchField _Field)
         {
@@ -197,6 +316,9 @@ namespace LMK.Editor.GameplayTags
             {
                 SearchField.Name => searchName ??= SearchQuery.Normalize(TagNode.IsRegistryHeader ? TagNode.ShortTag : TagNode.FullTag),
                 SearchField.Tooltip => searchComment ??= SearchQuery.Normalize(TagNode.Comment),
+                SearchField.Namespace => TagNode.IsRegistryHeader || TagNode.IsRoot
+                    ? null
+                    : SearchQuery.Normalize(TagMarkers.GetSearchText(TagNode.RegistryId, TagNode.Id)),
                 _ => null,
             };
         }

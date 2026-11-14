@@ -1,0 +1,88 @@
+/*
+Manage Markers window (TagMarkerListView).
+*/
+.tag-marker-list {
+	padding: 6px;
+	background-color: var(--lmk-color-popup-background);
+}
+
+.tag-marker-list__note {
+	margin: 0px 0px 6px 2px;
+	color: var(--lmk-color-text-muted);
+	white-space: normal;
+}
+
+.tag-marker-list__scroll {
+	flex-grow: 1;
+	border-width: 1px;
+	border-color: var(--lmk-color-border);
+	background-color: var(--lmk-color-popup-content-background);
+}
+
+.tag-marker-list__rows {
+	flex-direction: column;
+}
+
+.tag-marker-list__row {
+	flex-direction: row;
+	align-items: center;
+	height: 24px;
+	padding: 0px 4px 0px 2px;
+	border-bottom-width: 1px;
+	border-color: var(--lmk-color-border);
+	background-color: var(--lmk-color-popup-background);
+}
+
+.tag-marker-list__handle {
+	width: 16px;
+	margin: 0px;
+	padding: 0px;
+	color: var(--lmk-color-text-muted);
+	-unity-text-align: middle-center;
+	cursor: move-arrow;
+}
+
+.tag-marker-list__handle:hover {
+	color: var(--lmk-color-icon);
+}
+
+.tag-marker-list__color {
+	width: 56px;
+	margin: 0px 4px 0px 2px;
+}
+
+.tag-marker-list__text {
+	flex-grow: 1;
+	margin: 0px;
+}
+
+.tag-marker-list__uses {
+	min-width: 52px;
+	margin: 0px 2px 0px 6px;
+	color: var(--lmk-color-text-muted);
+	-unity-text-align: middle-right;
+}
+
+.tag-marker-list__delete {
+	width: 20px;
+	height: 18px;
+	margin: 0px 0px 0px 4px;
+	padding: 0px;
+}
+
+.tag-marker-list__empty {
+	margin: 8px;
+	color: var(--lmk-color-text-placeholder);
+	-unity-text-align: middle-center;
+}
+
+.tag-marker-list__error {
+	margin: 4px 2px 0px 2px;
+	color: var(--lmk-color-text-error);
+	white-space: normal;
+}
+
+.tag-marker-list__add {
+	align-self: flex-end;
+	margin: 6px 0px 0px 0px;
+}

@@ -60,8 +60,6 @@ namespace LMK.Editor.GameplayTags
         public override string EditorName => "Gameplay Tag Manager";
         public override Type ReferenceType => typeof(GameplayTag);
 
-        protected override string DefaultMarkersPath => TagMarkerStore.DEFAULT_FILE_PATH;
-
         public override bool CanOpenRegistry => true;
 
         public override void OpenRegistry(RegistryGuid _RegistryId) => GameplayTagManagerWindow.OpenRegistry(_RegistryId);

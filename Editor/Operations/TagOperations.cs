@@ -11,8 +11,8 @@ using LMK.Runtime.Registry;
 namespace LMK.Editor.GameplayTags
 {
     /// <summary>
-    /// The tag operations on the main registry: Add, Make Explicit, Rename, Delete and Edit description, and the
-    /// user's tag markers. <br/>
+    /// The tag operations on the main registry: Add, Make Explicit, Rename, Move, Delete and Edit description. The
+    /// user's tag markers are <see cref="TagMarkers"/>, which are not staged. <br/>
     /// Every edit is staged through the registry core (<see cref="RegistryEdit.Apply{TRow, TAsset}"/>): it checks
     /// the lock, validates a copy, records Undo and changes only the staged state. The registries are reloaded with
     /// the staged content, so every tag view shows it. <see cref="Save"/> writes it to disk, and <see cref="Discard"/>
@@ -39,22 +39,13 @@ namespace LMK.Editor.GameplayTags
             remove => Kind.StateChanged -= value;
         }
 
-        /// <summary>
-        /// Called after a marker changed. Marker edits don't reload the registries.
-        /// </summary>
-        public static event Action MarkersChanged
-        {
-            add => Kind.MarkersChanged += value;
-            remove => Kind.MarkersChanged -= value;
-        }
-
         internal static IReadOnlyList<string> LockedPaths => Kind.LockedPaths;
 
 
 
         #region Pending Changes
         /// <summary>
-        /// Whether there are staged tag edits that are not saved: registry content or markers.
+        /// Whether there are staged tag edits that are not saved. Markers are never staged.
         /// </summary>
         public static bool HasPendingChanges => Kind.HasPendingChanges;
 
@@ -74,14 +65,12 @@ namespace LMK.Editor.GameplayTags
 
         #region Save And Discard
         /// <summary>
-        /// Write the staged edits of every registry kind: each changed main registry, the markers, then the
-        /// generated code. Refused if a file changed on disk since the edits began, or without the lock.
+        /// Write the staged edits of every registry kind: each changed main registry, then the generated code. Refused if a file changed on disk since the edits began, or without the lock.
         /// </summary>
         public static RegistryResult Save() => RegistrySession.Save();
 
         /// <summary>
-        /// Drop the staged edits: load the main registries and the markers from disk again, and clear the undo
-        /// history.
+        /// Drop the staged edits: load the main registries from disk again, and clear their undo history.
         /// </summary>
         public static void Discard() => RegistrySession.Discard();
         #endregion
@@ -202,8 +191,75 @@ namespace LMK.Editor.GameplayTags
         }
 
         /// <summary>
-        /// Delete a tag and all of its descendants.
+        /// Move a tag, with its descendants, under another tag of the main registry, or to the top level. Only the
+        /// tag's parent changes: descendants and references follow, because they hold IDs. Any tag can be moved,
+        /// implicit ones too. An implicit parent left without children becomes explicit, keeping its ID.
         /// </summary>
+        /// <param name="_NewParent"> The new parent, or <see cref="RegistryGuid.Zero"/> for the top level. </param>
+        public static RegistryResult Move(RegistryGuid _Id, RegistryGuid _NewParent)
+        {
+            return RegistryEdit.Apply(Kind, "Move Gameplay Tag", data =>
+            {
+                int index = data.IndexOf(_Id);
+                if (index < 0) return RegistryResult.Fail(NOT_IN_MAIN);
+
+                var row = data.rows[index];
+                var oldParent = row.data.parent;
+                if (oldParent.Equals(_NewParent)) return RegistryResult.Ok(_Id);
+
+                string error = CheckMove(_Id, _NewParent,
+                    id => { int i = data.IndexOf(id); return i < 0 ? (TagRegistryRow?)null : data.rows[i].data; },
+                    (parent, segment) => FindChild(data, parent, segment) >= 0,
+                    id => GetPath(data, id));
+                if (error != null) return RegistryResult.Fail(error);
+
+                row.data.parent = _NewParent;
+                data.rows[index] = row;
+
+                // Implicit tags exist only as parents: one left empty stays, as an explicit tag.
+                if (!oldParent.IsZero && !HasChildren(data, oldParent))
+                {
+                    int parentIndex = data.IndexOf(oldParent);
+                    var parentRow = data.rows[parentIndex];
+                    if (parentRow.data.isImplicit)
+                    {
+                        parentRow.data.isImplicit = false;
+                        data.rows[parentIndex] = parentRow;
+                    }
+                }
+
+                return RegistryResult.Ok(_Id);
+            });
+        }
+
+        /// <summary>
+        /// Whether <see cref="Move"/> would move a tag, checked against the loaded main registry. Fast enough to call
+        /// on every pointer move of a drag.
+        /// </summary>
+        /// <param name="_NewParent"> The new parent, or <see cref="RegistryGuid.Zero"/> for the top level. </param>
+        /// <returns> <see langword="null"/> if the move is valid, otherwise why not. The current parent is not valid. </returns>
+        internal static string CheckMove(RegistryGuid _Id, RegistryGuid _NewParent)
+        {
+            var main = TagRegistryService.Snapshot.Main;
+            if (main == null || main.AssetPath != Kind.MainRegistryPath || !main.TryGetRow(_Id, out var row))
+                return NOT_IN_MAIN;
+
+            if (row.parent.Equals(_NewParent))
+                return "The tag is already there.";
+
+            return CheckMove(_Id, _NewParent,
+                id => main.TryGetRow(id, out var found) ? found : (TagRegistryRow?)null,
+                (parent, segment) =>
+                {
+                    foreach (var child in main.GetChildren(parent))
+                        if (main.TryGetRow(child, out var childRow) && childRow.segment == segment)
+                            return true;
+
+                    return false;
+                },
+                main.GetPath);
+        }
+
         /// <param name="_RemoveEmptyParents">
         /// If true, implicit ancestors left without children are removed too. Otherwise the parent left empty
         /// stays, with its ID, as an explicit tag.
@@ -288,26 +344,6 @@ namespace LMK.Editor.GameplayTags
 
 
 
-        #region Markers
-        /// <summary>
-        /// The markers to show: staged ones, or the saved ones before anything was staged.
-        /// </summary>
-        public static IReadOnlyList<RegistryMarker> Markers => Kind.Markers;
-
-        /// <summary>
-        /// The marker colour of a tag, if it has one.
-        /// </summary>
-        public static bool TryGetMarker(RegistryGuid _Registry, RegistryGuid _Tag, out Color _Color) => Kind.TryGetMarker(_Registry, _Tag, out _Color);
-
-        /// <summary>
-        /// Stage a tag's marker colour, for a tag of any registry. A fully transparent colour removes the marker.
-        /// Markers are per user, so no lock is needed.
-        /// </summary>
-        public static void SetMarker(RegistryGuid _Registry, RegistryGuid _Tag, Color _Color) => Kind.SetMarker(_Registry, _Tag, _Color);
-        #endregion
-
-
-
         #region Helpers
         /// <summary>
         /// What <see cref="AddPath"/> did with the last segment of the path.
@@ -384,6 +420,64 @@ namespace LMK.Editor.GameplayTags
 
             var subtree = CollectSubtree(_Data, _Root);
             _Data.rows.RemoveAll(e => subtree.Contains(e.id));
+        }
+
+        /// <summary>
+        /// The rules of a move, over registry content or a snapshot: the new parent is the top level or a tag of the
+        /// same registry, outside the moved tag's subtree, with no child of the same name.
+        /// </summary>
+        /// <param name="_RowOf"> The row of an ID in the registry, or <see langword="null"/>. </param>
+        /// <param name="_HasChildNamed"> Whether a parent has a child with a segment. </param>
+        /// <param name="_PathOf"> The full path of an ID, for messages. </param>
+        private static string CheckMove(
+            RegistryGuid _Id,
+            RegistryGuid _NewParent,
+            Func<RegistryGuid, TagRegistryRow?> _RowOf,
+            Func<RegistryGuid, string, bool> _HasChildNamed,
+            Func<RegistryGuid, string> _PathOf)
+        {
+            if (_RowOf(_Id) is not { } row) return NOT_IN_MAIN;
+
+            if (!_NewParent.IsZero)
+            {
+                if (_RowOf(_NewParent) == null) return "Tags can't be moved to another registry.";
+
+                // Walking up from the new parent must not reach the moved tag. Bounded, in case of a cycle.
+                var current = _NewParent;
+                for (int steps = 0; !current.IsZero && steps < 4096; steps++)
+                {
+                    if (current.Equals(_Id)) return "A tag can't be moved into itself or its own sub tags.";
+                    if (_RowOf(current) is not { } currentRow) break;
+
+                    current = currentRow.parent;
+                }
+            }
+
+            if (_HasChildNamed(_NewParent, row.segment))
+                return _NewParent.IsZero
+                    ? $"A top level tag is already named \"{row.segment}\"."
+                    : $"\"{_PathOf(_NewParent)}\" already has a sub tag named \"{row.segment}\".";
+
+            return null;
+        }
+
+        /// <summary>
+        /// Full path of a row of registry content, or <see langword="null"/>.
+        /// </summary>
+        private static string GetPath(RegistryData<TagRegistryRow> _Data, RegistryGuid _Id)
+        {
+            var segments = new List<string>();
+            for (int steps = 0; !_Id.IsZero && steps <= _Data.rows.Count; steps++)
+            {
+                int index = _Data.IndexOf(_Id);
+                if (index < 0) return null;
+
+                segments.Add(_Data.rows[index].data.segment);
+                _Id = _Data.rows[index].data.parent;
+            }
+
+            segments.Reverse();
+            return string.Join(TagPath.SEPARATOR.ToString(), segments);
         }
 
         private static int FindChild(RegistryData<TagRegistryRow> _Data, RegistryGuid _Parent, string _Segment)

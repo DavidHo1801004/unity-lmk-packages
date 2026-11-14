@@ -13,7 +13,7 @@ namespace LMK.Editor.GameplayTags
     internal struct TagRegistryRow
     {
         /// <summary>
-        /// Parent row ID, or zero for a top level tag. Never changes once the row exists.
+        /// Parent row ID, or zero for a top level tag. Changes only when the tag is moved.
         /// </summary>
         public RegistryGuid parent;
 
