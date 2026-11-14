@@ -3,6 +3,14 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-11-14
+
+### Added
+- `RegistryKindEditor<TRow, TAsset>.ValidatePackRows`: a kind's own pack rules on a package's registry, run after the core's, e.g. that gameplay attribute bounds never name the project's main registry.
+
+### Fixed
+- The first load of a kind's registries in Play Mode, e.g. after a domain reload on entering it, no longer warns that the registries changed during Play Mode.
+
 ## [1.0.0] - 2026-11-13
 
 First release. Gameplay tags 1.1.0 is its first client.

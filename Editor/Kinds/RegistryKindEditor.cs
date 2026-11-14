@@ -255,7 +255,8 @@ namespace LMK.Editor.Registry
 
             PublishDatabase(database, previousDatabase);
 
-            if (EditorApplication.isPlaying)
+            // The first load, e.g. on entering Play Mode after a domain reload, changes nothing a handle was built from.
+            if (EditorApplication.isPlaying && previousDatabase != null)
                 Debug.LogWarning($"{DisplayName} registries changed during Play Mode. Cached handles are rebuilt.");
 
             RaiseSnapshotChanged();
@@ -1072,6 +1073,15 @@ namespace LMK.Editor.Registry
 
             var mainId = snapshot.Main?.Id ?? RegistryGuid.Zero;
 
+            // The kind's own rules on its rows, e.g. references between rows.
+            if (own != null)
+            {
+                var rowProblems = new List<string>();
+                ValidatePackRows(own, allowed.Keys.ToList(), mainId, rowProblems);
+                foreach (string problem in rowProblems.Distinct())
+                    _Errors.Add($"[{DisplayName}] Registry \"{own.name}\": {problem}");
+            }
+
             // Rules 2 to 4: every reference.
             var problems = new List<string>();
             foreach (var (path, reference) in _References)
@@ -1088,6 +1098,18 @@ namespace LMK.Editor.Registry
 
             return own?.registryId ?? RegistryGuid.Zero;
         }
+
+        /// <summary>
+        /// Check the kind's own pack rules on a package's registry, after the core's: e.g. rows that reference other rows
+        /// may only name rows of registries other projects will have too. Called only when the package has exactly one
+        /// valid registry of the kind.
+        /// </summary>
+        /// <param name="_Own"> The package's registry, as read from its file. </param>
+        /// <param name="_AllowedRegistries"> The package's own registry and the registries of its declared dependencies. </param>
+        /// <param name="_MainRegistryId"> The project's main registry, which other projects don't have, or zero. </param>
+        /// <param name="_Problems"> Receives one message per problem, without the kind's name. </param>
+        protected virtual void ValidatePackRows(RegistryData<TRow> _Own, IReadOnlyCollection<RegistryGuid> _AllowedRegistries,
+                                                RegistryGuid _MainRegistryId, List<string> _Problems) { }
 
         private string CheckPackReference(in RegistryReference _Reference, Dictionary<RegistryGuid, (string Name, HashSet<RegistryGuid> Ids)> _Allowed, RegistryGuid _MainId)
         {

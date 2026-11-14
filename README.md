@@ -40,10 +40,10 @@ Everything else (loading, staging, saving, locks, markers, references, packages,
 
 ## Installation
 
-- **OpenUPM (recommended):** dependencies are installed automatically. `openupm add com.lmk.registry`, or add the OpenUPM scoped registry (scope `com.lmk`) and `"com.lmk.registry": "1.0.0"` to `Packages/manifest.json`. A domain package such as `com.lmk.gameplaytags` installs it for you.
+- **OpenUPM (recommended):** dependencies are installed automatically. `openupm add com.lmk.registry`, or add the OpenUPM scoped registry (scope `com.lmk`) and `"com.lmk.registry": "1.1.0"` to `Packages/manifest.json`. A domain package such as `com.lmk.gameplaytags` installs it for you.
 - **Git URL:** add both packages in *Package Manager → + → Add package from git URL*, the editor library first, since Git URLs don't resolve dependencies:
   1. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0`
-  2. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.0.0`
+  2. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.1.0`
 - **Embedded:** copy the `com.lmk.registry` folder into your project's `Packages/` folder, and install `com.lmk.editor`.
 
 The package is published on branch `upm/com.lmk.registry`, with one tag per version (`com.lmk.registry/<version>`).
