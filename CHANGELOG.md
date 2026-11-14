@@ -4,6 +4,14 @@ All notable changes to this package are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-11-14
+
+### Changed
+- Depends on `com.lmk.registry` 1.1.1 and `com.lmk.gameplaytags` 1.2.0. Registry 1.1.1 removed the marker API that 0.1.0 used, so 0.1.0 only works with registry 1.1.0.
+
+### Removed
+- Markers in the Attribute Manager (the colour swatch on rows and the marker field in the details). Markers are now a gameplay tags feature only.
+
 ## [0.1.0] - 2026-11-14
 
 First release. A single-player gameplay ability system modelled on Unreal Engine 5.4's, on `com.lmk.gameplaytags` 1.1.0 and `com.lmk.registry` 1.1.0.

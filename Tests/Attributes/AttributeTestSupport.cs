@@ -113,7 +113,7 @@ namespace LMK.Editor.AbilitySystem.Tests
 
     /// <summary>
     /// Runs every test against an attribute main registry in a test folder, never the project's own. Generated code
-    /// and markers go to <c>Temp/</c>, and the reference index to its own file.
+    /// goes to <c>Temp/</c>, and the reference index to its own file.
     /// </summary>
     public abstract class AttributeKindTestBase
     {
@@ -124,7 +124,7 @@ namespace LMK.Editor.AbilitySystem.Tests
         protected const string ATTRIBUTE_CODE = TEMP_FOLDER + "/GameplayAttributes.g.cs";
         private const string INDEX = TEMP_FOLDER + "/ReferenceIndex.json";
 
-        private readonly Dictionary<RegistryKind, (string Main, string Code, string Markers, string Generated, string Database)> previousPaths = new();
+        private readonly Dictionary<RegistryKind, (string Main, string Code, string Generated, string Database)> previousPaths = new();
         private string previousIndex;
 
         internal static AttributeKind Attributes => AttributeKind.Instance;
@@ -161,7 +161,6 @@ namespace LMK.Editor.AbilitySystem.Tests
                 RegistryCodeGen.CancelPending(kind);
                 kind.MainRegistryPath = paths.Main;
                 kind.CodeOutputPath = paths.Code;
-                kind.MarkersPath = paths.Markers;
                 kind.GeneratedRegistryFolder = paths.Generated;
                 kind.DatabaseFolder = paths.Database;
             }
@@ -188,11 +187,10 @@ namespace LMK.Editor.AbilitySystem.Tests
         /// </summary>
         protected void Redirect(RegistryKind _Kind, string _Name, string _CodePath)
         {
-            previousPaths[_Kind] = (_Kind.MainRegistryPath, _Kind.CodeOutputPath, _Kind.MarkersPath, _Kind.GeneratedRegistryFolder, _Kind.DatabaseFolder);
+            previousPaths[_Kind] = (_Kind.MainRegistryPath, _Kind.CodeOutputPath, _Kind.GeneratedRegistryFolder, _Kind.DatabaseFolder);
 
             _Kind.MainRegistryPath = $"{FOLDER}/{_Name}/Main.{_Kind.FileExtension}";
             _Kind.CodeOutputPath = _CodePath;
-            _Kind.MarkersPath = $"{TEMP_FOLDER}/{_Name}Markers.json";
             _Kind.GeneratedRegistryFolder = $"{FOLDER}/{_Name}/Packages";
             _Kind.DatabaseFolder = $"{FOLDER}/{_Name}/Generated/Resources";
         }

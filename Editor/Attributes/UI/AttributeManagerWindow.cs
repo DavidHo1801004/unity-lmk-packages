@@ -243,14 +243,6 @@ namespace LMK.Editor.AbilitySystem
             item.AddToClassList(USS_ROOT + "__item");
             item.EnableInClassList(USS_ROOT + "__item--selected", _Id.ToString() == selectedAttribute);
 
-            if (Kind.TryGetMarker(_Registry.Id, _Id, out var marker))
-            {
-                var swatch = new VisualElement();
-                swatch.AddToClassList(USS_ROOT + "__marker");
-                swatch.style.backgroundColor = marker;
-                item.Add(swatch);
-            }
-
             item.Add(new Label(AttributeName.GetShortName(_Name)) { tooltip = _Name });
 
             if (_Registry.TryGetRow(_Id, out var row))
@@ -366,8 +358,6 @@ namespace LMK.Editor.AbilitySystem
 
             foreach (var field in new VisualElement[] { nameField, defaultField, meta, integer, description })
                 field.SetEnabled(editable);
-
-            details.Add(new RegistryMarkerField(Kind, registry.Id, id));
 
             var dependents = AttributeOperations.FindDependents(registry.Id, id);
             if (dependents.Count > 0)

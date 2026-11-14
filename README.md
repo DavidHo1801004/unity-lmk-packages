@@ -23,7 +23,7 @@ A gameplay ability system for Unity, modelled on Unreal Engine 5's Gameplay Abil
 ## Requirements
 
 - Unity 6000.3 or newer.
-- `com.lmk.gameplaytags` 1.1.0, `com.lmk.registry` 1.1.0, `com.lmk.attributes` 0.2.0 and `com.lmk.editor` 0.3.0 (dependencies).
+- `com.lmk.gameplaytags` 1.2.0, `com.lmk.registry` 1.1.1, `com.lmk.attributes` 0.2.0 and `com.lmk.editor` 0.3.0 (dependencies).
 
 ## Installation
 
@@ -35,15 +35,15 @@ A gameplay ability system for Unity, modelled on Unreal Engine 5's Gameplay Abil
       { "name": "OpenUPM", "url": "https://package.openupm.com", "scopes": [ "com.lmk" ] }
     ],
     "dependencies": {
-      "com.lmk.abilitysystem": "0.1.0"
+      "com.lmk.abilitysystem": "0.1.1"
     }
     ```
 - **Git URL:** add the five packages in *Package Manager → + → Add package from git URL*, in this order, since Git URLs don't resolve dependencies:
   1. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0`
   2. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.2.0`
-  3. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.1.0`
-  4. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.1.0`
-  5. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.abilitysystem/0.1.0`
+  3. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.1.1`
+  4. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.2.0`
+  5. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.abilitysystem/0.1.1`
 - **Embedded:** copy the `com.lmk.abilitysystem` folder into your project's `Packages/` folder, and install its dependencies.
 
 The package is published on branch `upm/com.lmk.abilitysystem`, with one tag per version (`com.lmk.abilitysystem/<version>`).

@@ -44,13 +44,6 @@
     background-color: rgba(58, 121, 187, 0.55);
 }
 
-.attribute-manager__marker {
-    width: 4px;
-    height: 14px;
-    margin-right: 5px;
-    border-radius: 2px;
-}
-
 .attribute-manager__summary {
     flex-grow: 1;
     -unity-text-align: middle-right;
