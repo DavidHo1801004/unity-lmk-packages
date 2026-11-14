@@ -7,8 +7,8 @@ Editor tools and gameplay libraries for Unity, published as Unity Package Manage
 | [`com.lmk.abilitysystem`](../../tree/upm/com.lmk.abilitysystem) | Gameplay ability system modelled on Unreal Engine 5 GAS: registry-defined gameplay attributes, gameplay effects, abilities and cues, with a scene layer, a runtime debugger and asset validation. Built on `com.lmk.gameplaytags` and `com.lmk.registry`. | `upm/com.lmk.abilitysystem` | 0.1.0 |
 | [`com.lmk.attributes`](../../tree/upm/com.lmk.attributes) | Inspector attributes: `[InlineInstanced]` searchable type picker for `[SerializeReference]` fields, lists and arrays. | `upm/com.lmk.attributes` | 0.2.0 |
 | [`com.lmk.editor`](../../tree/upm/com.lmk.editor) | Shared UI Toolkit editor library: theme, searchable hierarchical dropdown, search syntax, controls. | `upm/com.lmk.editor` | 0.3.0 |
-| [`com.lmk.gameplaytags`](../../tree/upm/com.lmk.gameplaytags) | Hierarchical gameplay tags (`Status.Debuff.Stun`) identified by ID: tag fields, a tag editor, reference tools, package registries and generated constants, and tag queries. Built on `com.lmk.registry`. | `upm/com.lmk.gameplaytags` | 1.1.0 |
-| [`com.lmk.registry`](../../tree/upm/com.lmk.registry) | Shared core for ID-based registries: stable identity, registry files, a baked runtime database, staged editing with Undo, locking, reference tools, package registries, build checks and generated constants. | `upm/com.lmk.registry` | 1.1.0 |
+| [`com.lmk.gameplaytags`](../../tree/upm/com.lmk.gameplaytags) | Hierarchical gameplay tags (`Status.Debuff.Stun`) identified by ID: tag fields, a tag editor, reference tools, package registries and generated constants, and tag queries. Built on `com.lmk.registry`. | `upm/com.lmk.gameplaytags` | 1.2.0 |
+| [`com.lmk.registry`](../../tree/upm/com.lmk.registry) | Shared core for ID-based registries: stable identity, registry files, a baked runtime database, staged editing with Undo, locking, reference tools, package registries, build checks and generated constants. | `upm/com.lmk.registry` | 1.1.1 |
 
 Requires Unity 6000.3 or newer.
 
@@ -40,9 +40,11 @@ Add each package in *Package Manager → + → Add package from git URL*, depend
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.2.0
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.1.0
-https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.1.0
+https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.2.0
 https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.abilitysystem/0.1.0
 ```
+
+`com.lmk.abilitysystem` 0.1.0 needs `com.lmk.registry` 1.1.0: 1.1.1 removes the marker API it uses. Without the ability system, use `#com.lmk.registry/1.1.1`.
 
 ## Package signatures
 
