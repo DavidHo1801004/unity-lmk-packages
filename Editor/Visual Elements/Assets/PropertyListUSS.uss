@@ -1,0 +1,102 @@
+.lmk-property-list {
+	margin: 2px 0px;
+}
+
+/* Header: count, then the add button, left of the collapse button. */
+.lmk-property-list__count {
+	margin: 0px 4px 0px 0px;
+	padding: 0px;
+
+	color: var(--lmk-color-text-muted);
+	-unity-text-align: middle-right;
+}
+
+.lmk-property-list__add-wrapper {
+	flex-direction: row;
+	align-items: center;
+}
+
+/* Two classes, so it beats .toolbar-button but not its hover and active rules. */
+.lmk-property-list .lmk-property-list__add-button {
+	width: 22px;
+	height: 21px;
+	margin: 0px;
+	padding: 0px;
+
+	-unity-font-style: bold;
+	background-color: transparent;
+	border-width: 0px;
+}
+
+/* Rows */
+.lmk-property-list__rows {
+	flex-direction: column;
+}
+
+.lmk-property-list__row {
+	flex-direction: row;
+	align-items: flex-start;
+	min-height: 22px;
+	padding: 1px 2px 1px 0px;
+}
+
+.lmk-property-list__row--alternate {
+	background-color: var(--lmk-color-row-alternate);
+}
+
+.lmk-property-list__row:hover {
+	background-color: var(--lmk-color-item-hover);
+}
+
+.lmk-property-list__handle {
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 20px;
+
+	cursor: move-arrow;
+}
+
+.lmk-property-list__handle-bar {
+	width: 8px;
+	height: 1px;
+	margin: 1px 0px;
+
+	background-color: var(--lmk-color-icon);
+}
+
+.lmk-property-list__row-content {
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-width: 0px;
+}
+
+/* Room left of the default PropertyField for foldout arrows that hang into the inspector's gutter, as nested
+   drawers' foldouts do (e.g. [InlineInstanced] with margin-left: -15px), so the handle doesn't cover them. */
+.lmk-property-list__row-content--property-field {
+	margin-left: 15px;
+}
+
+.lmk-property-list .lmk-property-list__remove-button {
+	flex-shrink: 0;
+	width: 20px;
+	min-width: 20px;
+	height: 18px;
+	min-height: 18px;
+	margin: 1px 0px 0px 2px;
+	padding: 0px;
+
+	border-width: 1px;
+	border-radius: 2px;
+}
+
+/* Empty list and read-only message. */
+.lmk-property-list__empty,
+.lmk-property-list__message {
+	margin: 0px;
+	padding: 4px 6px;
+
+	color: var(--lmk-color-text-muted);
+	white-space: normal;
+}

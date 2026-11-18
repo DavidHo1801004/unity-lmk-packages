@@ -1,0 +1,16 @@
+.lmk-aligned-field > .unity-base-field__input {
+	flex-direction: row;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-width: 0px;
+}
+
+/* Label at the top, for content taller than one line. */
+.lmk-aligned-field--label-top {
+	align-items: flex-start;
+}
+
+.lmk-aligned-field--label-top > .unity-base-field__label {
+	align-self: flex-start;
+	-unity-text-align: upper-left;
+}

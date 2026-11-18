@@ -10,9 +10,10 @@ Shared UI Toolkit editor library used by the LMK packages. It provides a colour 
 - `HierarchyItem`: base class for logical item hierarchies with registered, two-phase event callbacks.
 - `SearchQuery`: search text parser (AND, OR, NOT, phrases, field prefixes).
 - Controls: `SearchBar`, `PlaceholderTextField`, `NamedSeparator`, `ToolbarButton`, `Switcher`, `ResizeHandle`, `ObjectLabel`, `ColorLabel`, `LinkLabel`, `EditableLabel` (also available in UI Builder under *LMK*).
-- Layout: `PanelLayout` (resizable, reorderable, collapsible panels with a saved per-user layout), `CollapsiblePanel`, `FieldRowGroup` and `FieldRow` (aligned label and value rows).
+- Inspector building blocks: `PropertyList` (reorderable list bound to an array property), `AlignedField` (any content with an inspector-aligned label).
+- Layout: `PanelLayout` (resizable, reorderable, collapsible panels with a saved per-user layout), `CollapsiblePanel` (with an optional saved collapsed state), `FieldRowGroup` and `FieldRow` (aligned label and value rows).
 - `AnchoredPopup`: small popup window with any content, placed under an anchor element.
-- `DragReorderManipulator`: drag to reorder the children of any container.
+- Manipulators: `DragReorderManipulator` (drag to reorder the children of any container), `FoldoutArrowManipulator` (a foldout that only its arrow expands).
 
 **Not included:** runtime features, or inspector attributes (see `com.lmk.attributes`).
 
@@ -30,11 +31,11 @@ Shared UI Toolkit editor library used by the LMK packages. It provides a colour 
       { "name": "OpenUPM", "url": "https://package.openupm.com", "scopes": [ "com.lmk" ] }
     ],
     "dependencies": {
-      "com.lmk.editor": "0.3.0"
+      "com.lmk.editor": "0.4.0"
     }
     ```
 - **Git URL:** in *Package Manager → + → Add package from git URL*, enter
-  `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0`
+  `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.4.0`
 - **Embedded:** copy the `com.lmk.editor` folder into your project's `Packages/` folder.
 
 The package is published on branch `upm/com.lmk.editor`, with one tag per version (`com.lmk.editor/<version>`).
@@ -54,7 +55,7 @@ UnityEditor.PopupWindow.Show(buttonRect, dropdown);
 
 - [Theme](Documentation~/Theme.md): palette variables and applying them to your own UI.
 - [Searchable dropdown](Documentation~/SearchableDropdown.md): dropdown, `HierarchyItem` events and search syntax.
-- [Controls](Documentation~/Controls.md): `SearchBar`, `PlaceholderTextField`, `NamedSeparator`, `ToolbarButton`, `Switcher`, `ResizeHandle`, `DragReorderManipulator`, `ObjectLabel`, `ColorLabel`, `CollapsiblePanel`, `PanelLayout`, `AnchoredPopup`, `FieldRowGroup`, `FieldRow`, `EditableLabel`, `LinkLabel`.
+- [Controls](Documentation~/Controls.md): `SearchBar`, `PlaceholderTextField`, `NamedSeparator`, `ToolbarButton`, `Switcher`, `ResizeHandle`, `DragReorderManipulator`, `ObjectLabel`, `ColorLabel`, `CollapsiblePanel`, `PanelLayout`, `AnchoredPopup`, `FieldRowGroup`, `FieldRow`, `EditableLabel`, `LinkLabel`, `PropertyList`, `AlignedField`, `FoldoutArrowManipulator`.
 
 ## License
 

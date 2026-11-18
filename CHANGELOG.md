@@ -3,6 +3,15 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-11-18
+
+### Added
+- `PropertyList`: reorderable list bound to an array or list `SerializedProperty`, in a collapsible panel with the element count and an add button. Rows have a drag handle, the element (a `PropertyField`, or `makeItem` / `bindItem` content) and a remove button. `AddRequested` lets the owner open a picker instead of adding an element, and `SetAddEnabled` disables the add button with a tooltip saying why. Edits go through the `SerializedObject` for Undo and prefab overrides, and multi-object editing edits each object separately.
+- `AlignedField`: field with any content as its input, whose label lines up with the inspector's built-in fields, with an option to keep the label at the top of tall content.
+- `FoldoutArrowManipulator`: a `Foldout` expands and collapses from its arrow only, while clicks elsewhere on the header still reach it.
+- `CollapsiblePanel.PersistenceKey`: saves the collapsed state per user and project.
+- EditMode tests for the new elements.
+
 ## [0.3.0] - 2026-11-10
 
 ### Added

@@ -1,6 +1,6 @@
 # Controls
 
-Reusable UI Toolkit controls in `LMK.Editor.UIElements`. All are `[UxmlElement]`s, listed in UI Builder under *LMK*, and apply the LMK theme when used without a themed parent. `AnchoredPopup` is the exception: it is a popup window, in `LMK.Editor.Windows`.
+Reusable UI Toolkit controls in `LMK.Editor.UIElements`. All are `[UxmlElement]`s, listed in UI Builder under *LMK*, and apply the LMK theme when used without a themed parent. The exceptions are the manipulators (`DragReorderManipulator`, `FoldoutArrowManipulator`), and `AnchoredPopup`, a popup window in `LMK.Editor.Windows`.
 
 ## PlaceholderTextField
 
@@ -181,7 +181,8 @@ inspector.SetCollapsedWithoutNotify(false);    // doesn't
 - The content is hidden, not removed, so its state survives.
 - `Collapsible = false` hides the button and ignores double-clicks. Code can still set `Collapsed`.
 - `MinSize` and `MaxSize` (0 = no limit) are used by `PanelLayout`. The panel doesn't keep its expanded size itself.
-- UXML attributes: `title`, `collapsed`, `collapsible`, `min-size`, `max-size`, `orientation`.
+- `PersistenceKey` saves the collapsed state per user and project (`EditorUserSettings`). Setting it applies the saved state without raising `CollapsedChanged`; from then on every change is saved, by the user or by code. Leave it empty in a `PanelLayout` that has its own key.
+- UXML attributes: `title`, `collapsed`, `collapsible`, `min-size`, `max-size`, `orientation`, `persistence-key`.
 - USS classes: `lmk-collapsible-panel`, `__header`, `__title`, `__header-actions`, `__collapse-button`, `__chevron`, `__content`, modifiers `--collapsed`, `--horizontal`.
 - Colours: header `--lmk-color-header-background` / `-hover`, header border `--lmk-color-border`, outer border `--lmk-color-content-border`, chevron `--lmk-color-icon`.
 
@@ -290,3 +291,64 @@ registry.clicked += () => EditorGUIUtility.PingObject(asset);
 - On hover: `--lmk-color-link-hover`, an underline and the link cursor. Otherwise `--lmk-color-link`.
 - `SetEnabled(false)` shows plain muted text without the hover effect, and raises nothing.
 - USS class `lmk-link-label`.
+
+## PropertyList
+
+A reorderable list bound to an array or list `SerializedProperty`, in a collapsible panel whose header shows the title, the element count and an add button.
+
+```csharp
+var list = new PropertyList(serializedObject.FindProperty("modifiers"), "Modifiers")
+{
+    EmptyText = "No modifiers",
+    PersistenceKey = "MyPackage.EffectInspector.Modifiers", // optional: saves the expanded state
+};
+root.Add(list);
+
+// Optional: a picker instead of adding an empty element.
+list.AddRequested = anchor => ShowPicker(anchor, picked => AddModifier(picked));
+list.ItemsChanged += () => list.SetAddEnabled(AnyLeft(), "Every attribute is already added");
+```
+
+- Each row has a drag handle, the element and a remove button. Rows are dragged by their handle only, and moved with `SerializedProperty.MoveArrayElement`.
+- Content is a `PropertyField` per element by default, so attribute drawers apply, including `[SerializeReference, InlineInstanced]` (`com.lmk.attributes`) with its type picker and shared-instance warning. The default content has a 15px left margin, for foldout arrows that hang into the inspector's gutter.
+- `makeItem` and `bindItem(content, element)` replace the content. Without `bindItem`, `IBindable` content is bound to its element. Set them before binding, or call `Refresh()`.
+- The add button calls `AddRequested(anchor)` when it is set, with the button's world bounds, e.g. to open a `SearchableDropdown` under it; the owner then adds the element itself. Without it, the button adds an element the way Unity does (`arraySize++`: a copy of the last element, or null for a managed reference).
+- `SetAddEnabled(false, reason)` disables the add button and shows `reason` as its tooltip.
+- Every change goes through `SerializedObject.ApplyModifiedProperties`, so Undo and prefab overrides work. With several objects selected, each object is edited separately, so their other elements are kept. If their lists have different sizes, the list is read-only with a message, and the count shows `—`.
+- Rows are rebuilt when elements are added, removed or moved, by this list, Undo or a script. Value edits only update the bound fields, so custom content that shows values without binding them needs `Refresh()`. `ItemsChanged` is raised after each rebuild.
+- Bind it in code, with the constructor or `BindProperty`. Unity's binding API gives custom elements no way to receive a property from `Bind()`, so it has no binding path. A `Bind()` on an ancestor is fine.
+- Rows aren't virtualized: it is meant for inspector-sized lists.
+- UXML attributes: `title`, `empty-text`, `persistence-key`.
+- USS classes: `lmk-property-list`, `__count`, `__add-wrapper`, `__add-button`, `__rows`, `__row`, `__row--alternate`, `__handle`, `__handle-bar`, `__row-content`, `__row-content--property-field`, `__remove-button`, `__empty`, `__message`. Colours: alternate rows `--lmk-color-row-alternate`, hovered rows `--lmk-color-item-hover`, handle `--lmk-color-icon`, count and messages `--lmk-color-text-muted`, plus the `CollapsiblePanel` and `ToolbarButton` colours.
+
+## AlignedField
+
+A field with a label and any content as its input, whose label lines up with the inspector's built-in fields. For custom property drawers whose value isn't a single built-in field.
+
+```csharp
+var field = new AlignedField(property.displayName);
+field.Add(new Button(OpenPicker) { text = "Health" }); // goes into the input
+var tags = new AlignedField("Tags") { AlignLabelToTop = true }; // for content taller than one line
+```
+
+- A `BaseField` with the standard `unity-base-field`, `__label` and `__input` classes and `alignedFieldUssClassName`, so its label width follows the other fields inside an `InspectorElement`.
+- `Add()` and UXML children go into the input (`Input`), which lays them out in a row.
+- `AlignLabelToTop` keeps the label on the first line of tall content, e.g. a tag container that wraps.
+- It has no value of its own: bind or update the content.
+- UXML attributes: `label`, `align-label-to-top`.
+- USS classes: `lmk-aligned-field`, `--label-top`.
+
+## FoldoutArrowManipulator
+
+Makes a `Foldout` expand and collapse from its arrow only, for tree rows whose header is clicked to select.
+
+```csharp
+var row = new Foldout { text = "State" };
+row.AddManipulator(new FoldoutArrowManipulator());
+row.Q<Toggle>(className: Foldout.toggleUssClassName).RegisterCallback<ClickEvent>(_ => Select(row));
+```
+
+- `Foldout.toggleOnLabelClick = false` only spares the label: a click on the header's padding, border or free space still toggles it. With the manipulator, those clicks still reach the header, for selection, context menus and dragging. Only the toggle they cause is undone, before the foldout changes, so no `ChangeEvent` is raised.
+- Keyboard input and code (`value = ...`) still toggle the foldout, including code in a header click handler.
+- The arrow isn't a pick target, so presses are matched to it by position.
+- Its target must be a `Foldout`; otherwise it logs a warning and does nothing. `RemoveManipulator` restores the default behaviour.

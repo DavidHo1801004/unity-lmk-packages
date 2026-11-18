@@ -1,5 +1,6 @@
 using System;
 
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -49,6 +50,31 @@ namespace LMK.Editor.UIElements
 
                 SetCollapsedWithoutNotify(value);
                 CollapsedChanged?.Invoke(collapsed);
+            }
+        }
+
+
+        private string persistenceKey = string.Empty;
+        /// <summary>
+        /// Key of the saved collapsed state in <see cref="EditorUserSettings"/> (per user and project),
+        /// e.g. <c>"MyPackage.MyInspector.Details"</c>. Empty means the state isn't saved. <br/>
+        /// Setting it applies the saved state, if any, without raising <see cref="CollapsedChanged"/>.
+        /// From then on every change is saved, by the user or by code.
+        /// </summary>
+        /// <remarks>
+        /// In a <see cref="PanelLayout"/> with its own key, leave this empty: the layout saves its panels' states.
+        /// </remarks>
+        [UxmlAttribute(name = "persistence-key")]
+        public string PersistenceKey
+        {
+            get => persistenceKey;
+            set
+            {
+                persistenceKey = value ?? string.Empty;
+                if (string.IsNullOrEmpty(persistenceKey)) return;
+
+                if (bool.TryParse(EditorUserSettings.GetConfigValue(persistenceKey), out bool savedCollapsed))
+                    SetCollapsedWithoutNotify(savedCollapsed);
             }
         }
 
@@ -229,6 +255,9 @@ namespace LMK.Editor.UIElements
             EnableInClassList(USS_CLASS_COLLAPSED, collapsed);
             content.style.display = collapsed ? DisplayStyle.None : DisplayStyle.Flex;
             UpdateChevron();
+
+            if (!string.IsNullOrEmpty(persistenceKey))
+                EditorUserSettings.SetConfigValue(persistenceKey, collapsed ? bool.TrueString : bool.FalseString);
         }
 
         private void OnHeaderPointerDown(PointerDownEvent _Event)

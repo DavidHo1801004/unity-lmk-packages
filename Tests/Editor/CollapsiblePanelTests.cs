@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
+using UnityEditor;
+
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
@@ -13,6 +15,14 @@ namespace LMK.Editor.Tests
 {
     public class CollapsiblePanelTests : WindowTestFixture
     {
+        private const string PERSISTENCE_KEY = "LMK.Editor.Tests.CollapsiblePanel";
+
+        [TearDown]
+        public void ClearSavedState()
+        {
+            EditorUserSettings.SetConfigValue(PERSISTENCE_KEY, null);
+        }
+
         [Test]
         public void Collapsed_RaisesCollapsedChangedOncePerChange()
         {
@@ -169,5 +179,81 @@ namespace LMK.Editor.Tests
 
             Assert.That(panel.layout.height, Is.EqualTo(panel.Header.layout.height).Within(2f));
         }
+
+        #region Persistence
+        [Test]
+        public void PersistenceKey_SavesEveryChange()
+        {
+            var panel = new CollapsiblePanel("Details") { PersistenceKey = PERSISTENCE_KEY };
+
+            panel.Collapsed = true;
+            Assert.That(EditorUserSettings.GetConfigValue(PERSISTENCE_KEY), Is.EqualTo(bool.TrueString));
+
+            panel.SetCollapsedWithoutNotify(false);
+            Assert.That(EditorUserSettings.GetConfigValue(PERSISTENCE_KEY), Is.EqualTo(bool.FalseString));
+        }
+
+        [Test]
+        public void PersistenceKey_RestoresSavedStateWithoutNotify()
+        {
+            new CollapsiblePanel("Details") { PersistenceKey = PERSISTENCE_KEY }.Collapsed = true;
+
+            var restored = new CollapsiblePanel("Details");
+            int changes = 0;
+            restored.CollapsedChanged += _ => changes++;
+            restored.PersistenceKey = PERSISTENCE_KEY;
+
+            Assert.That(restored.Collapsed, Is.True);
+            Assert.That(restored.contentContainer.style.display.value, Is.EqualTo(DisplayStyle.None));
+            Assert.That(changes, Is.Zero);
+        }
+
+        [Test]
+        public void PersistenceKey_WithoutSavedState_KeepsCurrentState()
+        {
+            var panel = new CollapsiblePanel("Details") { Collapsed = true };
+
+            panel.PersistenceKey = PERSISTENCE_KEY;
+
+            Assert.That(panel.Collapsed, Is.True);
+            Assert.That(EditorUserSettings.GetConfigValue(PERSISTENCE_KEY), Is.Null.Or.Empty, "nothing saved until a change");
+        }
+
+        [Test]
+        public void EmptyPersistenceKey_SavesNothing()
+        {
+            var panel = new CollapsiblePanel("Details") { PersistenceKey = PERSISTENCE_KEY };
+            panel.PersistenceKey = string.Empty;
+
+            panel.Collapsed = true;
+
+            Assert.That(EditorUserSettings.GetConfigValue(PERSISTENCE_KEY), Is.Null.Or.Empty);
+        }
+
+        [Test]
+        public void PersistenceKey_SetAfterCollapsed_SavedStateWins()
+        {
+            new CollapsiblePanel("Details") { PersistenceKey = PERSISTENCE_KEY }.SetCollapsedWithoutNotify(false);
+            Assume.That(EditorUserSettings.GetConfigValue(PERSISTENCE_KEY), Is.EqualTo(bool.FalseString));
+
+            // A default state in code or UXML, then the key: the user's saved state is kept.
+            var panel = new CollapsiblePanel("Details") { Collapsed = true, PersistenceKey = PERSISTENCE_KEY };
+
+            Assert.That(panel.Collapsed, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator PersistenceKey_SavesCollapseButtonClicks()
+        {
+            var panel = new CollapsiblePanel("Details") { PersistenceKey = PERSISTENCE_KEY };
+            yield return CreateInWindow(panel);
+
+            Click(panel.CollapseButton.worldBound.center);
+            yield return WaitUntil(() => panel.Collapsed);
+
+            Assert.That(panel.Collapsed, Is.True);
+            Assert.That(EditorUserSettings.GetConfigValue(PERSISTENCE_KEY), Is.EqualTo(bool.TrueString));
+        }
+        #endregion
     }
 }
