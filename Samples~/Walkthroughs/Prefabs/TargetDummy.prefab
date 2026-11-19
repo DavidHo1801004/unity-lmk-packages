@@ -132,6 +132,7 @@ MonoBehaviour:
   level: 1
   defaultSets:
   - {fileID: 11400000, guid: 15d479755419f2647a50f0caf05c5717, type: 2}
+  initialValues: {fileID: 11400000, guid: 2ea196998dce40d6808fba361b7fe2cc, type: 2}
   startupEffects: []
   defaultAbilities:
   - ability: {fileID: 11400000, guid: e9a971df2b8cbd647a25e47aaaed4aaf, type: 2}

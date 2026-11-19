@@ -13,7 +13,8 @@ namespace LMK.Editor.AbilitySystem
 {
     /// <summary>
     /// Runs <see cref="EffectValidator"/> and <see cref="AbilityValidator"/> over every effect and ability asset of the
-    /// project: from the menu, and before each player build, which an error stops.
+    /// project, and warns about attributes listed twice in attribute sets and initial values: from the menu, and before
+    /// each player build, which an error stops.
     /// </summary>
     internal static class AbilityAssetValidation
     {
@@ -63,8 +64,25 @@ namespace LMK.Editor.AbilitySystem
                 foreach (var issue in AbilityValidator.Validate(ability).Issues)
                     problems.Add(new Problem(ability, issue.Severity == EffectIssueSeverity.Error, issue.Message));
 
+            foreach (var set in LoadAll<AttributeSetDefinition>())
+                foreach (var name in Duplicates(set.Entries.Select(e => e.attribute)))
+                    problems.Add(new Problem(set, false, $"\"{set.name}\" lists \"{name}\" more than once. It exists once on a unit."));
+
+            foreach (var values in LoadAll<AttributeInitialValues>())
+                foreach (var name in Duplicates(values.Entries.Select(e => e.attribute)))
+                    problems.Add(new Problem(values, false, $"\"{values.name}\" gives \"{name}\" more than one value. The first one is used."));
+
             return problems;
         }
+
+        /// <summary>
+        /// Names of the attributes listed more than once, ignoring empty ones.
+        /// </summary>
+        internal static IEnumerable<string> Duplicates(IEnumerable<GameplayAttribute> _Attributes)
+            => _Attributes.Where(e => !e.IsNone)
+                          .GroupBy(e => e)
+                          .Where(e => e.Count() > 1)
+                          .Select(e => e.Key.Name);
 
         internal static void Log(IEnumerable<Problem> _Problems)
         {

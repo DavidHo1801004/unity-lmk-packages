@@ -216,17 +216,50 @@ namespace LMK.Editor.AbilitySystem.Tests
 
 
         #region Units
+        // The initial values built with each set by Set, used whenever the harness adds that set to a unit.
+        private readonly Dictionary<AttributeSetDefinition, AttributeInitialValues> initialValues = new();
+
         /// <summary>
         /// An attribute set: each attribute with its initial value, or its registry default for <see langword="null"/>.
+        /// The values go to an <see cref="AttributeInitialValues"/> kept with the set (<see cref="InitialValuesOf"/>), which
+        /// <see cref="AddSet"/> and <see cref="MakeUnit(AttributeSetDefinition[])"/> pass along with it.
         /// </summary>
         public AttributeSetDefinition Set(params (GameplayAttribute Attribute, float? Initial)[] _Entries)
         {
             var set = Own(UnityEngine.ScriptableObject.CreateInstance<AttributeSetDefinition>());
+            AttributeInitialValues values = null;
+
             foreach (var (attribute, initial) in _Entries)
-                set.Add(attribute, initial);
+            {
+                set.Add(attribute);
+                if (initial == null) continue;
+
+                values ??= InitialValues();
+                values.Add(attribute, initial.Value);
+            }
+
+            if (values != null)
+                initialValues[set] = values;
 
             return set;
         }
+
+        /// <summary>
+        /// An empty, in-memory initial values asset, destroyed with the world.
+        /// </summary>
+        public AttributeInitialValues InitialValues() => Own(UnityEngine.ScriptableObject.CreateInstance<AttributeInitialValues>());
+
+        /// <summary>
+        /// The initial values <see cref="Set"/> built with <paramref name="_Set"/>, or <see langword="null"/> if it gave none.
+        /// </summary>
+        public AttributeInitialValues InitialValuesOf(AttributeSetDefinition _Set)
+            => _Set != null && initialValues.TryGetValue(_Set, out var values) ? values : null;
+
+        /// <summary>
+        /// Add a set to a unit, with the initial values <see cref="Set"/> built with it.
+        /// </summary>
+        public bool AddSet(Unit _Unit, AttributeSetDefinition _Set, float _Level = 1f)
+            => _Unit.AddAttributeSet(_Set, _Level, InitialValuesOf(_Set));
 
         /// <summary>
         /// A unit with one set holding these attributes and initial values, watched by <see cref="Events"/>.
@@ -252,7 +285,7 @@ namespace LMK.Editor.AbilitySystem.Tests
             unit.InitActorInfo(unit.Name, new object());
 
             foreach (var set in _Sets)
-                unit.AddAttributeSet(set);
+                AddSet(unit, set);
 
             return unit;
         }

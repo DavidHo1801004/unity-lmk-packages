@@ -130,7 +130,11 @@ namespace LMK.Runtime.AbilitySystem
         /// Add a set's attributes in two passes, so a bound exists before the attribute it bounds: raw values first,
         /// then clamping in the clamp graph's order. No change events; one <c>OnAttributesInitialized</c>.
         /// </summary>
-        public bool AddSet(AttributeSetDefinition _Set, float _Level)
+        /// <param name="_InitialValues">
+        /// Starting values for the attributes this set adds, or <see langword="null"/> for their registry defaults.
+        /// Attributes the unit already has keep their values.
+        /// </param>
+        public bool AddSet(AttributeSetDefinition _Set, float _Level, AttributeInitialValues _InitialValues = null)
         {
             if (_Set == null) return false;
             if (sets.Exists(e => e.Set == _Set))
@@ -159,7 +163,9 @@ namespace LMK.Runtime.AbilitySystem
                 {
                     instance = new AttributeInstance(entry.attribute)
                     {
-                        BaseValue = entry.overrideDefault ? entry.initialValue.At(_Level) : database.GetDefault(resolution.Handle),
+                        BaseValue = _InitialValues != null && _InitialValues.TryGet(entry.attribute, _Level, out float initial)
+                            ? initial
+                            : database.GetDefault(resolution.Handle),
                     };
                     instances.Add(entry.attribute, instance);
                     created.Add(instance);

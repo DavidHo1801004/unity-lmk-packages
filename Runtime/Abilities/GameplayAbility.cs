@@ -74,9 +74,9 @@ namespace LMK.Runtime.AbilitySystem
     /// asset is a template: its logic is cloned per grant or per activation, and never written at runtime.
     /// </summary>
     [CreateAssetMenu(menuName = "LMK/Ability System/Gameplay Ability", fileName = "GameplayAbility")]
+    [Icon("Packages/com.lmk.abilitysystem/Editor/Assets/Icons/GameplayAbility.png")]
     public sealed class GameplayAbility : ScriptableObject
     {
-        [Header("Tags")]
         [Tooltip("What this ability is.")]
         public GameplayTagContainer abilityTags = new();
 
@@ -105,14 +105,12 @@ namespace LMK.Runtime.AbilitySystem
 
         public GameplayTagContainer targetBlockedTags = new();
 
-        [Header("Cost and cooldown")]
         [Tooltip("An instant effect applied on commit. Its AddBase modifiers must be affordable.")]
         public GameplayEffect costEffect;
 
         [Tooltip("A duration effect applied on commit. The tags it grants are the cooldown tags.")]
         public GameplayEffect cooldownEffect;
 
-        [Header("Policies")]
         public InstancingPolicy instancingPolicy;
 
         [Tooltip("InstancedPerActor: activating it again while active ends the running activation and starts a new one.")]
@@ -123,7 +121,6 @@ namespace LMK.Runtime.AbilitySystem
         [Tooltip("Reserved for multiplayer. Ignored.")]
         public NetExecutionPolicy netExecutionPolicy;
 
-        [Header("Logic")]
         [SerializeReference, InlineInstanced]
         public AbilityLogic logic;
 

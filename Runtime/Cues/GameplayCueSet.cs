@@ -10,6 +10,7 @@ namespace LMK.Runtime.AbilitySystem
     /// The notifies a cue manager routes to. A scene's runner lists the sets it uses.
     /// </summary>
     [CreateAssetMenu(menuName = "LMK/Ability System/Cue Set", fileName = "GameplayCueSet")]
+    [Icon("Packages/com.lmk.abilitysystem/Editor/Assets/Icons/GameplayCueSet.png")]
     public sealed class GameplayCueSet : ScriptableObject
     {
         public List<GameplayCueNotifyStatic> staticNotifies = new();

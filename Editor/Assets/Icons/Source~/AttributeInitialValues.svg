@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<defs><mask id="cut2"><rect width="64" height="64" fill="white"/><ellipse cx="40" cy="12" rx="11.5" ry="11.5" fill="black"/></mask><mask id="cut5"><rect width="64" height="64" fill="white"/><ellipse cx="18" cy="32" rx="11.5" ry="11.5" fill="black"/></mask><mask id="cut8"><rect width="64" height="64" fill="white"/><ellipse cx="46" cy="52" rx="11.5" ry="11.5" fill="black"/></mask></defs>
+<g mask="url(#cut8)"><g mask="url(#cut5)"><g mask="url(#cut2)"><rect x="4" y="9" width="56" height="6" rx="3" fill="#FFFFFF"/></g><ellipse cx="40" cy="12" rx="8" ry="8" fill="#48B661"/><rect x="4" y="29" width="56" height="6" rx="3" fill="#FFFFFF"/></g><ellipse cx="18" cy="32" rx="8" ry="8" fill="#48B661"/><rect x="4" y="49" width="56" height="6" rx="3" fill="#FFFFFF"/></g><ellipse cx="46" cy="52" rx="8" ry="8" fill="#48B661"/>
+</svg>

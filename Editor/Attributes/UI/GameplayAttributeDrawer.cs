@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 using LMK.Editor.Registry;
+using LMK.Editor.UIElements;
 using LMK.Runtime.AbilitySystem;
 using LMK.Runtime.Registry;
 
@@ -60,25 +61,20 @@ namespace LMK.Editor.AbilitySystem
         /// <summary>
         /// A label and a dropdown-styled button, aligned like the inspector's other fields.
         /// </summary>
-        private sealed class AttributeFieldElement : BaseField<string>
+        private sealed class AttributeFieldElement : AlignedField
         {
             public readonly Button Button;
             public event System.Action Clicked;
 
-            public AttributeFieldElement(string _Label) : base(_Label, new VisualElement())
+            public AttributeFieldElement(string _Label) : base(_Label)
             {
-                AddToClassList(alignedFieldUssClassName);
-
-                var input = this.Q(className: inputUssClassName);
-                input.style.flexDirection = FlexDirection.Row;
-
                 Button = new Button(() => Clicked?.Invoke()) { name = "attribute-button" };
                 Button.AddToClassList(USS_CLASS + "__button");
                 Button.style.flexGrow = 1;
                 Button.style.marginLeft = 0;
                 Button.style.marginRight = 0;
                 Button.style.unityTextAlign = TextAnchor.MiddleLeft;
-                input.Add(Button);
+                Add(Button);
             }
 
             public void SetDisplay(string _Text, string _Tooltip, bool _Missing)
@@ -148,7 +144,7 @@ namespace LMK.Editor.AbilitySystem
             var property = _SerializedObject.FindProperty(_PropertyPath);
             var current = RegistryProperties.Read(property, AttributeKind.Instance);
 
-            AttributePicker.Show(_Anchor, GameplayAttribute.FromId(current.Registry, current.Id, current.Name), true, picked =>
+            AttributeDropdown.Show(_Anchor, GameplayAttribute.FromId(current.Registry, current.Id, current.Name), true, picked =>
             {
                 if (_SerializedObject.targetObject == null) return;
 

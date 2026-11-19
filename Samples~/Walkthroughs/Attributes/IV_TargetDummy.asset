@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50617786d8944b0d8e16150b6ee19a7c, type: 3}
+  m_Name: IV_TargetDummy
+  m_EditorClassIdentifier: LMK.AbilitySystem.Runtime::LMK.Runtime.AbilitySystem.AttributeInitialValues
+  entries:
+  - attribute:
+      _registry:
+        _hi: 7804028007160479744
+        _lo: 1
+      _id:
+        _hi: 7804028007160479744
+        _lo: 518
+      _lastKnownName: Combat.Armor
+    value:
+      value: 25
+      curve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4

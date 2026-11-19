@@ -112,7 +112,7 @@ namespace LMK.Editor.AbilitySystem.Tests
             Assert.IsFalse(unit.HasAttribute(Armor));
             Assert.IsNotNull(unit.GetActiveEffect(handle), "the effect stays; its modifier waits");
 
-            unit.AddAttributeSet(armorSet);
+            w.AddSet(unit, armorSet);
             Assert.AreEqual(7f, unit.GetCurrent(Armor), "the dormant modifier is rebound");
 
             unit.RemoveActiveEffect(handle);

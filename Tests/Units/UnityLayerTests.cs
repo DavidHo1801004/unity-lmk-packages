@@ -80,7 +80,9 @@ namespace LMK.Editor.AbilitySystem.Tests
 
                 var ability = w.Ability(a => a.Logic(TestLogic.StayActive()));
                 var component = hero.AddComponent<AbilitySystemComponent>();
-                component.DefaultSets.Add(w.Set((Health, 100f), (Armor, 10f)));
+                var set = w.Set((Health, 100f), (Armor, 10f));
+                component.DefaultSets.Add(set);
+                component.InitialValues = w.InitialValuesOf(set);
                 component.StartupEffects.Add(w.Effect(e => e.Infinite().Mod(Armor, AddBase, 5)));
                 component.DefaultAbilities.Add(new DefaultAbility(ability, 2));
 

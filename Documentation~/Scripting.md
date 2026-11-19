@@ -5,8 +5,11 @@ The runtime API is in the `LMK.Runtime.AbilitySystem` namespace. The core is pla
 ## A unit in a scene
 
 1. Define attributes in *Tools → LMK → Ability System → Attribute Manager*, and tags in the Gameplay Tag Editor.
-2. Create an `AttributeSetDefinition` (*Create → LMK → Ability System*) listing the attributes a unit has, with optional initial values and `AttributeBehaviour`s.
-3. Add an `AbilitySystemComponent` to the object, with its default sets, startup effects and default abilities.
+2. Create an `AttributeSetDefinition` (*Create → LMK → Ability System → Attribute Set*) listing the attributes a unit has, and its `AttributeBehaviour`s.
+3. Optionally, create an `AttributeInitialValues` (*Create → LMK → Ability System → Attribute Initial Values*) with the starting value of some of those attributes. Attributes it doesn't list start at their registry default. Keeping the values apart lets one set serve units that start differently, such as a mage and a knight.
+4. Add an `AbilitySystemComponent` to the object, with its default sets, initial values, startup effects and default abilities.
+
+From code, `unit.AddAttributeSet(set, level, initialValues)` does the same. Initial values apply only to the attributes that set adds: an attribute the unit already has keeps its value. A value with a curve is multiplied by the curve at `level`. Values are clamped by the attribute's bounds, and no change event is raised.
 
 The component creates its unit (`System`, a `GameplayAbilitySystem`) in `Awake`, in the world of the scene's `AbilitySystemWorldRunner` (one is created if the scene has none), and sets it up in `Start`. The runner steps the world every frame: in `Update`, or in `FixedUpdate` with *Step In Fixed Update* on its `AbilitySystemSettings`.
 

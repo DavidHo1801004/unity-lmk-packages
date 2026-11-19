@@ -8,16 +8,21 @@ using LMK.Runtime.Attributes;
 namespace LMK.Runtime.AbilitySystem
 {
     /// <summary>
-    /// Which attributes a unit has, with optional initial values, and the behaviours that react to them. Takes the
-    /// place of UE's <c>UAttributeSet</c> class. Read-only at runtime: one asset serves every unit.
+    /// Which attributes a unit has, and the behaviours that react to them. Takes the place of UE's <c>UAttributeSet</c>
+    /// class. Read-only at runtime: one asset serves every unit.
     /// </summary>
     /// <remarks>
-    /// An attribute listed by two sets of a unit exists once; the first set's initial value wins. Behaviours are
-    /// inline-instanced and shared by every unit that uses the set, so they must hold no per-unit state.
+    /// An attribute listed by two sets of a unit exists once. Attributes start at their registry default, or at the
+    /// value of the unit's <see cref="AttributeInitialValues"/>, so one set can serve units with different starting
+    /// values. Behaviours are inline-instanced and shared by every unit that uses the set, so they must hold no
+    /// per-unit state.
     /// </remarks>
     [CreateAssetMenu(menuName = "LMK/Ability System/Attribute Set", fileName = "AttributeSet")]
+    [Icon(ICON_PATH)]
     public sealed class AttributeSetDefinition : ScriptableObject
     {
+        internal const string ICON_PATH = "Packages/com.lmk.abilitysystem/Editor/Assets/Icons/AttributeSet.png";
+
         /// <summary>
         /// One attribute of the set.
         /// </summary>
@@ -26,16 +31,9 @@ namespace LMK.Runtime.AbilitySystem
         {
             public GameplayAttribute attribute;
 
-            [Tooltip("Start from the initial value below instead of the registry default.")]
-            public bool overrideDefault;
-
-            public ScalableFloat initialValue;
-
-            public Entry(GameplayAttribute _Attribute, bool _OverrideDefault = false, ScalableFloat _InitialValue = default)
+            public Entry(GameplayAttribute _Attribute)
             {
                 attribute = _Attribute;
-                overrideDefault = _OverrideDefault;
-                initialValue = _InitialValue;
             }
         }
 
@@ -50,20 +48,16 @@ namespace LMK.Runtime.AbilitySystem
         public IReadOnlyList<AttributeBehaviour> Behaviours => behaviours;
 
         /// <summary>
-        /// Add an entry. For tools and tests that build a set in code; game code treats sets as read-only.
+        /// Whether the set lists <paramref name="_Attribute"/>.
         /// </summary>
-        internal AttributeSetDefinition Add(GameplayAttribute _Attribute, float? _InitialValue = null)
-        {
-            entries.Add(new Entry(_Attribute, _InitialValue.HasValue, _InitialValue ?? 0f));
-            return this;
-        }
+        public bool Contains(GameplayAttribute _Attribute) => entries.Exists(e => e.attribute == _Attribute);
 
         /// <summary>
-        /// Add an entry. For tools and tests that build a set in code; game code treats sets as read-only.
+        /// Add an attribute. For tools and tests that build a set in code; game code treats sets as read-only.
         /// </summary>
-        internal AttributeSetDefinition Add(Entry _Entry)
+        internal AttributeSetDefinition Add(GameplayAttribute _Attribute)
         {
-            entries.Add(_Entry);
+            entries.Add(new Entry(_Attribute));
             return this;
         }
 

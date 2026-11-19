@@ -4,6 +4,45 @@ All notable changes to this package are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-11-19
+
+### Removed
+- **Breaking:** `AttributeSetDefinition` no longer holds initial values: `Entry` keeps only `attribute`, and `Add(attribute, float?)` and the `Entry(attribute, bool, ScalableFloat)` constructor are removed. Starting values move to the new `AttributeInitialValues` asset. Existing sets still load, but any overridden initial values are dropped: move them into an Initial Values asset and assign it to the unit's `AbilitySystemComponent`. The Walkthroughs sample has `IV_Character` and `IV_TargetDummy` for this.
+
+### Added
+- `AttributeInitialValues` asset (*Create → LMK → Ability System → Attribute Initial Values*): the starting value of each listed attribute, level-scaled with an optional curve, so one attribute set can serve units that start differently. It's assigned on `AbilitySystemComponent.InitialValues`, or passed to `GameplayAbilitySystem.AddAttributeSet(set, level, initialValues)` and `AttributeContainer.AddSet`.
+- Inspectors for Attribute Set, Attribute Initial Values, Gameplay Effect and Gameplay Ability, in the LMK style with collapsible sections that remember their state per user and project. Lists are LMK property lists: a header with the element count and an add button, rows with a drag handle and a remove button, and Undo. With several objects selected, lists of the same size can be edited; lists of different sizes are read-only.
+  - Attribute Set: *Attributes* and *Behaviours*. Add opens a searchable picker of the registered attributes not in the list yet, so a list never holds an empty or duplicate attribute. Once every attribute is listed, Add is disabled and its tooltip says why.
+  - Attribute Initial Values: the same picker, with each attribute's value and level curve on one row. A new value starts at the attribute's registry default.
+  - Gameplay Effect: *Duration* (with the period), *Modifiers*, *Executions*, *Components*, *Stacking* and *Cues*. The duration shows only for *Has Duration*, and the period and stacking are hidden for *Instant* effects.
+  - Gameplay Ability: *Tags*, *Cost & Cooldown*, *Policies* and *Logic*.
+- Icons for every asset type: Attribute Set, Attribute Initial Values, attribute registries, Gameplay Effect, Gameplay Ability, Cue Set, cue notifies and Ability System Settings. They are flat glyphs on a transparent background in two colours, white and their category's tint (attributes green, effects violet, abilities orange, cues cyan, settings grey), with gaps between parts.
+- Project validation warns about attributes listed twice in an attribute set or an Initial Values asset.
+
+### Fixed
+- The Inspector header of an attribute registry shows its icon, not the default ScriptableObject icon.
+- Attribute Manager: a branch expands and collapses from its arrow only. Clicking the edge of its row, or the space around its name, toggled it.
+
+### Changed
+- Requires `com.lmk.editor` 0.5.0 and `com.lmk.registry` 1.1.2 (for `RegistryImporter.IconPath`, used by the attribute registry icon). Attribute fields use the editor library's `AlignedField`, and the Attribute Manager tree its `FoldoutArrowManipulator`.
+- Attribute pickers (attribute fields, bounds in the Attribute Manager, registry pickers) use the LMK searchable dropdown, with search syntax and one folder per group.
+- `GameplayAbility` no longer has `[Header]`s; its inspector sections replace them.
+- The Attribute Manager now has the Gameplay Tag Manager's layout and style: a toolbar (Save, Discard, search, Add Attribute, options), a scrollable tree, and a resizable, collapsible Inspector panel. The tree shows every registry as a branch with a *main* or *package, read-only* badge, then one level of groups (the name before its last segment, e.g. `Stats.Core` for `Stats.Core.Speed`), then the attributes, each with a summary of its default, bounds and flags. Search covers every registry; `#text` searches descriptions.
+- The Inspector shows the attribute's last name segment as an editable title, the registry it comes from, then the rows Group, Default, Min, Max, On Max Change, Meta, Integer, Description and Bound Of. Changing the Group moves the attribute to another group; a group set there is letters and digits only (a-z, A-Z, 0-9), and other characters can't be typed or pasted.
+- Context menus are grouped by what they do: add, edit, references, copy, then delete.
+- The Add Attribute popup is styled like the Add Tag popup and opens at the tree's top-right corner, starting with the group when opened from a group or a sibling. Enter adds the attribute. A name is `Group.Name` or `Name`: the group is letters and digits only, the name letters, digits and `_`. Keys that would break that are blocked, and other problems, such as a name already in use, show under the field as you type.
+
+### Added
+- *Add Sibling Attribute* and *Rename Attribute* (in place, on the row) in an attribute's context menu, *Add Attribute To Group* and *Copy Group Name* on a group, and *Select Registry Asset* on a registry.
+- A Find References icon at the end of the Inspector's title row.
+- *Bound Of* row: the attributes that use this one as their min or max, as links that select them.
+- Options menu (gear): Collapse All, Expand All, Generate Code, Prune Unused Code Aliases and Relink Missing References.
+- Registry problems (invalid or hand-edited files, inactive or outdated package registries, a main registry changed on disk under unsaved edits) show under the tree.
+
+### Removed
+- The registry dropdown in the toolbar: every registry is in the tree.
+- The Delete and Find References buttons and the attribute ID at the bottom of the details. Delete and Copy ID are in the context menu; Find References is an icon in the title row.
+
 ## [0.1.1] - 2026-11-14
 
 ### Changed

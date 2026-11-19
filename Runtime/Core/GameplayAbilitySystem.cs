@@ -229,13 +229,14 @@ namespace LMK.Runtime.AbilitySystem
         /// Give the unit a set's attributes and behaviours, at <paramref name="_Level"/> for initial values that scale.
         /// An attribute the unit already has keeps its values.
         /// </summary>
+        /// <param name="_InitialValues"> Starting values of the new attributes, or <see langword="null"/> for their registry defaults. </param>
         /// <returns> Whether the set was added: false if it already was, or the unit can't be changed. </returns>
-        public bool AddAttributeSet(AttributeSetDefinition _Set, float _Level = 1f)
+        public bool AddAttributeSet(AttributeSetDefinition _Set, float _Level = 1f, AttributeInitialValues _InitialValues = null)
         {
             if (_Set == null || !BeginMutation()) return false;
             try
             {
-                return Attributes.AddSet(_Set, _Level);
+                return Attributes.AddSet(_Set, _Level, _InitialValues);
             }
             finally
             {

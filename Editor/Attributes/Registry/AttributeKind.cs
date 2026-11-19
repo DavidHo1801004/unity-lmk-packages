@@ -85,7 +85,7 @@ namespace LMK.Editor.AbilitySystem
         public override void OpenRegistry(RegistryGuid _RegistryId) => AttributeManagerWindow.OpenRegistry(_RegistryId);
 
         public override void ShowRowPicker(UnityEngine.Rect _Anchor, Action<RegistryGuid, RegistryGuid> _OnPicked)
-            => AttributePicker.Show(_Anchor, GameplayAttribute.None, false, e => _OnPicked(e.RegistryId, e.Id));
+            => AttributeDropdown.Show(_Anchor, GameplayAttribute.None, false, e => _OnPicked(e.RegistryId, e.Id));
         #endregion
 
 

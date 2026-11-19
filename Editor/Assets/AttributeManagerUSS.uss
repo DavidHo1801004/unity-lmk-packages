@@ -1,95 +1,97 @@
-.attribute-manager__registry {
-    min-width: 140px;
-    margin-left: 4px;
-}
+/*
+Attribute Manager. Layout, toolbar, tree rows and inspector come from the Gameplay Tag Manager's stylesheets
+(GeneralGameplayTagUSS, GameplayTagManagerWindowUSS, GameplayTagControlPanelUSS, GameplayTagElementUSS); these
+are the attribute additions.
+*/
 
-.attribute-manager__search {
-    flex-grow: 1;
-    flex-shrink: 1;
-    width: auto;
-    min-width: 80px;
-}
-
+/* Shown above the tree while the project has no main registry. */
 .attribute-manager__create {
-    align-items: center;
-    padding: 24px 12px;
+	flex-shrink: 0;
+	align-items: center;
+	padding: 16px 12px;
+
+	border-bottom-width: 1px;
+	border-color: var(--lmk-color-border);
 }
 
 .attribute-manager__create > Label {
-    margin-bottom: 8px;
+	margin-bottom: 8px;
 }
 
-.attribute-manager__list {
-    padding: 4px 0;
+
+
+/*
+Tree rows: an attribute's name, then a summary of its values at the end of the row.
+*/
+#leaf-tag-container.attribute-row {
+	flex-direction: row;
+	align-items: center;
 }
 
-.attribute-manager__group > .unity-foldout__toggle {
-    -unity-font-style: bold;
+.attribute-row__summary {
+	flex-grow: 1;
+	flex-shrink: 1;
+	margin-left: 8px;
+	padding: 0px 4px 0px 0px;
+	overflow: hidden;
+
+	color: var(--lmk-color-text-muted);
+	font-size: 11px;
+	-unity-font-style: normal;
+	-unity-text-align: middle-right;
+	text-overflow: ellipsis;
 }
 
-.attribute-manager__item {
-    flex-direction: row;
-    align-items: center;
-    height: 20px;
-    padding: 0 6px;
-    border-radius: 3px;
+
+
+/*
+Inspector
+*/
+.attribute-inspector__field {
+	flex-grow: 1;
+	margin: 0px;
 }
 
-.attribute-manager__item:hover {
-    background-color: rgba(128, 128, 128, 0.15);
+.attribute-inspector__field .unity-base-field__input,
+.attribute-inspector__field .unity-text-field__input {
+	background-color: var(--lmk-color-field-background);
 }
 
-.attribute-manager__item--selected,
-.attribute-manager__item--selected:hover {
-    background-color: rgba(58, 121, 187, 0.55);
+/* Attributes that use this one as a bound. */
+.attribute-inspector__links {
+	flex-direction: row;
+	flex-wrap: wrap;
+	flex-grow: 1;
+	margin: 0px -2px;
 }
 
-.attribute-manager__summary {
-    flex-grow: 1;
-    -unity-text-align: middle-right;
-    opacity: 0.6;
-    font-size: 11px;
-    margin-left: 8px;
+.attribute-inspector__links > .tag-inspector__chip {
+	margin: 0px 2px 2px 2px;
 }
 
-.attribute-manager__details {
-    padding: 8px 10px;
+/* Min and Max: the bound's kind, then its value. */
+.attribute-bound {
+	flex-direction: row;
+	flex-grow: 1;
+	align-items: center;
 }
 
-.attribute-manager__title {
-    -unity-font-style: bold;
-    font-size: 14px;
-    margin-bottom: 8px;
+.attribute-bound__kind {
+	width: 92px;
+	flex-shrink: 0;
+	margin: 0px;
 }
 
-.attribute-manager__bound {
-    flex-direction: row;
+.attribute-bound__value {
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-width: 40px;
+	margin: 0px 0px 0px 4px;
 }
 
-.attribute-manager__bound-kind {
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
-.attribute-manager__bound-value {
-    width: 40%;
-    flex-shrink: 0;
-}
-
-.attribute-manager__description TextInput,
-.attribute-manager__description .unity-text-field__input {
-    min-height: 48px;
-    white-space: normal;
-}
-
-.attribute-manager__info {
-    margin-top: 8px;
-    opacity: 0.7;
-    font-size: 11px;
-}
-
-.attribute-manager__actions {
-    flex-direction: row;
-    justify-content: flex-end;
-    margin-top: 10px;
+.attribute-bound__value.tag-inspector__chip {
+	height: 20px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }

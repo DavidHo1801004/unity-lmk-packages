@@ -10,6 +10,7 @@ namespace LMK.Runtime.AbilitySystem
     /// A built-in static notify: spawns a prefab and plays a sound at the target's avatar, for one-shot feedback.
     /// </summary>
     [CreateAssetMenu(menuName = "LMK/Ability System/Cue Notify (Burst)", fileName = "GC_Burst")]
+    [Icon(ICON_PATH)]
     public sealed class GameplayCueNotifyBurst : GameplayCueNotifyStatic
     {
         [Tooltip("Spawned at the avatar, or at the cue's location, and destroyed after its lifetime.")]

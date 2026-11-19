@@ -54,6 +54,9 @@ namespace LMK.Runtime.AbilitySystem
         [SerializeField]
         private List<AttributeSetDefinition> defaultSets = new();
 
+        [SerializeField, Tooltip("Starting values of the attributes of the default sets. Empty for the registry defaults.")]
+        private AttributeInitialValues initialValues;
+
         [SerializeField, Tooltip("Applied to the unit at start, in order, after its sets.")]
         private List<GameplayEffect> startupEffects = new();
 
@@ -81,6 +84,16 @@ namespace LMK.Runtime.AbilitySystem
 
         public IList<AttributeSetDefinition> DefaultSets => defaultSets;
 
+        /// <summary>
+        /// Starting values of the attributes of the default sets, or <see langword="null"/> for the registry defaults.
+        /// Read in <c>Start</c>.
+        /// </summary>
+        public AttributeInitialValues InitialValues
+        {
+            get => initialValues;
+            set => initialValues = value;
+        }
+
         public IList<GameplayEffect> StartupEffects => startupEffects;
 
         public IList<DefaultAbility> DefaultAbilities => defaultAbilities;
@@ -102,7 +115,7 @@ namespace LMK.Runtime.AbilitySystem
 
             foreach (var set in defaultSets)
                 if (set != null)
-                    System.AddAttributeSet(set, level);
+                    System.AddAttributeSet(set, level, initialValues);
 
             foreach (var effect in startupEffects)
                 if (effect != null)

@@ -12,9 +12,11 @@ namespace LMK.Editor.AbilitySystem
     /// Imported early, so registries are ready before assets that reference attributes are processed. The registry
     /// core reloads the registries when a registry file changes.
     /// </remarks>
-    [ScriptedImporter(1, AttributeKind.EXTENSION, RegistryImport.IMPORT_ORDER)]
+    [ScriptedImporter(3, AttributeKind.EXTENSION, RegistryImport.IMPORT_ORDER)]
     internal sealed class AttributeRegistryImporter : RegistryImporter<AttributeRegistryRow, AttributeRegistryAsset>
     {
         protected override IRegistryFormat<AttributeRegistryRow> Format => AttributeKind.Instance;
+
+        protected override string IconPath => AttributeRegistryAsset.ICON_PATH;
     }
 }

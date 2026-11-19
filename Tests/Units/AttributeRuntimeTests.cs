@@ -105,13 +105,66 @@ namespace LMK.Editor.AbilitySystem.Tests
         [Test]
         public void InitialValues_ScaleWithTheLevel()
         {
-            var set = w.Set();
-            set.Add(new AttributeSetDefinition.Entry(AttackPower, true, new ScalableFloat(10f, AnimationCurve.Linear(1f, 1f, 10f, 10f))));
+            var set = w.Set((AttackPower, null));
+            var values = w.InitialValues().Add(AttackPower, new ScalableFloat(10f, AnimationCurve.Linear(1f, 1f, 10f, 10f)));
             var unit = w.World.CreateSystem();
 
-            unit.AddAttributeSet(set, 3f);
+            unit.AddAttributeSet(set, 3f, values);
 
             Assert.AreEqual(30f, unit.GetCurrent(AttackPower), 1e-4f);
+        }
+
+        [Test]
+        public void InitialValues_OneSet_ServesUnitsThatStartDifferently()
+        {
+            var set = w.Set((MaxHealth, null), (Health, null), (Armor, null));
+            var mage = w.World.CreateSystem("Mage");
+            var knight = w.World.CreateSystem("Knight");
+
+            mage.AddAttributeSet(set, 1f, w.InitialValues().Add(Armor, 2f));
+            knight.AddAttributeSet(set, 1f, w.InitialValues().Add(Armor, 20f).Add(Health, 60f));
+
+            Assert.AreEqual(2f, mage.GetCurrent(Armor));
+            Assert.AreEqual(20f, knight.GetCurrent(Armor));
+            Assert.AreEqual(100f, mage.GetCurrent(Health), "not listed: the registry default");
+            Assert.AreEqual(60f, knight.GetCurrent(Health));
+        }
+
+        [Test]
+        public void InitialValues_AreClampedByBounds_WithoutChangeEvents()
+        {
+            var set = w.Set((MaxHealth, null), (Health, null));
+            var unit = w.MakeUnit();
+            w.Events.Clear();
+
+            unit.AddAttributeSet(set, 1f, w.InitialValues().Add(Health, 500f));
+
+            Assert.AreEqual(100f, unit.GetBase(Health), "clamped to MaxHealth's default");
+            Assert.AreEqual(0, w.Events.AttributeChanges);
+            Assert.AreEqual(1, w.Events.Initializations);
+        }
+
+        [Test]
+        public void InitialValues_IgnoreAttributesTheUnitHasNot_AndKeepExistingValues()
+        {
+            var unit = w.MakeUnit(w.Set((Health, 40f), (MaxHealth, null)));
+            var values = w.InitialValues().Add(Health, 80f).Add(AttackPower, 7f).Add(Armor, 5f);
+
+            unit.AddAttributeSet(w.Set((Health, null), (Armor, null)), 1f, values);
+
+            Assert.AreEqual(40f, unit.GetCurrent(Health), "the unit already had it");
+            Assert.AreEqual(5f, unit.GetCurrent(Armor));
+            Assert.IsFalse(unit.HasAttribute(AttackPower), "a value alone doesn't add an attribute");
+        }
+
+        [Test]
+        public void InitialValues_FirstEntryWins()
+        {
+            var values = w.InitialValues().Add(Armor, 3f).Add(Armor, 9f);
+
+            Assert.IsTrue(values.TryGet(Armor, 1f, out float value));
+            Assert.AreEqual(3f, value);
+            Assert.IsFalse(values.TryGet(Health, 1f, out _));
         }
         #endregion
 
@@ -287,11 +340,11 @@ namespace LMK.Editor.AbilitySystem.Tests
             unit.AddModifier(Armor, ModifierOp.AddFinal, 5f);
             Assert.AreEqual(0f, unit.GetCurrent(Armor));
 
-            unit.AddAttributeSet(set);
+            w.AddSet(unit, set);
             Assert.AreEqual(7f, unit.GetCurrent(Armor), "it applies once the attribute arrives");
 
             unit.RemoveAttributeSet(set);
-            unit.AddAttributeSet(set);
+            w.AddSet(unit, set);
             Assert.AreEqual(7f, unit.GetCurrent(Armor), "and again when it comes back");
         }
         #endregion

@@ -21,15 +21,6 @@ MonoBehaviour:
         _hi: 7804028007160479744
         _lo: 514
       _lastKnownName: Vitals.MaxHealth
-    overrideDefault: 0
-    initialValue:
-      value: 0
-      curve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
   - attribute:
       _registry:
         _hi: 7804028007160479744
@@ -38,15 +29,6 @@ MonoBehaviour:
         _hi: 7804028007160479744
         _lo: 513
       _lastKnownName: Vitals.Health
-    overrideDefault: 0
-    initialValue:
-      value: 0
-      curve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
   - attribute:
       _registry:
         _hi: 7804028007160479744
@@ -55,15 +37,6 @@ MonoBehaviour:
         _hi: 7804028007160479744
         _lo: 516
       _lastKnownName: Vitals.MaxMana
-    overrideDefault: 0
-    initialValue:
-      value: 0
-      curve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
   - attribute:
       _registry:
         _hi: 7804028007160479744
@@ -72,15 +45,6 @@ MonoBehaviour:
         _hi: 7804028007160479744
         _lo: 515
       _lastKnownName: Vitals.Mana
-    overrideDefault: 0
-    initialValue:
-      value: 0
-      curve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
   - attribute:
       _registry:
         _hi: 7804028007160479744
@@ -89,15 +53,6 @@ MonoBehaviour:
         _hi: 7804028007160479744
         _lo: 517
       _lastKnownName: Combat.AttackPower
-    overrideDefault: 0
-    initialValue:
-      value: 0
-      curve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
   - attribute:
       _registry:
         _hi: 7804028007160479744
@@ -106,15 +61,6 @@ MonoBehaviour:
         _hi: 7804028007160479744
         _lo: 518
       _lastKnownName: Combat.Armor
-    overrideDefault: 1
-    initialValue:
-      value: 25
-      curve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
   - attribute:
       _registry:
         _hi: 7804028007160479744
@@ -123,15 +69,6 @@ MonoBehaviour:
         _hi: 7804028007160479744
         _lo: 519
       _lastKnownName: Meta.IncomingDamage
-    overrideDefault: 0
-    initialValue:
-      value: 0
-      curve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
   behaviours:
   - rid: 4261159815954038786
   - rid: 4261159815954038787

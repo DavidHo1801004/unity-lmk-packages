@@ -1,0 +1,86 @@
+/*
+Asset inspectors of the ability system: Attribute Set, Attribute Initial Values, Gameplay Effect, Gameplay Ability.
+Only --lmk-color-* variables, no colour literals.
+*/
+
+.lmk-asset-inspector {
+	margin-top: 2px;
+}
+
+.lmk-asset-inspector__section {
+	margin-bottom: 4px;
+}
+
+/*
+15px on the left, like Unity's inspector: foldouts (lists, nested fields) draw their arrow in it.
+*/
+.lmk-asset-inspector__section > .lmk-collapsible-panel__content {
+	padding: 4px 4px 4px 15px;
+}
+
+.lmk-asset-inspector__note {
+	margin: 2px 3px;
+	white-space: normal;
+
+	color: var(--lmk-color-text-muted);
+	-unity-font-style: italic;
+}
+
+/*
+What a list shows below its rows (InspectorSection.Content): a note in line with the list's empty text, fields inset
+like a section's content.
+*/
+.lmk-asset-inspector__list > .lmk-collapsible-panel > .lmk-collapsible-panel__content > .lmk-asset-inspector__note {
+	margin: 2px 6px 4px 6px;
+}
+
+.lmk-asset-inspector__list > .lmk-collapsible-panel > .lmk-collapsible-panel__content > .unity-property-field {
+	margin: 2px 4px 4px 15px;
+}
+
+/*
+Attribute rows of the attribute lists.
+*/
+.lmk-asset-inspector__attribute-row {
+	flex-grow: 1;
+	flex-direction: row;
+	align-items: center;
+	min-height: 20px;
+}
+
+.lmk-asset-inspector__attribute-name {
+	flex-shrink: 1;
+	min-width: 80px;
+	padding-left: 2px;
+	overflow: hidden;
+
+	text-overflow: ellipsis;
+	-unity-text-align: middle-left;
+}
+
+.lmk-asset-inspector__attribute-row--with-value > .lmk-asset-inspector__attribute-name {
+	width: 40%;
+}
+
+.lmk-asset-inspector__attribute-value {
+	flex-grow: 1;
+	flex-direction: row;
+	align-items: center;
+}
+
+.lmk-asset-inspector__attribute-value-number {
+	flex-grow: 1;
+	min-width: 40px;
+	margin-right: 2px;
+}
+
+.lmk-asset-inspector__attribute-value-curve {
+	width: 64px;
+	flex-shrink: 0;
+	margin-right: 2px;
+}
+
+.lmk-asset-inspector__attribute-name--missing {
+	color: var(--lmk-color-text-error);
+	-unity-font-style: italic;
+}

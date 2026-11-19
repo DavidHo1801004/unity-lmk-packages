@@ -5,12 +5,14 @@ A gameplay ability system for Unity, modelled on Unreal Engine 5's Gameplay Abil
 ## Features
 
 - **Gameplay attributes** defined as data in attribute registries (`*.attrregistry`), with defaults, clamp bounds (constants or other attributes), meta and integer flags. Edit them in *Tools → LMK → Ability System → Attribute Manager*, reference them with `GameplayAttribute` fields, and optionally use generated `Attributes` constants.
+- **Attribute sets and initial values:** an `AttributeSetDefinition` lists the attributes a unit has and their behaviours, and a separate `AttributeInitialValues` asset gives their starting values, so one set can serve units that start differently.
 - **Units and the world:** `AbilitySystemWorld` steps every unit's `GameplayAbilitySystem` on its own clock and seeded random source. State changes only through a unit's methods. Values are evaluated as in UE 5.4: base, the six modifier ops, evaluation channels and stacks, clamped to the registry bounds.
 - **Gameplay effects:** instant, duration, infinite and periodic effects; scalable, SetByCaller, attribute-based and custom magnitudes; execution calculations; stacking; tag requirements and inhibition; immunity, removal of other effects, chance to apply, additional effects and granted abilities.
 - **Gameplay abilities:** tags, cost, cooldown, instancing policies and triggers, with custom logic authored as an inline-instanced `AbilityLogic` that is cloned per grant or activation. Logic acts through an `AbilityContext` with tasks and `await` helpers; `SequenceLogic` builds simple abilities without code.
 - **Tags on units:** loose, granted and ability-owned tags, reference-counted with their ancestors, with tag events and gameplay events.
 - **Gameplay cues:** cue events queued during a step and delivered at its end, routed by tag with parent fallback to `GameplayCueNotifyStatic` assets and pooled `GameplayCueNotifyActor` prefabs.
 - **Scene layer:** `AbilitySystemComponent` hosts a unit on a GameObject, and `AbilitySystemWorldRunner` steps the scene's world in `Update` or `FixedUpdate`. `PlayAnimationAndWait` plays an animator state from an ability.
+- **Inspectors:** sectioned inspectors for attribute sets, initial values, effects and abilities, with searchable attribute pickers, and colour-coded icons for every asset type.
 - **Tools:** a runtime debugger (*Tools → LMK → Ability System → Debugger*), asset validation from the menu and before every build, and project checks for CI.
 
 ## Documentation
@@ -23,7 +25,7 @@ A gameplay ability system for Unity, modelled on Unreal Engine 5's Gameplay Abil
 ## Requirements
 
 - Unity 6000.3 or newer.
-- `com.lmk.gameplaytags` 1.2.0, `com.lmk.registry` 1.1.1, `com.lmk.attributes` 0.2.0 and `com.lmk.editor` 0.3.0 (dependencies).
+- `com.lmk.gameplaytags` 1.2.0, `com.lmk.registry` 1.1.2, `com.lmk.attributes` 0.2.0 and `com.lmk.editor` 0.5.0 (dependencies).
 
 ## Installation
 
@@ -35,15 +37,15 @@ A gameplay ability system for Unity, modelled on Unreal Engine 5's Gameplay Abil
       { "name": "OpenUPM", "url": "https://package.openupm.com", "scopes": [ "com.lmk" ] }
     ],
     "dependencies": {
-      "com.lmk.abilitysystem": "0.1.1"
+      "com.lmk.abilitysystem": "0.2.0"
     }
     ```
 - **Git URL:** add the five packages in *Package Manager → + → Add package from git URL*, in this order, since Git URLs don't resolve dependencies:
-  1. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0`
+  1. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.5.0`
   2. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.attributes/0.2.0`
-  3. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.1.1`
+  3. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.1.2`
   4. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.2.0`
-  5. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.abilitysystem/0.1.1`
+  5. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.abilitysystem/0.2.0`
 - **Embedded:** copy the `com.lmk.abilitysystem` folder into your project's `Packages/` folder, and install its dependencies.
 
 The package is published on branch `upm/com.lmk.abilitysystem`, with one tag per version (`com.lmk.abilitysystem/<version>`).

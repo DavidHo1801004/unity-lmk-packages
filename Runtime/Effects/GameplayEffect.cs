@@ -148,6 +148,7 @@ namespace LMK.Runtime.AbilitySystem
     /// executes once on base values or becomes an active effect on the target.
     /// </summary>
     [CreateAssetMenu(menuName = "LMK/Ability System/Gameplay Effect", fileName = "GameplayEffect")]
+    [Icon("Packages/com.lmk.abilitysystem/Editor/Assets/Icons/GameplayEffect.png")]
     public sealed class GameplayEffect : ScriptableObject
     {
         [SerializeField]

@@ -9,6 +9,7 @@ namespace LMK.Runtime.AbilitySystem
     ///. A world reads them from the settings asset it is given.
     /// </summary>
     [CreateAssetMenu(menuName = "LMK/Ability System/Settings", fileName = "AbilitySystemSettings")]
+    [Icon("Packages/com.lmk.abilitysystem/Editor/Assets/Icons/AbilitySystemSettings.png")]
     public sealed class AbilitySystemSettings : ScriptableObject
     {
         public const double DEFAULT_MAX_STEP = 0.1;

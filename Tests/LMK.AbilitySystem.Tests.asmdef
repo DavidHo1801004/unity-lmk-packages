@@ -11,6 +11,7 @@
         "LMK.Registry.Editor",
         "LMK.GameplayTags.Runtime",
         "LMK.GameplayTags.Editor",
+        "LMK.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
