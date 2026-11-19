@@ -3,6 +3,11 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] - 2026-11-19
+
+### Added
+- `RegistryImporter.IconPath`: the asset path of a kind's registry icon. The import depends on the texture, so registries get their icon even when they import before it (registries import early), and pick up changes to it. `Icon` still works, without that dependency.
+
 ## [1.1.1] - 2026-11-14
 
 ### Removed

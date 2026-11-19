@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
+using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 
@@ -96,9 +97,15 @@ namespace LMK.Editor.Registry
         protected abstract IRegistryFormat<TRow> Format { get; }
 
         /// <summary>
-        /// Icon of the imported asset, or <see langword="null"/> for the default.
+        /// Icon of the imported asset, or <see langword="null"/> for the default. Prefer <see cref="IconPath"/>.
         /// </summary>
         protected virtual Texture2D Icon => null;
+
+        /// <summary>
+        /// Asset path of the icon texture, or <see langword="null"/> to use <see cref="Icon"/>. The import depends on
+        /// it, so the icon is there even when registries import before textures, and follows changes to the texture.
+        /// </summary>
+        protected virtual string IconPath => null;
 
         public override void OnImportAsset(AssetImportContext _Context)
         {
@@ -114,8 +121,17 @@ namespace LMK.Editor.Registry
             foreach (string warning in result.Warnings)
                 _Context.LogImportWarning($"{_Context.assetPath}: {warning}");
 
-            _Context.AddObjectToAsset("main", asset, Icon);
+            _Context.AddObjectToAsset("main", asset, LoadIcon(_Context));
             _Context.SetMainObject(asset);
+        }
+
+        private Texture2D LoadIcon(AssetImportContext _Context)
+        {
+            string path = IconPath;
+            if (string.IsNullOrEmpty(path)) return Icon;
+
+            _Context.DependsOnArtifact(path);
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
     }
 }
