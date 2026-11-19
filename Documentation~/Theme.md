@@ -40,12 +40,15 @@ Elements keep the palette they were built with when the Editor skin changes; reb
 | `--lmk-color-item-selected` | Selected list or tree rows |
 | `--lmk-color-row-alternate` | Alternate rows in tables and lists |
 | `--lmk-color-header-background` / `-hover` | Foldout headers |
+| `--lmk-color-row-header` | Row headers in lists, between the window background and foldout headers |
 | `--lmk-color-border` | Header borders |
 | `--lmk-color-content-border` | Foldout content borders |
 | `--lmk-color-field-background` / `-hover` | Input fields |
 | `--lmk-color-field-border` / `-hover` | Input field borders |
 | `--lmk-color-button-background` / `-active` / `-hover` | Toolbar buttons (normal, active, hovered) |
 | `--lmk-color-button-border` | Toolbar button borders |
+| `--lmk-color-button-destructive` / `-hover` | Destructive buttons, e.g. remove (the same red as com.lmk.gameplaytags' tag remove button) |
+| `--lmk-color-icon-destructive` | Icons on destructive buttons |
 | `--lmk-color-link` / `-hover` | `LinkLabel` text (normal, hovered) |
 | `--lmk-color-drop-indicator` | Drop position while dragging to reorder |
 

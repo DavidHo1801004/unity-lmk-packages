@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="7" height="7" viewBox="0 0 7 7">
+  <!-- Add: white, tinted by USS. 1px strokes on a 7px grid, so it stays crisp at 7px. -->
+  <path fill="#FFFFFF" d="M3 0h1v3h3v1H4v3H3V4H0V3h3z"/>
+</svg>

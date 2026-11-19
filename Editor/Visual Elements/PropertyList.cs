@@ -23,8 +23,9 @@ namespace LMK.Editor.UIElements
     /// way to receive a property from <c>Bind()</c>, so it has no binding path. A <c>Bind()</c> on an ancestor is fine. <br/>
     /// Every change goes through the <see cref="SerializedObject"/>, so Undo, multi-object editing and prefab overrides
     /// work. With several objects selected whose lists have different sizes, the list is read-only, as in Unity. <br/>
-    /// Rows are rebuilt when elements are added, removed or moved, by this list, Undo or scripts. Value edits only
-    /// update the bound fields. Rows aren't virtualized: meant for inspector-sized lists.
+    /// Rows are rebuilt when elements are added, removed or moved, by this list, Undo or scripts, in any of the objects
+    /// edited. Value edits only update the bound fields. Rows are cleared when an object is destroyed. <br/>
+    /// Rows aren't virtualized: meant for inspector-sized lists.
     /// </remarks>
     [UxmlElement("PropertyList", libraryPath = "LMK/Fields", visibility = LibraryVisibility.Visible)]
     public partial class PropertyList : VisualElement
@@ -146,6 +147,10 @@ namespace LMK.Editor.UIElements
 
         internal const string USS_CLASS_ROW_ALTERNATE = USS_CLASS_ROW + "--alternate";
 
+        internal const string USS_CLASS_ROW_FIRST = USS_CLASS_ROW + "--first";
+
+        internal const string USS_CLASS_ROW_HEADER = USS_CLASS + "__row-header";
+
         internal const string USS_CLASS_HANDLE = USS_CLASS + "__handle";
 
         internal const string USS_CLASS_HANDLE_BAR = USS_CLASS + "__handle-bar";
@@ -169,6 +174,10 @@ namespace LMK.Editor.UIElements
         private const string ADD_TOOLTIP = "Add an element";
 
         private const string USS_PATH = LMKAssetUtility.EDITOR_PACKAGE_ROOT + "/Editor/Visual Elements/Assets/PropertyListUSS.uss";
+
+        internal const string ADD_ICON_PATH = LMKAssetUtility.EDITOR_PACKAGE_ROOT + "/Editor/Assets/Icons/Commons/plus.svg";
+
+        internal const string REMOVE_ICON_PATH = LMKAssetUtility.EDITOR_PACKAGE_ROOT + "/Editor/Assets/Icons/Commons/minus.svg";
 
         private readonly CollapsiblePanel panel;
 
@@ -204,6 +213,11 @@ namespace LMK.Editor.UIElements
         // other changes are value edits, which bound fields show themselves.
         private uint[] shownHashes = Array.Empty<uint>();
 
+        // Dirty count of each target at the last poll. Null until the first poll after binding.
+        private int[] targetDirtyCounts;
+
+        private const long TARGET_POLL_INTERVAL_MS = 200;
+
 
 
         public PropertyList()
@@ -230,7 +244,8 @@ namespace LMK.Editor.UIElements
             addWrapper.AddToClassList(USS_CLASS_ADD_WRAPPER);
             panel.HeaderActions.Add(addWrapper);
 
-            addButton = new ToolbarButton(false, OnAddClicked) { text = "+", tooltip = ADD_TOOLTIP };
+            addButton = new ToolbarButton(false, OnAddClicked) { tooltip = ADD_TOOLTIP };
+            SetIcon(addButton, ADD_ICON_PATH);
             addButton.AddToClassList(USS_CLASS_ADD_BUTTON);
             addWrapper.Add(addButton);
 
@@ -261,6 +276,10 @@ namespace LMK.Editor.UIElements
             });
             RegisterCallback<DetachFromPanelEvent>(_ => Undo.undoRedoPerformed -= RefreshIfChanged);
 
+            // Trackers miss edits to the other targets of a multi-object list, and destroyed targets: see PollTargets.
+            // A scheduled item only runs while the element is in a panel.
+            schedule.Execute(PollTargets).Every(TARGET_POLL_INTERVAL_MS);
+
             if (_Property != null)
                 BindProperty(_Property);
             else
@@ -280,6 +299,7 @@ namespace LMK.Editor.UIElements
         {
             serializedObject = _Property?.serializedObject;
             arrayPath = _Property?.propertyPath;
+            targetDirtyCounts = null;
 
             tracker?.RemoveFromHierarchy();
             tracker = null;
@@ -300,19 +320,78 @@ namespace LMK.Editor.UIElements
 
         private SerializedProperty GetArray()
         {
-            if (serializedObject == null || string.IsNullOrEmpty(arrayPath)) return null;
-
-            try
-            {
-                if (serializedObject.targetObject == null) return null;
-            }
-            catch (Exception _Exception) when (_Exception is ArgumentNullException or NullReferenceException)
-            {
-                return null; // the serialized object was disposed, e.g. by its inspector closing
-            }
+            if (string.IsNullOrEmpty(arrayPath) || !HasTargets()) return null;
 
             var array = serializedObject.FindProperty(arrayPath);
             return array is { isArray: true } && array.propertyType != SerializedPropertyType.String ? array : null;
+        }
+
+        // Whether the serialized object is usable: not disposed, and none of its targets destroyed. Updating it
+        // otherwise logs an error. With several targets, the first can be alive while another is destroyed.
+        private bool HasTargets()
+        {
+            if (serializedObject == null) return false;
+
+            try
+            {
+                foreach (var target in serializedObject.targetObjects)
+                {
+                    if (target == null) return false;
+                }
+                return true;
+            }
+            catch (Exception _Exception) when (_Exception is ArgumentNullException or NullReferenceException)
+            {
+                return false; // the serialized object was disposed, e.g. by its inspector closing
+            }
+        }
+
+        // Read the targets again. Call only while HasTargets().
+        private void UpdateSerializedObject()
+        {
+            if (serializedObject.isEditingMultipleObjects)
+            {
+                // A multi-object SerializedObject caches whether its targets' values differ, and clears that cache only
+                // when the first target changes: an edit to another target alone would keep the old sizes and values.
+                serializedObject.SetIsDifferentCacheDirty();
+                serializedObject.Update();
+            }
+            else
+            {
+                serializedObject.UpdateIfRequiredOrScript();
+            }
+        }
+
+        // Property trackers see neither edits to the targets after the first of a multi-object list, nor destroyed
+        // targets. Their dirty counts change with every edit, by a SerializedObject or by a script with SetDirty.
+        private void PollTargets()
+        {
+            if (serializedObject == null) return;
+
+            if (!HasTargets())
+            {
+                RefreshIfChanged(); // clears rows bound to a destroyed object
+                return;
+            }
+
+            if (!serializedObject.isEditingMultipleObjects) return;
+
+            var targets = serializedObject.targetObjects;
+            bool changed = targetDirtyCounts == null || targetDirtyCounts.Length != targets.Length;
+            if (changed)
+                targetDirtyCounts = new int[targets.Length];
+
+            for (int i = 0; i < targets.Length; i++)
+            {
+                int dirtyCount = EditorUtility.GetDirtyCount(targets[i]);
+                if (dirtyCount == targetDirtyCounts[i]) continue;
+
+                targetDirtyCounts[i] = dirtyCount;
+                changed = true;
+            }
+
+            if (changed)
+                RefreshIfChanged();
         }
         #endregion
 
@@ -337,7 +416,7 @@ namespace LMK.Editor.UIElements
                 return;
             }
 
-            serializedObject.UpdateIfRequiredOrScript();
+            UpdateSerializedObject();
             var array = GetArray();
 
             if (GetStructure(array) != shownStructure)
@@ -359,7 +438,8 @@ namespace LMK.Editor.UIElements
         {
             rows.Clear();
 
-            serializedObject?.UpdateIfRequiredOrScript();
+            if (HasTargets())
+                UpdateSerializedObject();
             var array = GetArray();
 
             bool mixedSizes = array != null && serializedObject.isEditingMultipleObjects
@@ -369,7 +449,7 @@ namespace LMK.Editor.UIElements
             shownStructure = array != null ? GetStructure(array) : null;
             shownHashes = array != null && !mixedSizes ? GetHashes(array) : Array.Empty<uint>();
 
-            countLabel.text = array == null ? string.Empty : mixedSizes ? MIXED_COUNT : array.arraySize.ToString();
+            countLabel.text = array == null ? string.Empty : mixedSizes ? MIXED_COUNT : FormatCount(array.arraySize);
             SetShown(messageLabel, mixedSizes);
             SetShown(emptyLabel, array != null && !mixedSizes && array.arraySize == 0);
             UpdateAddButton();
@@ -387,7 +467,14 @@ namespace LMK.Editor.UIElements
         {
             var row = new VisualElement();
             row.AddToClassList(USS_CLASS_ROW);
-            row.EnableInClassList(USS_CLASS_ROW_ALTERNATE, _Index % 2 == 1);
+            row.EnableInClassList(USS_CLASS_ROW_ALTERNATE, _Index % 2 == 1); // unstyled, kept for custom style sheets
+            row.EnableInClassList(USS_CLASS_ROW_FIRST, _Index == 0); // USS has no :first-child; no line above it
+
+            // Background of the row's first line only, so an expanded element's content isn't coloured.
+            // Behind the other children, and ignores the pointer so presses reach them.
+            var header = new VisualElement { pickingMode = PickingMode.Ignore };
+            header.AddToClassList(USS_CLASS_ROW_HEADER);
+            row.Add(header);
 
             var handle = new VisualElement { tooltip = "Drag to reorder" };
             handle.AddToClassList(USS_CLASS_HANDLE);
@@ -410,12 +497,26 @@ namespace LMK.Editor.UIElements
             else if (content is IBindable bindable)
                 bindable.BindProperty(_Element);
 
-            var removeButton = new ToolbarButton(false, () => RemoveAt(_Index)) { text = "-", tooltip = "Remove this element" };
+            var removeButton = new ToolbarButton(false, () => RemoveAt(_Index)) { tooltip = "Remove this element" };
+            SetIcon(removeButton, REMOVE_ICON_PATH);
             removeButton.AddToClassList(USS_CLASS_REMOVE_BUTTON);
             SetShown(removeButton, editable);
             row.Add(removeButton);
 
             return row;
+        }
+
+        internal static string FormatCount(int _Count) => _Count == 1 ? "1 item" : $"{_Count} items";
+
+        // A vector icon from the package, tinted by USS (--unity-image-tint-color). The icon ignores the pointer, so
+        // presses and hovers reach the button, or the add wrapper and its tooltip while the button is disabled.
+        private static void SetIcon(Button _Button, string _Path)
+        {
+            _Button.iconImage = Background.FromVectorImage(LMKAssetUtility.Load<VectorImage>(_Path));
+
+            var icon = _Button.Q<Image>(className: Button.imageUSSClassName);
+            if (icon != null)
+                icon.pickingMode = PickingMode.Ignore;
         }
 
         private static uint[] GetHashes(SerializedProperty _Array)

@@ -110,6 +110,41 @@ namespace LMK.Editor.Tests
         }
 
         [UnityTest]
+        public IEnumerator CollapseButton_IsLeftOfTheTitle_WithALineBetween()
+        {
+            var panel = new CollapsiblePanel("Inspector");
+            panel.HeaderActions.Add(new ToolbarButton(false) { text = "+" });
+            yield return CreateInWindow(panel);
+            var title = panel.Header.Q(className: CollapsiblePanel.USS_CLASS_TITLE);
+
+            Assert.That(panel.Header.IndexOf(panel.CollapseButton), Is.Zero);
+            Assert.That(panel.CollapseButton.worldBound.xMin, Is.EqualTo(panel.Header.worldBound.xMin).Within(0.5f));
+            Assert.That(panel.CollapseButton.worldBound.xMax, Is.LessThanOrEqualTo(title.worldBound.xMin + 0.5f));
+            Assert.That(panel.HeaderActions.worldBound.xMin, Is.GreaterThanOrEqualTo(title.worldBound.xMax - 0.5f), "actions stay right of the title");
+            Assert.That(panel.CollapseButton.resolvedStyle.borderRightWidth, Is.EqualTo(1f));
+        }
+
+        // Collapsed, the header loses its bottom line, so the button grows by that pixel instead of leaving a gap.
+        [UnityTest]
+        public IEnumerator CollapseButton_FillsTheHeader_ExpandedAndCollapsed()
+        {
+            var panel = new CollapsiblePanel("Inspector");
+            yield return CreateInWindow(panel);
+            var header = panel.Header;
+            var button = panel.CollapseButton;
+
+            Assert.That(button.worldBound.yMin, Is.EqualTo(header.worldBound.yMin).Within(0.5f));
+            Assert.That(button.worldBound.yMax, Is.EqualTo(header.worldBound.yMax - header.resolvedStyle.borderBottomWidth).Within(0.5f), "expanded");
+
+            panel.Collapsed = true;
+            yield return WaitUntil(() => Mathf.Abs(button.worldBound.yMax - header.worldBound.yMax) < 0.5f);
+
+            Assert.That(header.resolvedStyle.borderBottomWidth, Is.Zero);
+            Assert.That(button.worldBound.yMin, Is.EqualTo(header.worldBound.yMin).Within(0.5f));
+            Assert.That(button.worldBound.yMax, Is.EqualTo(header.worldBound.yMax).Within(0.5f), "collapsed");
+        }
+
+        [UnityTest]
         public IEnumerator CollapseButton_Click_Toggles()
         {
             var panel = new CollapsiblePanel("Inspector");
@@ -130,7 +165,7 @@ namespace LMK.Editor.Tests
             var panel = new CollapsiblePanel("Inspector");
             yield return CreateInWindow(panel);
 
-            var titlePosition = new Vector2(panel.Header.worldBound.xMin + 20f, panel.Header.worldBound.center.y);
+            var titlePosition = panel.Header.Q(className: CollapsiblePanel.USS_CLASS_TITLE).worldBound.center;
             DoubleClick(titlePosition);
 
             Assert.That(panel.Collapsed, Is.True);
@@ -145,7 +180,7 @@ namespace LMK.Editor.Tests
             int presses = 0;
             panel.Header.RegisterCallback<PointerDownEvent>(_ => presses++, TrickleDown.TrickleDown);
 
-            var titlePosition = new Vector2(panel.Header.worldBound.xMin + 20f, panel.Header.worldBound.center.y);
+            var titlePosition = panel.Header.Q(className: CollapsiblePanel.USS_CLASS_TITLE).worldBound.center;
             DoubleClick(titlePosition);
 
             Assert.That(presses, Is.EqualTo(2), "The presses didn't reach the header.");

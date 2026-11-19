@@ -31,11 +31,11 @@ Shared UI Toolkit editor library used by the LMK packages. It provides a colour 
       { "name": "OpenUPM", "url": "https://package.openupm.com", "scopes": [ "com.lmk" ] }
     ],
     "dependencies": {
-      "com.lmk.editor": "0.4.0"
+      "com.lmk.editor": "0.5.0"
     }
     ```
 - **Git URL:** in *Package Manager → + → Add package from git URL*, enter
-  `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.4.0`
+  `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.5.0`
 - **Embedded:** copy the `com.lmk.editor` folder into your project's `Packages/` folder.
 
 The package is published on branch `upm/com.lmk.editor`, with one tag per version (`com.lmk.editor/<version>`).

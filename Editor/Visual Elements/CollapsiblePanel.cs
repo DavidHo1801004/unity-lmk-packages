@@ -214,6 +214,11 @@ namespace LMK.Editor.UIElements
             Header.RegisterCallback<PointerDownEvent>(OnHeaderPointerDown);
             hierarchy.Add(Header);
 
+            // Arrow first, as Unity's foldouts have it, then the title and the actions.
+            collapseButton = new(false, () => Collapsed = !Collapsed);
+            collapseButton.AddToClassList(USS_CLASS_COLLAPSE_BUTTON);
+            Header.Add(collapseButton);
+
             titleLabel = new();
             titleLabel.AddToClassList(USS_CLASS_TITLE);
             Header.Add(titleLabel);
@@ -221,10 +226,6 @@ namespace LMK.Editor.UIElements
             HeaderActions = new();
             HeaderActions.AddToClassList(USS_CLASS_HEADER_ACTIONS);
             Header.Add(HeaderActions);
-
-            collapseButton = new(false, () => Collapsed = !Collapsed);
-            collapseButton.AddToClassList(USS_CLASS_COLLAPSE_BUTTON);
-            Header.Add(collapseButton);
 
             chevron = new()
             {

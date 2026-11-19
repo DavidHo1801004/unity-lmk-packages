@@ -11,7 +11,6 @@
 	align-items: center;
 	flex-shrink: 0;
 	height: 22px;
-	padding-left: 6px;
 
 	background-color: var(--lmk-color-header-background);
 	border-bottom-width: 1px;
@@ -26,7 +25,7 @@
 	flex-grow: 1;
 	flex-shrink: 1;
 	margin: 0px;
-	padding: 0px;
+	padding: 0px 0px 0px 6px;
 
 	overflow: hidden;
 	white-space: nowrap;
@@ -41,16 +40,20 @@
 	flex-shrink: 0;
 }
 
-/* Two classes, so it beats .toolbar-button but not its hover and active rules. */
+/* Left of the title, as Unity's foldout arrows, with a line between them. Fills the header's height, which grows by
+   the bottom border's 1px while collapsed. No minimum: .toolbar-button's 20px would push it out of a shorter header.
+   Two classes, so it beats .toolbar-button but not its hover and active rules. */
 .lmk-collapsible-panel__header .lmk-collapsible-panel__collapse-button {
 	flex-shrink: 0;
+	align-self: stretch;
 	width: 22px;
-	height: 21px;
+	min-height: 0px;
 	margin: 0px;
 	padding: 0px;
 
 	background-color: transparent;
-	border-width: 0px;
+	border-width: 0px 1px 0px 0px;
+	border-color: var(--lmk-color-content-border);
 }
 
 .lmk-collapsible-panel__chevron {
@@ -93,12 +96,20 @@
 	display: none;
 }
 
+/* In the strip the title is below the button, so the line between them is under the button. */
+.lmk-collapsible-panel--collapsed.lmk-collapsible-panel--horizontal .lmk-collapsible-panel__collapse-button {
+	align-self: auto;
+	height: 21px;
+	border-width: 0px 0px 1px 0px;
+}
+
 /* Rotated clockwise around its top-left corner, so the text runs down and its left edge sits at `left`. */
 .lmk-collapsible-panel--collapsed.lmk-collapsible-panel--horizontal .lmk-collapsible-panel__title {
 	position: absolute;
 	top: 26px;
 	left: 19px;
 	flex-grow: 0;
+	padding: 0px;
 
 	overflow: visible;
 	transform-origin: left top;

@@ -19,6 +19,7 @@
 	--lmk-color-row-alternate: rgba(1, 1, 1, 0.2);
 
 	--lmk-color-header-background: rgba(1, 1, 1, 0.2);
+	--lmk-color-row-header: rgba(1, 1, 1, 0.1);
 	--lmk-color-header-background-hover: rgb(80, 80, 80);
 	--lmk-color-border: rgb(20, 20, 20);
 	--lmk-color-content-border: rgba(1, 1, 1, 0.5);
@@ -32,6 +33,11 @@
 	--lmk-color-button-background-active: rgb(38, 38, 38);
 	--lmk-color-button-background-hover: rgb(30, 30, 30);
 	--lmk-color-button-border: rgb(12, 12, 12);
+
+	/* Destructive buttons, e.g. remove: the same red as com.lmk.gameplaytags' tag remove button. */
+	--lmk-color-button-destructive: rgb(110, 61, 50);
+	--lmk-color-button-destructive-hover: rgb(145, 52, 33);
+	--lmk-color-icon-destructive: rgb(230, 230, 230);
 
 	--lmk-color-link: rgb(76, 126, 255);
 	--lmk-color-link-hover: rgb(120, 160, 255);

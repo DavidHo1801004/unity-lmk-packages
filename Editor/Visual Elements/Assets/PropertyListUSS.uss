@@ -1,10 +1,39 @@
 .lmk-property-list {
-	margin: 2px 0px;
+	margin: 2px 2px;
 }
 
-/* Header: count, then the add button, left of the collapse button. */
+/* The panel: rounded corners, and a header shorter than a standalone panel's. Its overflow: hidden clips the rows
+   to the corners. */
+.lmk-property-list > .lmk-collapsible-panel {
+	border-radius: 3px;
+}
+
+.lmk-property-list .lmk-collapsible-panel__header {
+	height: 18px;
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
+
+.lmk-property-list .lmk-collapsible-panel--collapsed > .lmk-collapsible-panel__header {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+}
+
+/* Three classes, so it beats the panel's own rule. It fills the header's height as there; no minimum width, or
+   .toolbar-button's 22px would win. 20px wide, as the rows' drag handles below it. */
+.lmk-property-list .lmk-collapsible-panel__header .lmk-collapsible-panel__collapse-button {
+	width: 20px;
+	min-width: 0px;
+}
+
+/* The actions and the add button fill the header's height, expanded (inside its bottom border) or collapsed. */
+.lmk-property-list .lmk-collapsible-panel__header-actions {
+	align-self: stretch;
+}
+
+/* Header actions: the item count, then the add button, with a line between them. */
 .lmk-property-list__count {
-	margin: 0px 4px 0px 0px;
+	margin: 0px 6px 0px 0px;
 	padding: 0px;
 
 	color: var(--lmk-color-text-muted);
@@ -13,19 +42,30 @@
 
 .lmk-property-list__add-wrapper {
 	flex-direction: row;
-	align-items: center;
+	align-items: stretch;
+	align-self: stretch;
 }
 
-/* Two classes, so it beats .toolbar-button but not its hover and active rules. */
+/* Two classes, so it beats .toolbar-button but not its hover and active rules. No minimum size, as the collapse
+   button. 20px wide, as the rows' remove buttons below it. */
 .lmk-property-list .lmk-property-list__add-button {
-	width: 22px;
-	height: 21px;
+	width: 20px;
+	min-width: 0px;
+	min-height: 0px;
 	margin: 0px;
 	padding: 0px;
 
-	-unity-font-style: bold;
 	background-color: transparent;
-	border-width: 0px;
+	border-width: 0px 0px 0px 1px;
+	border-color: var(--lmk-color-content-border);
+}
+
+/* Vector icons, drawn on a 7px grid with 1px strokes. */
+.lmk-property-list .lmk-property-list__add-button .unity-button__image,
+.lmk-property-list .lmk-property-list__remove-button .unity-button__image {
+	width: 7px;
+	height: 7px;
+	flex-shrink: 0;
 }
 
 /* Rows */
@@ -33,28 +73,47 @@
 	flex-direction: column;
 }
 
+/* A line between rows, in the panel's outline colour. Not above the first row: the panel header has its own. */
 .lmk-property-list__row {
 	flex-direction: row;
 	align-items: flex-start;
-	min-height: 22px;
-	padding: 1px 2px 1px 0px;
+	min-height: 20px;
+
+	border-top-width: 1px;
+	border-color: var(--lmk-color-content-border);
 }
 
-.lmk-property-list__row--alternate {
-	background-color: var(--lmk-color-row-alternate);
+.lmk-property-list__row--first {
+	border-top-width: 0px;
 }
 
-.lmk-property-list__row:hover {
+/* The row's first line: the handle, the element's header and the remove button. Only this line is coloured,
+   not the content of an expanded element. Below the row's top line: absolute positions start inside the border. */
+.lmk-property-list__row-header {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	height: 20px;
+
+	background-color: var(--lmk-color-row-header);
+}
+
+.lmk-property-list__row:hover > .lmk-property-list__row-header {
 	background-color: var(--lmk-color-item-hover);
 }
 
+/* One line high, so its separator stops at the first line. Separators use the outline colour.
+   20px wide, as the header's collapse button above it, so their separators line up. */
 .lmk-property-list__handle {
 	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
-	width: 16px;
+	width: 20px;
 	height: 20px;
 
+	border-right-width: 1px;
+	border-color: var(--lmk-color-content-border);
 	cursor: move-arrow;
 }
 
@@ -66,10 +125,17 @@
 	background-color: var(--lmk-color-icon);
 }
 
+/* Centred on the first line when shorter than it, e.g. a label. Taller content sets the row's height. */
 .lmk-property-list__row-content {
 	flex-grow: 1;
 	flex-shrink: 1;
+	align-self: center;
 	min-width: 0px;
+}
+
+/* In an inspector, Unity gives fields margin-right: -2px, which would slide them under the remove button's separator. */
+.unity-inspector-element .lmk-property-list__row-content {
+	padding-right: 2px;
 }
 
 /* Room left of the default PropertyField for foldout arrows that hang into the inspector's gutter, as nested
@@ -78,17 +144,35 @@
 	margin-left: 15px;
 }
 
+/* Fills the end of the first line, with a separator on its left and its outer corners rounded. */
 .lmk-property-list .lmk-property-list__remove-button {
 	flex-shrink: 0;
 	width: 20px;
 	min-width: 20px;
-	height: 18px;
-	min-height: 18px;
-	margin: 1px 0px 0px 2px;
+	height: 20px;
+	min-height: 20px;
+	margin: 0px;
 	padding: 0px;
 
-	border-width: 1px;
-	border-radius: 2px;
+	border-width: 0px 0px 0px 1px;
+	border-color: var(--lmk-color-content-border);
+	border-radius: 0px 3px 3px 0px;
+
+	/* Red, as com.lmk.gameplaytags' tag remove button. */
+	background-color: var(--lmk-color-button-destructive);
+	transition-property: background-color;
+	transition-duration: 0.1s;
+}
+
+/* Four selectors' worth, so it beats .toolbar-button's hover and active rules. */
+.lmk-property-list .lmk-property-list__remove-button:hover:enabled,
+.lmk-property-list .lmk-property-list__remove-button:active:enabled {
+	background-color: var(--lmk-color-button-destructive-hover);
+}
+
+/* Three classes, so it beats .toolbar-button's icon tint. */
+.lmk-property-list .lmk-property-list__remove-button .unity-button__image {
+	--unity-image-tint-color: var(--lmk-color-icon-destructive);
 }
 
 /* Empty list and read-only message. */

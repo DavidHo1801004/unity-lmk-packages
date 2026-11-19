@@ -176,7 +176,7 @@ inspector.Collapsed = true;                    // raises CollapsedChanged
 inspector.SetCollapsedWithoutNotify(false);    // doesn't
 ```
 
-- The header has the title (with an ellipsis), the `HeaderActions` slot and a collapse button. Double-clicking the header toggles too.
+- The header has the collapse button on the left, as Unity's foldout arrows, a line, then the title (with an ellipsis) and the `HeaderActions` slot. Double-clicking the header toggles too.
 - `CollapseAxis` `Vertical` (the default) collapses to the header, like a foldout. `Horizontal` collapses sideways to a 24px strip with the expand button at the top and the title rotated below it. `PanelLayout` sets it to its own orientation.
 - The content is hidden, not removed, so its state survives.
 - `Collapsible = false` hides the button and ignores double-clicks. Code can still set `Collapsed`.
@@ -310,6 +310,7 @@ list.ItemsChanged += () => list.SetAddEnabled(AnyLeft(), "Every attribute is alr
 ```
 
 - Each row has a drag handle, the element and a remove button. Rows are dragged by their handle only, and moved with `SerializedProperty.MoveArrayElement`.
+- Look: a panel with rounded corners, an 18px header and a 2px side margin. The header shows the item count ("1 item", "3 items"), a line, then the add button. Add and remove use vector icons (`Editor/Assets/Icons/Commons/plus.svg`, `minus.svg`), and the remove button is red. A line in the panel's outline colour divides the rows. Only a row's first line is tinted, and highlighted on hover, so an expanded element's content isn't. Separators on that line, in the same outline colour, divide the handle, the element and the remove button, which fills the end of the line. Content shorter than the line is centred on it.
 - Content is a `PropertyField` per element by default, so attribute drawers apply, including `[SerializeReference, InlineInstanced]` (`com.lmk.attributes`) with its type picker and shared-instance warning. The default content has a 15px left margin, for foldout arrows that hang into the inspector's gutter.
 - `makeItem` and `bindItem(content, element)` replace the content. Without `bindItem`, `IBindable` content is bound to its element. Set them before binding, or call `Refresh()`.
 - The add button calls `AddRequested(anchor)` when it is set, with the button's world bounds, e.g. to open a `SearchableDropdown` under it; the owner then adds the element itself. Without it, the button adds an element the way Unity does (`arraySize++`: a copy of the last element, or null for a managed reference).
@@ -319,7 +320,7 @@ list.ItemsChanged += () => list.SetAddEnabled(AnyLeft(), "Every attribute is alr
 - Bind it in code, with the constructor or `BindProperty`. Unity's binding API gives custom elements no way to receive a property from `Bind()`, so it has no binding path. A `Bind()` on an ancestor is fine.
 - Rows aren't virtualized: it is meant for inspector-sized lists.
 - UXML attributes: `title`, `empty-text`, `persistence-key`.
-- USS classes: `lmk-property-list`, `__count`, `__add-wrapper`, `__add-button`, `__rows`, `__row`, `__row--alternate`, `__handle`, `__handle-bar`, `__row-content`, `__row-content--property-field`, `__remove-button`, `__empty`, `__message`. Colours: alternate rows `--lmk-color-row-alternate`, hovered rows `--lmk-color-item-hover`, handle `--lmk-color-icon`, count and messages `--lmk-color-text-muted`, plus the `CollapsiblePanel` and `ToolbarButton` colours.
+- USS classes: `lmk-property-list`, `__count`, `__add-wrapper`, `__add-button`, `__rows`, `__row`, `__row--first`, `__row--alternate` (on odd rows, unstyled, for your own style sheets), `__row-header` (the first line's background), `__handle`, `__handle-bar`, `__row-content`, `__row-content--property-field`, `__remove-button`, `__empty`, `__message`. Colours: row headers `--lmk-color-row-header`, hovered rows `--lmk-color-item-hover`, lines between rows and separators `--lmk-color-content-border`, remove button `--lmk-color-button-destructive` / `-hover` with `--lmk-color-icon-destructive`, handle `--lmk-color-icon`, count and messages `--lmk-color-text-muted`, plus the `CollapsiblePanel` and `ToolbarButton` colours.
 
 ## AlignedField
 
@@ -331,7 +332,8 @@ field.Add(new Button(OpenPicker) { text = "Health" }); // goes into the input
 var tags = new AlignedField("Tags") { AlignLabelToTop = true }; // for content taller than one line
 ```
 
-- A `BaseField` with the standard `unity-base-field`, `__label` and `__input` classes and `alignedFieldUssClassName`, so its label width follows the other fields inside an `InspectorElement`.
+- A `BaseField` with the standard `unity-base-field`, `__label` and `__input` classes and `alignedFieldUssClassName`, so its label width follows the other fields inside an `InspectorElement`: at any nesting depth, in `PropertyList` rows, and as the view changes width.
+- Its label width comes from Unity's alignment, so it behaves as Unity's own fields. In the Inspector window, Unity sizes labels from the inspector's main container, which includes the scroll bar, so labels keep their width when a scroll bar appears; the fields themselves end at the visible area. In an `InspectorElement` elsewhere, e.g. in a `ScrollView` of your own window, labels follow the `InspectorElement`'s width.
 - `Add()` and UXML children go into the input (`Input`), which lays them out in a row.
 - `AlignLabelToTop` keeps the label on the first line of tall content, e.g. a tag container that wraps.
 - It has no value of its own: bind or update the content.

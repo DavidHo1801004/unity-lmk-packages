@@ -8,6 +8,9 @@
 	align-items: center;
 	justify-content: center;
 
+	/* Unity's .unity-button, which this class replaces, centres the text: text used as an icon, e.g. "+", needs it. */
+	-unity-text-align: middle-center;
+
 	background-color: var(--lmk-color-button-background);
 	border-width: 0px 1px 0px 1px;
 	border-radius: 0px;

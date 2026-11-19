@@ -84,7 +84,7 @@ namespace LMK.Editor.Tests
 
         private Vector2 HeaderPoint(CollapsiblePanel _Panel)
         {
-            return new Vector2(_Panel.Header.worldBound.xMin + 10f, _Panel.Header.worldBound.center.y);
+            return _Panel.Header.Q(className: CollapsiblePanel.USS_CLASS_TITLE).worldBound.center; // the arrow is at the left end
         }
 
         #region Resize
