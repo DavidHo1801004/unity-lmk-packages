@@ -77,7 +77,7 @@ namespace LMK.Editor.Registry
 
         private const string SESSION_ACTIVE = "LMK.Registry.Import.Active";
         private const string SESSION_PATHS = "LMK.Registry.Import.Paths";
-        private const string MAP_MENU = "Assets/LMK Registries/Map References From Another Project...";
+        private const string MAP_MENU = "Assets/LMK/Registry/Map References From Another Project...";
         private const int MAX_LISTED = 10;
 
         /// <summary>

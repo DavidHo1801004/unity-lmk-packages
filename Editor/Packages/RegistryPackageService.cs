@@ -245,9 +245,9 @@ namespace LMK.Editor.Registry
 
 
         #region Commands
-        private const string GENERATE_MENU = "Assets/LMK Registries/Generate Registries For Package...";
-        private const string VALIDATE_MENU = "Assets/LMK Registries/Validate Package";
-        private const string PACK_MENU = "Assets/LMK Registries/Pack Package...";
+        private const string GENERATE_MENU = "Assets/LMK/Registry/Generate Registries For Package...";
+        private const string VALIDATE_MENU = "Assets/LMK/Registry/Validate Package";
+        private const string PACK_MENU = "Assets/LMK/Registry/Pack Package...";
 
         private static PackRequest packRequest;
         private static RegistryPackage packing;

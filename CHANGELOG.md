@@ -3,6 +3,11 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.3] - 2026-11-25
+
+### Changed
+- The Project window's *LMK Registries* context menu moved under *LMK*, next to the other LMK packages: *Assets → LMK → Registry* (*Generate Registries For Package...*, *Validate Package*, *Pack Package...*, *Map References From Another Project...*).
+
 ## [1.1.2] - 2026-11-19
 
 ### Added
