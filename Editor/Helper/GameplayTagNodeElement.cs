@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using LMK.Editor.Registry;
 using LMK.Editor.UIElements;
 using LMK.Editor.Utilities;
 using LMK.Runtime.GameplayTags;
@@ -104,6 +105,27 @@ namespace LMK.Editor.GameplayTags
         /// </summary>
         internal GameplayTagNodeElement MovePreview => movePreview;
 
+        /// <summary>
+        /// The world rect of what <see cref="ShowMovePreview"/> added to the tree, margins included: the preview, or
+        /// the whole content of a collapsed branch it opened. The rows after it are pushed down by its height. <br/>
+        /// <see langword="null"/> without a preview, or before the layout that places it.
+        /// </summary>
+        internal Rect? MovePreviewBound
+        {
+            get
+            {
+                if (movePreview == null) return null;
+
+                var added = IsBranch && !expandedBeforePreview ? foldout.contentContainer : movePreview;
+                var bound = added.worldBound;
+                if (float.IsNaN(bound.height) || bound.height <= 0f) return null;
+
+                var style = added.resolvedStyle;
+                float top = bound.yMin - style.marginTop;
+                return new Rect(bound.xMin, top, bound.width, bound.yMax + style.marginBottom - top);
+            }
+        }
+
 
 
         public GameplayTagNodeElement(GameplayTagNode _NodeData, GameplayTagTreeOptions _Options)
@@ -126,6 +148,7 @@ namespace LMK.Editor.GameplayTags
             foldout = root.Q<Foldout>("branch-tag");
             foldout.text = _NodeData.ShortTag;
             foldout.toggleOnLabelClick = false;
+            foldout.AddManipulator(new FoldoutArrowManipulator());
             var foldoutToggle = foldout.Q<Toggle>(className: Foldout.toggleUssClassName);
             foldoutToggle.RegisterCallback<ContextClickEvent>(OnContextClick);
             foldout.RegisterValueChangedCallback(OnFoldoutExpandValueChanged);

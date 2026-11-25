@@ -1,0 +1,13 @@
+/*
+ * Gameplay tags colour palette: light skin. Colours the LMK palette (com.lmk.editor's LMKThemeLight.uss) doesn't have.
+ * Applied to the tag fields by GameplayTagDrawerBinding.CreateField, for the current Editor skin.
+ * Keep the variable names in sync with GameplayTagThemeDark.uss.
+ */
+.gameplay-tag-field,
+.gameplay-tag-container-field {
+	/* Gameplay Tag field: a lighter box than the LMK field colours, so it reads as the tag itself. */
+	--gameplay-tag-color-tag-background: rgb(252, 252, 252);
+	--gameplay-tag-color-tag-background-hover: rgb(255, 255, 255);
+	--gameplay-tag-color-tag-border: rgba(0, 0, 0, 0.18);
+	--gameplay-tag-color-tag-border-hover: rgba(0, 0, 0, 0.3);
+}

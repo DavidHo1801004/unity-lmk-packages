@@ -7,16 +7,11 @@
     xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
 >
 <Style src="GameplayTagContainerUSS.uss"/>
-    <ui:VisualElement class="gameplay-tag__container">
-        <ui:Label name="property-label" class="gameplay-tag__label"/>
-        <ui:VisualElement name="main-container" class="gameplay-tag__content-container">
-            <ui:VisualElement name="tag-container" class="gameplay-tag__tag-container">
-                <lmk:Switcher name="tag-container-switcher">
-                    <ui:Label name="empty-tag-label" text="Empty"/>
-                    <ui:VisualElement name="tag-container-content" class="gameplay-tag__tag-container-content"/>
-                </lmk:Switcher>
-            </ui:VisualElement>
-            <ui:Image name="dropdown-icon" class="gameplay-tag__tag-container-dropdown-icon"/>
-        </ui:VisualElement>
+    <ui:VisualElement name="main-container" class="gameplay-tag__box">
+        <lmk:Switcher name="tag-container-switcher" class="gameplay-tag__switcher">
+            <ui:Label name="empty-tag-label" text="Empty" class="gameplay-tag__placeholder-label"/>
+            <ui:VisualElement name="tag-container-content" class="gameplay-tag__tag-container-content"/>
+        </lmk:Switcher>
+        <ui:VisualElement name="dropdown-arrow" class="gameplay-tag__dropdown-arrow" picking-mode="Ignore"/>
     </ui:VisualElement>
 </ui:UXML>

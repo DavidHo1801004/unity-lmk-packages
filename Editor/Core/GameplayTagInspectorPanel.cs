@@ -27,6 +27,9 @@ namespace LMK.Editor.GameplayTags
         private const string USS_CLASS = "tag-inspector";
         private const string USS_CHIP = USS_CLASS + "__chip";
 
+        // Built-in editor icon of Find References.
+        private const string SEARCH_ICON = "Search Icon";
+
         /// <summary>
         /// Called when the parent tag link is clicked.
         /// </summary>
@@ -65,7 +68,7 @@ namespace LMK.Editor.GameplayTags
                 return;
             }
 
-            Add(CreateTitle(_Node));
+            Add(CreateTitleRow(_Node));
             Add(CreateSubheading(_Node));
 
             // A line between the tag's identity and its fields.
@@ -85,6 +88,29 @@ namespace LMK.Editor.GameplayTags
 
 
         #region Elements
+        /// <summary>
+        /// The editable title, with the tag's actions as icons at the end.
+        /// </summary>
+        private VisualElement CreateTitleRow(GameplayTagNode _Node)
+        {
+            var titleRow = new VisualElement { name = "title-row" };
+            titleRow.AddToClassList(USS_CLASS + "__title-row");
+            titleRow.Add(CreateTitle(_Node));
+
+            // Reference tools write assets, not registries, so they work for tags of any registry.
+            var tag = (_Node.RegistryId, _Node.Id);
+            var findReferences = new ToolbarButton(false, () => RegistryReferenceWindow.ShowReferences(TagKind.Instance, tag))
+            {
+                name = "find-references-button",
+                iconImage = EditorGUIUtility.IconContent(SEARCH_ICON).image as Texture2D,
+                tooltip = "Find References",
+            };
+            findReferences.AddToClassList(USS_CLASS + "__icon");
+            titleRow.Add(findReferences);
+
+            return titleRow;
+        }
+
         private EditableLabel CreateTitle(GameplayTagNode _Node)
         {
             var title = new EditableLabel

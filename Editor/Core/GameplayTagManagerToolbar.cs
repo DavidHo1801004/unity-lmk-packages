@@ -20,7 +20,7 @@ namespace LMK.Editor.GameplayTags
     internal sealed class GameplayTagManagerToolbar : VisualElement
     {
         private const string USS_PATH = "Packages/com.lmk.gameplaytags/Editor/Assets/GameplayTagManagerWindowUSS.uss";
-        private const string GEAR_ICON_PATH = "Packages/com.lmk.gameplaytags/Editor/Assets/Sprites/gear_white_32.png";
+        internal const string GEAR_ICON_PATH ="Packages/com.lmk.gameplaytags/Editor/Assets/Sprites/gear_white_32.png";
 
         private const string USS_CLASS = "gameplay-tag-toolbar";
 
@@ -63,10 +63,43 @@ namespace LMK.Editor.GameplayTags
                 iconImage = LMKAssetUtility.Load<Texture2D>(GEAR_ICON_PATH),
                 tooltip = "Options",
             };
-            optionsButton.clicked += () => controlPanel.ShowGeneralMenu(optionsButton);
+            optionsButton.clicked += () => ShowOptionsMenu(optionsButton);
             registryToolbar.AddControl(optionsButton);
 
             Refresh();
+        }
+
+        /// <summary>
+        /// The Tag Manager's options menu, under <paramref name="_Anchor"/>: tree commands, markers, then registry commands.
+        /// The selection popup has its own, see <see cref="GameplayTagSelectionWindow"/>.
+        /// </summary>
+        private void ShowOptionsMenu(VisualElement _Anchor)
+        {
+            GenericDropdownMenu menu = new();
+
+            menu.AddItem("Collapse All", false, () => controlPanel.TagTree?.SetExpanded(false));
+            menu.AddItem("Expand All", false, () => controlPanel.TagTree?.SetExpanded(true));
+            menu.AddSeparator(null);
+
+            menu.AddItem("Manage Markers...", false, TagMarkerManagerWindow.Open);
+            menu.AddSeparator(null);
+
+            menu.AddItem("Import Tag Files...", false, GameplayTagCommands.ImportTagFiles);
+            menu.AddItem("Export Main Registry To Tag File...", false, GameplayTagCommands.ExportMainRegistry);
+            menu.AddSeparator(null);
+            menu.AddItem("Generate Code", false, GameplayTagCommands.GenerateCode);
+            menu.AddItem("Prune Unused Code Aliases", false, GameplayTagCommands.PruneCodeAliases);
+            menu.AddSeparator(null);
+            menu.AddItem("Relink Missing References...", false, GameplayTagCommands.RelinkMissingReferences);
+            menu.AddItem("Rebuild Reference Index", false, GameplayTagCommands.RebuildReferenceIndex);
+
+            if (ProjectAssetImport.HasPending)
+                menu.AddItem("Map Imported Assets", false, GameplayTagCommands.MapImportedAssets);
+
+            menu.DropDown(
+                _Anchor.ChangeCoordinatesTo(_Anchor.panel.visualTree, _Anchor.contentRect),
+                _Anchor,
+                DropdownMenuSizeMode.Auto);
         }
 
         /// <summary>

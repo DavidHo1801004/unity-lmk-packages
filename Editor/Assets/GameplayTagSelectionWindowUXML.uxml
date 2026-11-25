@@ -9,9 +9,7 @@
 >
 <Style src="GeneralGameplayTagUSS.uss"/>
 <Style src="GameplayTagSelectionWindowUSS.uss"/>
-    <lmk:NamedSeparator name="window-label" color="#707070" style="margin-bottom: 2px;"/>
-    <ui:Button name="clear-selection" class="gameplay-tag__menu-button" text="Clear Selection"/>
-    <ui:Button name="open-manager-window" class="gameplay-tag__menu-button" text="Manage Gameplay Tags..."/>
-    <lmk:NamedSeparator color="#707070"/>
+    <lmk:NamedSeparator name="window-label" color="#707070"/>
+    <uie:Toolbar name="toolbar" class="gameplay-tag-selection__toolbar"/>
     <lmk_gt:GameplayTagControlPanel/>
 </ui:UXML>

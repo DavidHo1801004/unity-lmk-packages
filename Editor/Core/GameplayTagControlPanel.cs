@@ -25,8 +25,6 @@ namespace LMK.Editor.GameplayTags
     {
         private const string UXML_PATH = "Packages/com.lmk.gameplaytags/Editor/Assets/GameplayTagControlPanelUXML.uxml";
 
-        private const string USS_CLASS_NO_HEADER = "gameplay-tag-control-panel--no-header";
-
         private const string RENAME_FIELD_CLASS = "tag-rename-field";
 
         /// <summary>
@@ -59,9 +57,6 @@ namespace LMK.Editor.GameplayTags
 
 
         private readonly VisualElement content;
-        private readonly VisualElement header;
-        private readonly SearchBar searchBar;
-        private readonly Button generalControlsButton;
 
         private readonly ScrollView tagTreeScrollView;
         private readonly Label emptyDataDisplay;
@@ -86,22 +81,6 @@ namespace LMK.Editor.GameplayTags
         /// The selected node, or <see langword="null"/>.
         /// </summary>
         internal GameplayTagNode SelectedNode { get; private set; }
-
-        private bool showHeader = true;
-        /// <summary>
-        /// Whether the panel shows its own search bar and options button. Turn it off when the host has its own.
-        /// </summary>
-        [UxmlAttribute(name = "show-header")]
-        public bool ShowHeader
-        {
-            get => showHeader;
-            set
-            {
-                showHeader = value;
-                header.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
-                content.EnableInClassList(USS_CLASS_NO_HEADER, !value);
-            }
-        }
 
         /// <summary>
         /// Whether context menus offer edits of the main registry. Edits are staged until they are saved in the
@@ -161,15 +140,7 @@ namespace LMK.Editor.GameplayTags
             LMKTheme.ApplyIfStandalone(this);
             content.style.flexGrow = 1;
 
-            // Search bar and options
-            header = content.Q("search-bar-controls");
-
-            searchBar = content.Q<SearchBar>();
-            searchBar.tooltip = SEARCH_HELP;
-            searchBar.RegisterValueChangedCallback(e => SetFilter(e.newValue));
-
-            generalControlsButton = content.Q<Button>("general-controls");
-            generalControlsButton.clicked += () => ShowGeneralMenu(generalControlsButton);
+            // Search and options belong to the host's toolbar, see SetFilter.
 
             // Scrollable tag tree
             tagTreeScrollView = content.Q<ScrollView>("tag-tree-scroll-view");
@@ -388,11 +359,13 @@ namespace LMK.Editor.GameplayTags
             bool canEdit = Editable && !node.IsReadOnly;
             GenericDropdownMenu menu = new();
 
+            // Items are grouped by what they do: add, edit, references, copy, then delete.
             if (node.IsRegistryHeader)
             {
                 if (canEdit)
                 {
                     menu.AddItem("Add Tag", false, () => AddTagRequested?.Invoke(string.Empty));
+                    menu.AddSeparator(null);
                     menu.AddItem("Import Tag Files...", false, GameplayTagCommands.ImportTagFiles);
                 }
 
@@ -407,19 +380,22 @@ namespace LMK.Editor.GameplayTags
                         .FirstOrDefault(e => e.name == registry.Data.package));
 
                     if (package != null)
+                    {
+                        menu.AddSeparator(null);
                         menu.AddItem("Regenerate From Package...", false, () => GameplayTagCommands.GeneratePackageRegistryWithDialog(package));
+                    }
                 }
             }
             else
             {
                 if (canEdit)
                 {
+                    menu.AddItem("Add Sibling Tag", false, () => AddTagRequested?.Invoke(SiblingPrefix(node)));
                     menu.AddItem("Add Sub Tag", false, () => AddTagRequested?.Invoke(node.FullTag + TagPath.SEPARATOR));
-                    if (!node.IsExplicit)
-                        menu.AddItem("Make Explicit", false, () => MakeExplicit(node));
                     menu.AddSeparator(null);
                     menu.AddItem("Rename Tag", false, () => RenameTag(_Callback.element, node));
-                    menu.AddItem(node.ChildCount > 0 ? "Delete Tag And Sub Tags" : "Delete Tag", false, () => DeleteTag(node));
+                    if (!node.IsExplicit)
+                        menu.AddItem("Make Explicit", false, () => MakeExplicit(node));
                     menu.AddSeparator(null);
                 }
 
@@ -433,6 +409,12 @@ namespace LMK.Editor.GameplayTags
                 }
 
                 menu.AddItem("Copy To Clipboard", false, () => GUIUtility.systemCopyBuffer = node.FullTag);
+
+                if (canEdit)
+                {
+                    menu.AddSeparator(null);
+                    menu.AddItem(node.ChildCount > 0 ? "Delete Tag And Sub Tags" : "Delete Tag", false, () => DeleteTag(node));
+                }
             }
 
             menu.DropDown(
@@ -442,45 +424,15 @@ namespace LMK.Editor.GameplayTags
         }
 
         /// <summary>
-        /// The options menu, under <paramref name="_Anchor"/>. Tree commands, then registry commands when
-        /// <see cref="Editable"/>, or a way to the Gameplay Tag Manager otherwise.
+        /// Path to start a sibling of <paramref name="_Node"/> from: its parent's path and a separator, or empty for a
+        /// top level tag.
         /// </summary>
-        internal void ShowGeneralMenu(VisualElement _Anchor)
+        internal static string SiblingPrefix(GameplayTagNode _Node)
         {
-            GenericDropdownMenu menu = new();
-
-            menu.AddItem("Collapse All", false, () => TagTree?.SetExpanded(false));
-            menu.AddItem("Expand All", false, () => TagTree?.SetExpanded(true));
-            menu.AddSeparator(null);
-
-            // Markers are the user's own, so every tag tree offers them.
-            menu.AddItem("Manage Markers...", false, TagMarkerManagerWindow.Open);
-            menu.AddSeparator(null);
-
-            if (Editable)
-            {
-                menu.AddItem("Import Tag Files...", false, GameplayTagCommands.ImportTagFiles);
-                menu.AddItem("Export Main Registry To Tag File...", false, GameplayTagCommands.ExportMainRegistry);
-                menu.AddSeparator(null);
-                menu.AddItem("Generate Code", false, GameplayTagCommands.GenerateCode);
-                menu.AddItem("Prune Unused Code Aliases", false, GameplayTagCommands.PruneCodeAliases);
-                menu.AddSeparator(null);
-                menu.AddItem("Relink Missing References...", false, GameplayTagCommands.RelinkMissingReferences);
-                menu.AddItem("Rebuild Reference Index", false, GameplayTagCommands.RebuildReferenceIndex);
-
-                if (ProjectAssetImport.HasPending)
-                    menu.AddItem("Map Imported Assets", false, GameplayTagCommands.MapImportedAssets);
-            }
-            else
-            {
-                menu.AddItem("Open Tag Manager", false, GameplayTagManagerWindow.Open);
-            }
-
-            menu.DropDown(
-                _Anchor.ChangeCoordinatesTo(_Anchor.panel.visualTree, _Anchor.contentRect),
-                _Anchor,
-                DropdownMenuSizeMode.Auto);
+            string parent = TagPath.GetParent(_Node.FullTag);
+            return string.IsNullOrEmpty(parent) ? string.Empty : parent + TagPath.SEPARATOR;
         }
+
         #endregion
 
         #region Tag Controls

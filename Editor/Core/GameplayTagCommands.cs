@@ -38,7 +38,7 @@ namespace LMK.Editor.GameplayTags
             TagFileExport.ExportWithDialog(main);
         }
 
-        private const string ASSETS_EXPORT_MENU = "Assets/Gameplay Tags/Export To Tag File...";
+        private const string ASSETS_EXPORT_MENU = "Assets/LMK/Gameplay Tags/Export To Tag File...";
 
         /// <summary>
         /// Export the registry files selected in the Project window: main, package or generated.

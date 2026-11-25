@@ -11,7 +11,7 @@ namespace LMK.Editor.GameplayTags
     /// file are reported as warnings. Stores no tags and never writes anything: importing a tag file into the
     /// main registry is a separate, explicit command.
     /// </summary>
-    [ScriptedImporter(1, TagFile.EXTENSION)]
+    [ScriptedImporter(3, TagFile.EXTENSION)]
     internal sealed class TagFileImporter : ScriptedImporter
     {
         public override void OnImportAsset(AssetImportContext _Context)
@@ -26,8 +26,14 @@ namespace LMK.Editor.GameplayTags
             foreach (string warning in result.Warnings)
                 _Context.LogImportWarning(warning);
 
+            // A dependency, so the icon is there whatever imports first, and follows changes to the texture.
+            _Context.DependsOnArtifact(TagFileAsset.ICON_PATH);
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(TagFileAsset.ICON_PATH);
+            if (icon == null)
+                icon = EditorGUIUtility.IconContent("TextAsset Icon").image as Texture2D;
+
             var asset = ScriptableObject.CreateInstance<TagFileAsset>();
-            _Context.AddObjectToAsset("main", asset, EditorGUIUtility.IconContent("TextAsset Icon").image as Texture2D);
+            _Context.AddObjectToAsset("main", asset, icon);
             _Context.SetMainObject(asset);
         }
     }

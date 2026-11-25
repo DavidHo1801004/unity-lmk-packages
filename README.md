@@ -64,7 +64,7 @@ Some limits of staged edits:
 
 Markers are personal: named colours you define once and put on tags of any registry, several per tag. They're saved in `UserSettings/LMKGameplayTags/Markers.json`, which isn't committed. Markers aren't staged: every change is saved at once, *Save* and *Discard* don't affect them, and Undo and Redo do. A markers file from 1.1.0 or earlier (one colour per tag) is converted the first time it loads: each colour becomes a marker named "Marker 1", "Marker 2" and so on.
 
-**Manage Markers** (options menu of any tag tree, the Inspector's **+** menu, or *Tools → LMK → Gameplay Tags → Manage Markers...*) lists every marker: rename it, set any colour, see how many tags use it, delete it (with a confirmation when tags use it; it's removed from them), add one, or drag the ≡ handle to reorder them. The order is the order tag rows show markers in.
+**Manage Markers** (the Gameplay Tag Editor's options menu, the Inspector's **+** menu, or *Tools → LMK → Gameplay Tags → Manage Markers...*) lists every marker: rename it, set any colour, see how many tags use it, delete it (with a confirmation when tags use it; it's removed from them), add one, or drag the ≡ handle to reorder them. The order is the order tag rows show markers in.
 
 ### Finding and rewriting references
 
@@ -92,10 +92,10 @@ Status.Stun
 Tag files hold no IDs. Anyone can edit them, and nothing changes until they are imported:
 
 - **Inspect:** select a `.tags` file in the Project window. The Inspector shows its tags as a tree, each marked *new*, *exists*, *made explicit* or *description differs* against the main registry, and lists any invalid lines. It reads the file directly, so no copy of its tags is stored.
-- **Import:** *Tools → LMK → Gameplay Tags → Import Tag Files...*, or select `.tags` files in the Project window and choose *Gameplay Tags → Import Into Main Registry...*. The window previews the changes before you import. New paths are added with their parents. A path that exists only as an implicit parent becomes explicit and keeps its ID. The import is one Undo step, and is staged like any other edit, so save it in the Tag Editor.
+- **Import:** *Tools → LMK → Gameplay Tags → Import Tag Files...*, or select `.tags` files in the Project window and choose *LMK → Gameplay Tags → Import Into Main Registry...*. The window previews the changes before you import. New paths are added with their parents. A path that exists only as an implicit parent becomes explicit and keeps its ID. The import is one Undo step, and is staged like any other edit, so save it in the Tag Editor.
   - *Overwrite descriptions* replaces the descriptions of existing tags. A line without `;` never changes a description.
   - *Remove tags not in the file(s)* deletes the main registry's other tags, after a dialog that lists them.
-- **Export:** *Tools → LMK → Gameplay Tags → Export Main Registry To Tag File...* exports the main registry. To export any registry (main, package or generated), right-click its header in the Tag Editor, or select `.tagregistry` files in the Project window and choose *Gameplay Tags → Export To Tag File...*. Several selected registries are exported to one folder. Export never changes a registry.
+- **Export:** *Tools → LMK → Gameplay Tags → Export Main Registry To Tag File...* exports the main registry. To export any registry (main, package or generated), right-click its header in the Tag Editor, or select `.tagregistry` files in the Project window and choose *LMK → Gameplay Tags → Export To Tag File...*. Several selected registries are exported to one folder. Export never changes a registry.
 
 Tags are matched by path. Renaming a line in a tag file and importing it creates a new tag, so rename tags in the Tag Editor, where references follow.
 
@@ -103,11 +103,11 @@ Tags are matched by path. Renaming a line in a tag file and importing it creates
 
 A package can ship its own registry (kind `package`) anywhere inside it. It loads while the package is installed, and is read-only. Uninstalling the package makes its references show as `(deleted)`; reinstalling it brings them back. Neither writes anything to your project. Packages should put their tags under their own top-level name, such as `VendorCombat.*`.
 
-**Packages without a registry.** A package whose assets reference tags from its author's project shows them as `(deleted)`. Select its folder in the Project window and choose *LMK Registries → Generate Registries For Package...*. This writes a registry of kind `generated` to `Assets/GameplayTags/Packages/<package>.tagregistry`, with the registry ID and tag IDs the package's assets use, so they resolve without changing the package. Tags listed in the package's tag files are added too. Commit the file. It loads only while the package is installed.
+**Packages without a registry.** A package whose assets reference tags from its author's project shows them as `(deleted)`. Select its folder in the Project window and choose *LMK → Registry → Generate Registries For Package...*. This writes a registry of kind `generated` to `Assets/GameplayTags/Packages/<package>.tagregistry`, with the registry ID and tag IDs the package's assets use, so they resolve without changing the package. Tags listed in the package's tag files are added too. Commit the file. It loads only while the package is installed.
 
 When the package is updated, the Tag Editor offers to regenerate the registry: right-click its header and choose *Regenerate From Package...*. Nothing regenerates on its own. Regenerating keeps existing tags, unless you choose *Regenerate And Remove Unused*.
 
-**Packages you author.** Select your package's folder (embedded or local) and choose *LMK Registries → Validate Package* or *Pack Package...*. Packing is refused unless, for its tags:
+**Packages you author.** Select your package's folder (embedded or local) and choose *LMK → Registry → Validate Package* or *Pack Package...*. Packing is refused unless, for its tags:
 - the package contains exactly one registry of kind `package`, with a valid checksum;
 - its assets reference only that registry, or the registry of a package listed in its `package.json` dependencies, never your project's main registry;
 - every referenced tag exists;
@@ -123,7 +123,7 @@ Assets from another project reference that project's main registry, which yours 
 
 Only the imported assets are changed. A log in `Logs/LMKRegistry/` lists every added tag and rewritten reference. Cancelled or failed imports, pulls and copied files are never mapped.
 
-Mapping needs the tag lock. Without it, the assets wait, and the Tag Editor offers *Map Imported Assets* in its options menu. To map assets that came in another way, select them or their folder and choose *LMK Registries → Map References From Another Project...*.
+Mapping needs the tag lock. Without it, the assets wait, and the Tag Editor offers *Map Imported Assets* in its options menu. To map assets that came in another way, select them or their folder and choose *LMK → Registry → Map References From Another Project...*.
 
 ## Usage
 
@@ -145,6 +145,10 @@ public class Example : MonoBehaviour
     }
 }
 ```
+
+In the Inspector, both fields line up with the fields around them. A Gameplay Tag field is a box as wide as the tag's name, with the dropdown arrow after it. A Gameplay Tag Container field is a box that fills the field and grows with its tags. A Gameplay Tag field shows the tag's path, or *None*. A Gameplay Tag Container field lists its tags, each with **×** to remove it, or shows *Empty*. When the selected objects hold different values, the field shows *- Mixed -*.
+
+Clicking a field opens the tag picker. Its toolbar has a search field (same syntax as the Gameplay Tag Editor's), *Clear*, and an options menu (*Collapse All*, *Expand All*, *Open Tag Manager*). When you edit a container on several objects, the picker starts with the tags they all hold. Ticking a tag adds it to every object, unticking one removes it from every object, and tags only some of the objects hold stay as they are. *Clear* empties every object's container.
 
 ### Generated constants
 
@@ -186,7 +190,7 @@ An empty query matches nothing: check `IsEmpty` where no query should mean no re
 - `TagGuid` is now `RegistryGuid` (namespace `LMK.Runtime.Registry`), with the same layout and text form. `TagGuid` still compiles, as an obsolete type that converts to and from `RegistryGuid`.
 - The 1.0.0 settings (`ProjectSettings/LMKGameplayTagSettings.asset`) are carried over once into `ProjectSettings/LMKRegistrySettings.asset`. Commit the new file. The old one is no longer used.
 - The reference index rebuilds once, in its new place in `Library/`.
-- Commands shared by every registry kind moved to *Tools → LMK → Registries* and *Assets → LMK Registries*: *Rebuild Reference Index*, *Generate Registries For Package...*, *Validate Package*, *Pack Package...* and *Map References From Another Project...*. The lock provider and the shared build policy are in *Project Settings → LMK → Registries*.
+- Commands shared by every registry kind moved to *Tools → LMK → Registries* and *Assets → LMK → Registry*: *Rebuild Reference Index*, *Generate Registries For Package...*, *Validate Package*, *Pack Package...* and *Map References From Another Project...*. The lock provider and the shared build policy are in *Project Settings → LMK → Registries*.
 - `GameplayTagDatabase.ActiveDatabaseChanged` passes the previous and the new database. `ActiveChanged` still works.
 - Saving in the Tag Editor saves the unsaved edits of every registry kind.
 
@@ -203,7 +207,7 @@ An empty query matches nothing: check `IsEmpty` where no query should mean no re
 ## Requirements
 
 - Unity 6000.3 or newer.
-- `com.lmk.editor` 0.3.0 and `com.lmk.registry` 1.0.0 (dependencies).
+- `com.lmk.editor` 0.4.0 and `com.lmk.registry` 1.0.0 (dependencies).
 
 ## Installation
 
@@ -215,13 +219,13 @@ An empty query matches nothing: check `IsEmpty` where no query should mean no re
       { "name": "OpenUPM", "url": "https://package.openupm.com", "scopes": [ "com.lmk" ] }
     ],
     "dependencies": {
-      "com.lmk.gameplaytags": "1.2.0"
+      "com.lmk.gameplaytags": "2.0.0"
     }
     ```
 - **Git URL:** add the three packages in *Package Manager → + → Add package from git URL*, in this order, since Git URLs don't resolve dependencies:
-  1. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.3.0`
+  1. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.editor/0.4.0`
   2. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.registry/1.0.0`
-  3. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/1.2.0`
+  3. `https://github.com/DavidHo1801004/unity-lmk-packages.git#com.lmk.gameplaytags/2.0.0`
 - **Embedded:** copy the `com.lmk.gameplaytags` folder into your project's `Packages/` folder, and install `com.lmk.editor` and `com.lmk.registry`.
 
 The package is published on branch `upm/com.lmk.gameplaytags`, with one tag per version (`com.lmk.gameplaytags/<version>`).

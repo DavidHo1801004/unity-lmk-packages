@@ -1,89 +1,91 @@
-.gameplay-tag__container {
-	flex-direction: row;
-	margin: 1px 0px 1px 3px;
-}
-
-.gameplay-tag__content-container {
+/*
+Gameplay Tag Container field (GameplayTagContainerDrawer). Everything here is inside the field's input: a dropdown box
+in the LMK theme, filling the input, as tall as its tags (at least one line), with the arrow at its end.
+*/
+.gameplay-tag__box {
 	flex-grow: 1;
+	flex-shrink: 1;
 	flex-direction: row;
-
-	border-radius: 4px;
-
-	transition: background-color;
-	transition-duration: 0.1s;
-}
-.gameplay-tag__content-container:hover {
-	background-color: var(--lmk-color-item-hover);
-}
-
-.gameplay-tag__tag-container {
-	min-height: 20px;
-	align-items: center;
-	flex-grow: 1;
-	flex-direction: row;
-	justify-content: space-between;
-	padding: 2px;
+	align-items: flex-start;
+	min-width: 0;
+	min-height: 18px;
+	padding: 0px 2px 0px 1px;
+	overflow: hidden;
 
 	background-color: var(--lmk-color-field-background);
-	border-radius: 4px;
 	border-width: 1px;
 	border-color: var(--lmk-color-field-border);
+	border-radius: 3px;
+
+	transition-property: background-color, border-color;
+	transition-duration: 0.1s;
+}
+
+.gameplay-tag__box:hover {
+	background-color: var(--lmk-color-field-background-hover);
+	border-color: var(--lmk-color-field-border-hover);
+}
+
+.gameplay-tag__dropdown-arrow {
+	flex-shrink: 0;
+	align-self: center;
+	width: 12px;
+	height: 12px;
+	margin: 0px 0px 0px 2px;
+
+	background-image: url("Sprites/down-arrow_white_32.png");
+	-unity-background-image-tint-color: var(--lmk-color-icon);
+	-unity-background-scale-mode: scale-to-fit;
+}
+
+.gameplay-tag__switcher {
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-width: 0;
 }
 
 .gameplay-tag__tag-container-content {
 	flex-grow: 1;
 	flex-direction: column;
-	margin-bottom: -2px;
+	padding: 2px 1px 1px 1px;
 
 	overflow: hidden;
 }
 
-.gameplay-tag__tag-container-dropdown-icon {
-	min-height: 12px;
-	height: 12px;
-	min-width: 12px;
-	width: 12px;
-	margin: 0px 2px 0px 2px;
-	align-self: center;
-	
-	--unity-image: url("Sprites/down-arrow_white_32.png");
-}
-
-#property-label.gameplay-tag__label {
-	width: 40%;
-	min-width: 100px;
-	padding: 2px 0px 0px 0px;
-
-	-unity-text-align: upper-left;
+.gameplay-tag__tag-container-content .gameplay-tag__tag-value-container {
+	flex-direction: row;
+	margin: 0 0 1px 0;
 }
 
 .gameplay-tag__tag-container-content .gameplay-tag__tag-value {
 	flex-grow: 0;
-	height: 15px;
-	padding: 0px 4px 1px 4px;
-	margin: 0px 2px 2px 0px;
+	flex-shrink: 1;
+	height: 14px;
+	padding: 0 4px 0 4px;
+	margin: 0;
 	overflow: hidden;
 
 	background-color: var(--lmk-color-header-background-hover);
-	border-radius: 0px 3px 3px 0px;
+	border-radius: 0 3px 3px 0;
 
 	text-overflow: ellipsis;
 	-unity-text-align: middle-left;
 }
 
 .gameplay-tag__tag-container-content .gameplay-tag__tag-value-clear-button {
-	width: 15px;
-	height: 15px;
-	padding: 0px 2px 2px 2px;
-	margin: 0px;
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+	padding: 0 0 1px 0;
+	margin: 0;
 
-	border-width: 0px 1px 0px 0px;
+	border-width: 0 1px 0 0;
 	border-color: var(--lmk-color-content-border);
-	border-radius: 3px 0px 0px 3px;
+	border-radius: 3px 0 0 3px;
 	background-color: #6e3d32;
 
 	-unity-text-align: middle-center;
-	
+
 	transition-property: background-color;
 	transition-duration: 0.1s;
 }
@@ -93,12 +95,17 @@
 	background-color: #913421;
 }
 
-#empty-tag-label.unity-label {
-	align-self: stretch;
+.gameplay-tag__placeholder-label {
 	flex-grow: 1;
-	padding: 0px 2px 0px 2px;
+	flex-shrink: 1;
+	height: 16px;
+	padding: 0 2px 0 2px;
+	margin: 0;
+	overflow: hidden;
 
-	color: var(--lmk-color-text-placeholder);
+	color: var(--lmk-color-text-muted);
+	text-overflow: ellipsis;
+	-unity-text-align: middle-left;
 }
 
 

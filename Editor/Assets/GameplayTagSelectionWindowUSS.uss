@@ -6,14 +6,38 @@
 	border-radius: 4px;
 }
 
-.gameplay-tag__menu-button {
-	border-width: 0px;
-	border-radius: 1px;
-	background-color: var(--lmk-color-header-background);
+/*
+Toolbar above the tag tree: search, Clear, options. The search field takes the room the buttons leave.
+*/
+.gameplay-tag-selection__toolbar {
+	flex-direction: row;
+	flex-shrink: 0;
+	align-items: center;
+	height: 22px;
 
-	transition: background-color;
-	transition-duration: 0.1s;
+	background-color: var(--lmk-color-header-background);
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	border-color: var(--lmk-color-border);
 }
-.gameplay-tag__menu-button:hover {
-	background-color: var(--lmk-color-header-background-hover);
+
+.gameplay-tag-selection__toolbar > #search-field {
+	flex-grow: 1;
+	flex-shrink: 1;
+	width: auto;
+	min-width: 60px;
+	margin: 0px 6px 0px 6px;
+}
+
+.gameplay-tag-selection__toolbar > .toolbar-button {
+	flex-shrink: 0;
+	height: 21px;
+	font-size: 12px;
+	padding: 0px 8px 0px 8px;
+	-unity-text-align: middle-center;
+}
+
+.gameplay-tag-selection__toolbar > #options-button {
+	width: 22px;
+	padding: 3px;
 }

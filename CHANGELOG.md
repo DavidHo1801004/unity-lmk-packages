@@ -3,6 +3,33 @@
 All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this package follows [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] - 2026-11-25
+
+Major version: `GameplayTagControlPanel` no longer has its own search bar and options button, and `ShowHeader` (`show-header` in UXML) is removed. Hosts put their own toolbar above the panel, as the tag picker and the Gameplay Tag Editor do. Serialized data and the rest of the API are unchanged.
+
+### Added
+- *Add Sibling Tag* in a tag's context menu: starts the new tag's path from its parent's.
+- A Find References icon at the end of the Inspector panel's title row.
+- Icons for tag registries and tag files, in two colours: white and the tag category's amber tint. The tag registry keeps its two hanging tags.
+
+### Changed
+- Requires `com.lmk.editor` 0.4.0. Gameplay Tag and Gameplay Tag Container fields use its `AlignedField`, and the Gameplay Tag Manager tree its `FoldoutArrowManipulator`.
+- Tag context menus are grouped by what they do: add, edit, references, copy, then delete, which is now last and on its own.
+- The Gameplay Tag and Gameplay Tag Container fields follow Unity's label width rule, and are skinned in the LMK theme. A Gameplay Tag is a one-line (18px) box only as wide as the tag's name, with the dropdown arrow after it. A container is a box that fills the field and grows by one line per tag.
+- The Project window's *Gameplay Tags* context menu (*Import Into Main Registry...*, *Export To Tag File...*) moved under *LMK*: *LMK → Gameplay Tags*, next to the registry core's *LMK → Registry*.
+- When the selected objects hold different tags, the Gameplay Tag and Gameplay Tag Container fields show a dimmed *- Mixed -* in place of the first object's value.
+- The tag picker has a single toolbar: Unity's search field, *Clear*, and an options menu of its own (*Collapse All*, *Expand All*, *Open Tag Manager*). The *Clear Selection* and *Manage Gameplay Tags...* buttons are gone, and *Manage Markers...* is only in the Gameplay Tag Editor's options menu.
+- Editing a container on several objects: the picker starts with the tags they all hold. Ticking or unticking a tag adds it to or removes it from every object, and *Clear* empties all of them.
+
+### Removed
+- `GameplayTagControlPanel`'s own search bar and options button, and its `show-header` attribute. The Gameplay Tag Editor and the tag picker have their own toolbars.
+
+### Fixed
+- The Inspector header of a tag registry or tag file shows its icon, not the default ScriptableObject icon.
+- Gameplay Tag Manager: a branch expands and collapses from its arrow only. Clicking the edge of its row, or the space around its name, toggled it.
+- *Project Settings → LMK → Gameplay Tags* shows the actual baked database and generated code paths, not the defaults.
+- A Gameplay Tag Container field edited on several objects removed entries by the first object's list indices, so the other objects could lose the wrong tags. Changes are now applied to each object by tag.
+
 ## [1.2.0] - 2026-11-14
 
 ### Added

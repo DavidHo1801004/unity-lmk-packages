@@ -1,14 +1,12 @@
 using System.Collections.Generic;
 
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 using LMK.Editor.UIElements;
 using LMK.Runtime.GameplayTags;
 using LMK.Editor.Utilities;
-using LMK.Editor.Styles;
 
 namespace LMK.Editor.GameplayTags
 {
@@ -17,13 +15,20 @@ namespace LMK.Editor.GameplayTags
     /// </summary>
     /// <remarks>
     /// While any selected object holds missing tags, a click offers only "Remove N missing tag(s)".
-    /// Otherwise it opens the picker. The picker's changes are applied as a diff (append added tags, remove
-    /// removed ones), so untouched entries keep their indices.
+    /// Otherwise it opens the picker. The picker's changes are applied to each selected object as a diff (append added
+    /// tags, remove removed ones), so untouched entries keep their indices. When the selected objects hold different
+    /// tags, the field shows "- Mixed -" and the picker starts with the tags they all hold.
     /// </remarks>
     [CustomPropertyDrawer(typeof(GameplayTagContainer))]
     internal sealed class GameplayTagContainerDrawer : PropertyDrawer
     {
         private const string UXML_PATH = "Packages/com.lmk.gameplaytags/Editor/Assets/GameplayTagContainerUXML.uxml";
+
+        private const string USS_CLASS = "gameplay-tag-container-field";
+
+        private const string EMPTY_TEXT = "Empty";
+        private const string UNDO_EDIT = "Edit Gameplay Tag Container";
+        private const string UNDO_CLEAR = "Clear Gameplay Tag Container";
 
 
 
@@ -36,81 +41,92 @@ namespace LMK.Editor.GameplayTags
             VisualTreeAsset visualTree = LMKAssetUtility.Load<VisualTreeAsset>(UXML_PATH);
             if (visualTree == null) return base.CreatePropertyGUI(_Property);
 
-            var root = visualTree.CloneTree();
-            LMKTheme.ApplyIfStandalone(root);
+            var root = GameplayTagDrawerBinding.CreateField(_Property.displayName, visualTree.CloneTree(), USS_CLASS, true);
 
             string propertyPath = _Property.propertyPath;
+            var serializedObject = _Property.serializedObject;
 
-            root.Q<Label>("property-label").text = _Property.displayName;
-
+            var box = root.Q<VisualElement>("main-container");
             var contentSwitcher = root.Q<Switcher>("tag-container-switcher");
             var contentContainer = root.Q<VisualElement>("tag-container-content");
+            var placeholder = root.Q<Label>("empty-tag-label");
 
             void RefreshDisplay()
             {
                 if (!GameplayTagDrawerHelper.IsAlive(tagsProperty)) return;
 
-                PopulateTagDisplays(tagsProperty, contentSwitcher, contentContainer);
+                PopulateTagDisplays(serializedObject.targetObjects, propertyPath, contentSwitcher, contentContainer, placeholder, OnRemoveTag);
+            }
+
+            // Writes go to each target on its own, then the inspector's serialized object reads them back.
+            void AfterWrite()
+            {
+                if (!GameplayTagDrawerHelper.IsAlive(tagsProperty)) return;
+
+                serializedObject.Update();
+                RefreshDisplay();
+            }
+
+            void OnRemoveTag(GameplayTag _Tag)
+            {
+                if (!GameplayTagDrawerHelper.IsAlive(tagsProperty)) return;
+
+                GameplayTagDrawerHelper.ApplyChange(serializedObject.targetObjects, propertyPath, null, new[] { _Tag }, UNDO_EDIT);
+                AfterWrite();
             }
 
             contentSwitcher.OnAttachedToPanel += RefreshDisplay;
 
-            // Undo, prefab overrides, other editors and registry changes can all change what is shown.
-            root.TrackPropertyValue(tagsProperty, _ => RefreshDisplay());
-            root.RegisterCallback<AttachToPanelEvent>(_ => TagRegistryService.OnSnapshotChanged += RefreshDisplay);
-            root.RegisterCallback<DetachFromPanelEvent>(_ => TagRegistryService.OnSnapshotChanged -= RefreshDisplay);
+            GameplayTagDrawerBinding.BindRefresh(root, tagsProperty, RefreshDisplay);
 
-            var tagContainer = root.Q<VisualElement>("tag-container");
-            var mainContainer = root.Q<VisualElement>("main-container");
-
-            mainContainer.RegisterCallback<PointerDownEvent>((e) =>
+            GameplayTagDrawerBinding.BindClick(box, _Property, true, AfterWrite, () =>
             {
-                if (e.button != 0 || !GameplayTagDrawerHelper.IsAlive(tagsProperty)) return;
+                var targets = serializedObject.targetObjects;
 
-                // Clicking a tag's remove button should not open the window.
-                if (e.target is Button) return;
+                // The picker shows the tags every target holds. Each change is applied to every target as a diff from
+                // the previous selection, so tags only some targets hold stay as they are.
+                var lastSelection = GameplayTagDrawerHelper.CommonTags(targets, propertyPath);
 
-                var targets = _Property.serializedObject.targetObjects;
-
-                // While missing tags are present, the only action is to remove them.
-                int missing = GameplayTagDrawerHelper.CountMissing(targets, propertyPath, true);
-                if (missing > 0)
-                {
-                    var menu = new GenericMenu();
-                    menu.AddItem(new GUIContent(GameplayTagDrawerHelper.GetRemoveMissingLabel(true, missing)), false, () =>
-                    {
-                        GameplayTagDrawerHelper.RemoveMissing(targets, propertyPath, true);
-                        _Property.serializedObject.Update();
-                        RefreshDisplay();
-                    });
-                    menu.ShowAsContext();
-                    return;
-                }
+                // Mixed, Clear must also remove the tags only some targets hold, which the picker doesn't show.
+                bool mixed = targets.Length > 1 && GameplayTagDrawerHelper.HasMixedTags(targets, propertyPath);
 
                 GameplayTagSelectionWindow.Open(
-                    _GUILocation: new Vector2(tagContainer.worldBound.xMin, mainContainer.worldBound.yMax),
+                    _GUILocation: new Vector2(box.worldBound.xMin, box.worldBound.yMax),
                     _WindowLabel: "GAMEPLAY TAG CONTAINER",
                     _SingleSelection: false,
-                    _SelectedTags: ReadAssigned(tagsProperty),
+                    _SelectedTags: lastSelection,
                     _OnSelectionChanged: (tags) =>
                     {
                         if (!GameplayTagDrawerHelper.IsAlive(tagsProperty)) return;
 
-                        tagsProperty.serializedObject.Update();
-                        ApplySelection(tagsProperty, tags);
-                        RefreshDisplay();
+                        var selection = new List<GameplayTag>(tags);
+                        var added = selection.FindAll(t => !lastSelection.Contains(t));
+                        var removed = lastSelection.FindAll(t => !selection.Contains(t));
+                        lastSelection = selection;
+
+                        GameplayTagDrawerHelper.ApplyChange(targets, propertyPath, added, removed, UNDO_EDIT);
+                        AfterWrite();
+                    },
+                    _OnCleared: !mixed ? null : () =>
+                    {
+                        if (!GameplayTagDrawerHelper.IsAlive(tagsProperty)) return;
+
+                        lastSelection = new List<GameplayTag>();
+
+                        GameplayTagDrawerHelper.RemoveAllLive(targets, propertyPath, UNDO_CLEAR);
+                        AfterWrite();
                     });
             });
 
             // Compact list: only offered when None entries exist (left by prefab-safe removal).
-            mainContainer.RegisterCallback<ContextClickEvent>((e) =>
+            box.RegisterCallback<ContextClickEvent>((e) =>
             {
                 if (!GameplayTagDrawerHelper.IsAlive(_Property)) return;
 
-                _Property.serializedObject.Update();
+                serializedObject.Update();
                 if (!GameplayTagDrawerHelper.HasNoneEntries(_Property)) return;
 
-                var targets = _Property.serializedObject.targetObjects;
+                var targets = serializedObject.targetObjects;
                 var menu = new GenericMenu();
                 menu.AddItem(new GUIContent("Compact List"), false, () => CompactWithWarning(targets, propertyPath));
                 menu.ShowAsContext();
@@ -124,50 +140,6 @@ namespace LMK.Editor.GameplayTags
 
 
         #region Serialized Tags
-        private static List<GameplayTag> ReadAssigned(SerializedProperty _TagsProperty)
-        {
-            var result = new List<GameplayTag>();
-            foreach (var tag in GameplayTagDrawerHelper.ReadList(_TagsProperty))
-                if (!tag.IsNone)
-                    result.Add(tag);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Apply the picker's selection as a diff: remove deselected entries (highest index first) and append
-        /// newly selected ones. Missing and None entries are never touched here.
-        /// </summary>
-        private static void ApplySelection(SerializedProperty _TagsProperty, IReadOnlyList<GameplayTag> _Selection)
-        {
-            var selected = new HashSet<GameplayTag>(_Selection);
-            var stored = GameplayTagDrawerHelper.ReadList(_TagsProperty);
-
-            for (int i = stored.Count - 1; i >= 0; i--)
-                if (!stored[i].IsNone && stored[i].IsLive && !selected.Contains(stored[i]))
-                    _TagsProperty.DeleteArrayElementAtIndex(i);
-
-            var present = new HashSet<GameplayTag>(stored);
-            foreach (var tag in _Selection)
-            {
-                if (tag.IsNone || present.Contains(tag)) continue;
-
-                _TagsProperty.arraySize++;
-                GameplayTagDrawerHelper.Write(_TagsProperty.GetArrayElementAtIndex(_TagsProperty.arraySize - 1), tag);
-            }
-
-            _TagsProperty.serializedObject.ApplyModifiedProperties();
-        }
-
-        private static void RemoveTagAt(SerializedProperty _TagsProperty, int _Index)
-        {
-            _TagsProperty.serializedObject.Update();
-            if (_Index < 0 || _Index >= _TagsProperty.arraySize) return;
-
-            _TagsProperty.DeleteArrayElementAtIndex(_Index);
-            _TagsProperty.serializedObject.ApplyModifiedProperties();
-        }
-
         private static void CompactWithWarning(Object[] _Targets, string _PropertyPath)
         {
             bool prefabAsset = false;
@@ -187,42 +159,52 @@ namespace LMK.Editor.GameplayTags
         #endregion
 
         #region Tag Value Display
-        private static void PopulateTagDisplays(SerializedProperty _TagsProperty, Switcher _ContentSwitcher, VisualElement _ContentContainer)
+        /// <summary>
+        /// Show the targets' tags, "Empty", or "- Mixed -" when the targets hold different tags. Missing tags are
+        /// shown too, as "(deleted)".
+        /// </summary>
+        private static void PopulateTagDisplays(
+            Object[] _Targets,
+            string _PropertyPath,
+            Switcher _ContentSwitcher,
+            VisualElement _ContentContainer,
+            Label _Placeholder,
+            System.Action<GameplayTag> _OnRemove)
         {
             _ContentContainer.Clear();
 
-            var tags = GameplayTagDrawerHelper.ReadList(_TagsProperty);
-
-            bool any = false;
-            for (int i = 0; i < tags.Count; i++)
+            if (_Targets.Length > 1 && GameplayTagDrawerHelper.HasMixedTags(_Targets, _PropertyPath))
             {
-                // None entries are placeholders kept for prefab overrides: not shown.
-                if (tags[i].IsNone) continue;
-
-                _ContentContainer.Add(CreateTagValueElement(_TagsProperty, tags[i], i));
-                any = true;
+                _Placeholder.text = GameplayTagDrawerHelper.MIXED_TEXT;
+                _Placeholder.tooltip = GameplayTagDrawerHelper.MIXED_TOOLTIP;
+                _ContentSwitcher.SwitchActive(0);
+                return;
             }
 
-            _ContentSwitcher.SwitchActive(any ? 1 : 0);
+            _Placeholder.text = EMPTY_TEXT;
+            _Placeholder.tooltip = string.Empty;
+
+            // None entries are placeholders kept for prefab overrides: not shown.
+            var tags = _Targets.Length > 0 ? GameplayTagDrawerHelper.ReadAssigned(_Targets[0], _PropertyPath) : new List<GameplayTag>();
+            foreach (var tag in tags)
+                _ContentContainer.Add(CreateTagValueElement(tag, _OnRemove));
+
+            _ContentSwitcher.SwitchActive(tags.Count > 0 ? 1 : 0);
         }
 
-        private static VisualElement CreateTagValueElement(SerializedProperty _TagsProperty, GameplayTag _Tag, int _Index)
+        private static VisualElement CreateTagValueElement(GameplayTag _Tag, System.Action<GameplayTag> _OnRemove)
         {
-            VisualElement container = new();
-            container.name = "gameplay-tag__tag-value-container";
-            container.style.flexDirection = FlexDirection.Row;
+            VisualElement container = new() { name = "gameplay-tag__tag-value-container" };
+            container.AddToClassList("gameplay-tag__tag-value-container");
 
             var tagValueClearButton = new Button()
             {
                 name = "gameplay-tag__tag-value-clear-button",
-                text = "x"
+                text = "x",
+                tooltip = "Remove",
             };
             tagValueClearButton.AddToClassList("gameplay-tag__tag-value-clear-button");
-            tagValueClearButton.clicked += () =>
-            {
-                if (GameplayTagDrawerHelper.IsAlive(_TagsProperty))
-                    RemoveTagAt(_TagsProperty, _Index);
-            };
+            tagValueClearButton.clicked += () => _OnRemove(_Tag);
             container.Add(tagValueClearButton);
 
             var tagDisplay = new Label() { name = "gameplay-tag__tag-value" };

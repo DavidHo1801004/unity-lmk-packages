@@ -6,6 +6,7 @@ using UnityEditorInternal;
 using UnityEngine;
 
 using LMK.Editor.Registry;
+using LMK.Runtime.GameplayTags;
 using LMK.Runtime.Registry;
 
 namespace LMK.Editor.GameplayTags
@@ -226,8 +227,9 @@ namespace LMK.Editor.GameplayTags
 
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Main registry", Kind.MainRegistryPath);
-                    EditorGUILayout.LabelField("Baked database", TagBuildProcessor.DATABASE_PATH);
-                    EditorGUILayout.LabelField("Generated code", TagCodeGen.DEFAULT_OUTPUT_PATH);
+                    // The kind's paths, not the defaults: they can differ.
+                    EditorGUILayout.LabelField("Baked database", RegistryBuildProcessor.DatabasePath(Kind, typeof(GameplayTagDatabase)));
+                    EditorGUILayout.LabelField("Generated code", Kind.CodeOutputPath);
 
                     EditorGUILayout.Space();
                     EditorGUILayout.HelpBox("The lock provider and the settings shared by every registry kind are in Project Settings → LMK → Registries.", MessageType.Info);

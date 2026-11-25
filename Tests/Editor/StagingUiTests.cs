@@ -91,6 +91,33 @@ namespace LMK.Editor.GameplayTags.Tests
         }
 
         [Test]
+        public void Inspector_TitleRow_HasTheFindReferencesIcon()
+        {
+            Add("A.B");
+            var inspector = new GameplayTagInspectorPanel();
+
+            inspector.SetNode(NodeOf("A.B"));
+
+            var titleRow = inspector.Q("title-row");
+            Assert.IsNotNull(titleRow.Q<EditableLabel>("tag-title"));
+            var findReferences = titleRow.Q<Button>("find-references-button");
+            Assert.IsNotNull(findReferences, "Find References sits at the end of the title row");
+            Assert.AreEqual(string.Empty, findReferences.text, "an icon only");
+            Assert.IsNull(inspector.Q("delete-button"), "Delete stays in the context menu");
+        }
+
+        [Test]
+        public void SiblingPrefix_IsTheParentPath_OrEmptyAtTheTop()
+        {
+            Add("A.B.C");
+            Add("Top");
+
+            Assert.AreEqual("A.B.", GameplayTagControlPanel.SiblingPrefix(NodeOf("A.B.C")));
+            Assert.AreEqual("A.", GameplayTagControlPanel.SiblingPrefix(NodeOf("A.B")));
+            Assert.AreEqual(string.Empty, GameplayTagControlPanel.SiblingPrefix(NodeOf("Top")));
+        }
+
+        [Test]
         public void Inspector_ImplicitTag_OffersMakeExplicit()
         {
             var b = Add("A.B");
@@ -215,6 +242,35 @@ namespace LMK.Editor.GameplayTags.Tests
             Assert.AreSame(b, GameplayTagMoveManipulator.FindRowOwner(b.Row));
             Assert.AreSame(b, GameplayTagMoveManipulator.FindRowOwner(b.Row.Q<Label>()));
             Assert.IsNull(GameplayTagMoveManipulator.FindRowOwner(b), "between rows");
+        }
+
+        [Test]
+        public void MoveManipulator_PicksAsIfThePreviewWereGone()
+        {
+            // A preview 40px high, from y = 100: the rows after it start 40px further down than without it.
+            var preview = new Rect(0f, 100f, 200f, 40f);
+
+            Assert.AreEqual(new Vector2(10f, 99f), GameplayTagMoveManipulator.MapPastPreview(new Vector2(10f, 99f), preview), "above the preview");
+            Assert.AreEqual(new Vector2(10f, 140f), GameplayTagMoveManipulator.MapPastPreview(new Vector2(10f, 100f), preview), "its top: the row after it");
+            Assert.AreEqual(new Vector2(10f, 160f), GameplayTagMoveManipulator.MapPastPreview(new Vector2(10f, 120f), preview), "over it");
+            Assert.AreEqual(new Vector2(10f, 200f), GameplayTagMoveManipulator.MapPastPreview(new Vector2(10f, 160f), preview), "below it");
+        }
+
+        [Test]
+        public void MovePreviewBound_IsNull_WithoutAPreviewOrALayout()
+        {
+            Add("Leaf");
+            Add("M.B");
+            var tree = new GameplayTagTreeElement(TagRegistryService.Snapshot.Root, new GameplayTagTreeOptions());
+            var target = tree.Find($"{Main.Id}:{IdOf("Leaf")}");
+
+            Assert.IsNull(target.MovePreviewBound, "no preview");
+
+            // Not in a panel, so never laid out: the rows haven't moved yet either.
+            target.ShowMovePreview(NodeOf("M.B"));
+            Assert.IsNull(target.MovePreviewBound, "no layout");
+
+            target.HideMovePreview();
         }
 
         private static GameplayTagNode NodeOf(string _Path)

@@ -18,7 +18,7 @@ namespace LMK.Editor.GameplayTags
     {
         private const string SESSION_OVERWRITE = "LMK.GameplayTags.Import.OverwriteDescriptions";
         private const string SESSION_REMOVE = "LMK.GameplayTags.Import.RemoveTagsNotInFiles";
-        private const string ASSETS_MENU = "Assets/Gameplay Tags/Import Into Main Registry...";
+        private const string ASSETS_MENU = "Assets/LMK/Gameplay Tags/Import Into Main Registry...";
 
         [SerializeField]
         private List<string> files = new();

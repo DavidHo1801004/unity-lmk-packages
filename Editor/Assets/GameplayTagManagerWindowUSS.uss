@@ -97,32 +97,32 @@ Inspector panel.
 /*
 Add Tag popup
 */
-#add-tag-popup {
+#add-tag-popup, .add-popup {
 	padding: 2px;
 }
 
-#add-tag-field {
+#add-tag-field, .add-popup__field {
 	height: var(--text-field-h);
 	margin: 0px;
 }
 
-#add-tag-field > .unity-label {
+#add-tag-field > .unity-label, .add-popup__field > .unity-label {
 	min-width: 40px;
 	padding: 0px 6px 0px 2px;
 
 	-unity-text-align: middle-left;
 }
 
-#add-tag-field .unity-text-field__input {
+#add-tag-field .unity-text-field__input, .add-popup__field .unity-text-field__input {
 	background-color: var(--lmk-color-field-background);
 }
 
-#add-tag-field.warning .unity-text-field__input {
+#add-tag-field.warning .unity-text-field__input, .add-popup__field.warning .unity-text-field__input {
 	border-color: var(--warning-color-light);
 	background-color: var(--warning-color);
 }
 
-#add-tag-error {
+#add-tag-error, .add-popup__error {
 	margin: 4px 0px 0px 2px;
 
 	color: var(--lmk-color-text-error);
@@ -148,8 +148,25 @@ Inspector panel
 	-unity-text-align: upper-center;
 }
 
+/* The editable title, then the item's actions as icons at the end. */
+.tag-inspector__title-row {
+	flex-direction: row;
+	align-items: center;
+}
+
 .tag-inspector__title {
+	flex-grow: 1;
+	flex-shrink: 1;
 	margin-bottom: 2px;
+}
+
+.tag-inspector__icon {
+	flex-shrink: 0;
+	width: 22px;
+	height: 22px;
+	margin-left: 2px;
+	padding: 3px;
+	border-radius: 3px;
 }
 
 .tag-inspector__subheading {

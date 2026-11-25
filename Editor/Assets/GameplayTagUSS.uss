@@ -1,65 +1,75 @@
-.gameplay-tag__container {
+/*
+Gameplay Tag field (GameplayTagDrawer). Everything here is inside the field's input: a one-line box in the LMK theme,
+only as wide as the tag's path (up to the input's width, then the path is cut with an ellipsis), and the arrow after
+the box, outside it. The box and the arrow are clicked together.
+*/
+.gameplay-tag__content {
+	flex-grow: 0;
+	flex-shrink: 1;
 	flex-direction: row;
-	margin: 1px 0px 1px 3px;
+	align-items: center;
+	align-self: flex-start; /* The template container is a column: on the left, not stretched across it. */
+	max-width: 100%;
+	min-width: 0px;
 }
 
-.gameplay-tag__content-container {
+.gameplay-tag__box {
+	flex-grow: 0;
+	flex-shrink: 1;
 	flex-direction: row;
-
-	border-radius: 4px;
-
-	transition: background-color;
-	transition-duration: 0.1s;
-}
-.gameplay-tag__content-container:hover {
-	background-color: var(--lmk-color-item-hover);
-}
-
-.gameplay-tag__tag-container-dropdown-icon {
-	min-height: 12px;
-	height: 12px;
-	min-width: 12px;
-	width: 12px;
-	margin: 0px 2px 0px 2px;
-	align-self: center;
-
-	--unity-image: url("Sprites/down-arrow_white_32.png");
-}
-
-#property-label.gameplay-tag__label {
-	width: 40%;
-	min-width: 100px;
-	padding: 2px 0px 0px 0px;
-
-	-unity-text-align: upper-left;
-}
-
-#tag-label.gameplay-tag__tag-label {
-	flex-grow: 1;
+	align-items: center;
+	height: 18px;
+	min-width: 0px;
 	padding: 0px 4px 0px 4px;
-	margin: 0px;
 	overflow: hidden;
 
-	background-color: var(--lmk-color-header-background-hover);
-	border-radius: 3px;
+	background-color: var(--gameplay-tag-color-tag-background);
 	border-width: 1px;
-	border-color: var(--lmk-color-field-border);
+	border-color: var(--gameplay-tag-color-tag-border);
+	border-radius: 3px;
+
+	transition-property: background-color, border-color;
+	transition-duration: 0.1s;
+}
+
+/* Hovering the arrow highlights the box too: they open the same picker. */
+.gameplay-tag__content:hover > .gameplay-tag__box {
+	background-color: var(--gameplay-tag-color-tag-background-hover);
+	border-color: var(--gameplay-tag-color-tag-border-hover);
+}
+
+.gameplay-tag__switcher {
+	flex-grow: 0;
+	flex-shrink: 1;
+	min-width: 0px;
+}
+
+.gameplay-tag__tag-label,
+.gameplay-tag__placeholder-label {
+	flex-grow: 0;
+	flex-shrink: 1;
+	padding: 0px;
+	margin: 0px;
+	overflow: hidden;
 
 	text-overflow: ellipsis;
 	-unity-text-align: middle-left;
 }
 
-#empty-tag-label.gameplay-tag__empty-tag-label {
-	align-self: stretch;
-	flex-grow: 1;
-	padding: 0px 2px 0px 2px;
-
-	background-color: var(--lmk-color-header-background);
-	border-radius: 3px;
-	border-width: 1px;
-	border-color: var(--lmk-color-field-border);
-
+/* None, or "- Mixed -" when the selected objects hold different tags. */
+.gameplay-tag__placeholder-label {
 	color: var(--lmk-color-text-muted);
+}
+
+.gameplay-tag__dropdown-arrow {
+	flex-shrink: 0;
+	width: 12px;
+	height: 12px;
+	margin: 0px 2px 0px 3px;
+
+	background-image: url("Sprites/down-arrow_white_32.png");
+	-unity-background-image-tint-color: var(--lmk-color-icon);
+	-unity-background-scale-mode: scale-to-fit;
 }
 
 

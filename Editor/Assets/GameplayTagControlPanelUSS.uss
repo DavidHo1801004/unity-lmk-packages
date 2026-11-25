@@ -19,48 +19,6 @@
 
 
 
-/*
-Search bar controls
-*/
-#search-bar-controls {
-	flex-direction: row;
-	flex-shrink: 0;
-	padding: 5px 5px 0px 5px;
-}
-
-#general-controls {
-	min-height: 20px;
-	min-width: 20px;
-	height: 20px;
-	width: 20px;
-	flex-grow: 0;
-	align-self: center;
-	margin: 0px 0px 0px 4px;
-	padding: 0px;
-
-	background-color: rgba(0, 0, 0, 0);
-	background-image: url("Sprites/gear_white_32.png");
-	-unity-background-image-tint-color: var(--lmk-color-icon);
-	background-size: 14px 14px;
-	background-repeat: no-repeat;
-	background-position-x: center;
-	background-position-y: center;
-	border-width: 0px;
-	border-radius: 3px;
-
-	transition: background-color;
-	transition-duration: 0.1s;
-}
-#general-controls:hover {
-	background-color: var(--lmk-color-item-hover);
-}
-
-#search-bar {
-	flex-grow: 1;
-}
-
-
-
 .unity-text-field__input {
 	background-color: var(--lmk-color-field-background);
 }
@@ -73,17 +31,12 @@ Search bar controls
 
 
 /*
-Tag tree scroll-view
+Tag tree scroll-view. Hosts put their own toolbar above it, so the tree starts at the top.
 */
 #tag-tree-scroll-view {
 	flex-grow: 1;
 	align-self: stretch;
 	padding: 2px;
-	margin-top: 5px;
-}
-
-/* Without the header (the Gameplay Tag Manager has its own toolbar), the tree starts at the top. */
-.gameplay-tag-control-panel--no-header #tag-tree-scroll-view {
 	margin-top: 0px;
 	border-top-width: 0px;
 }

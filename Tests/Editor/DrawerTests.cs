@@ -169,6 +169,70 @@ namespace LMK.Editor.GameplayTags.Tests
         }
 
         [Test]
+        public void MixedTags_IgnoresOrderAndNoneEntries()
+        {
+            var first = CreateScriptableObject(A, C);
+            var reordered = CreateScriptableObject(C, GameplayTag.None, A);
+            var other = CreateScriptableObject(A, D);
+
+            Assert.IsFalse(GameplayTagDrawerHelper.HasMixedTags(new Object[] { first, reordered }, CONTAINER));
+            Assert.IsTrue(GameplayTagDrawerHelper.HasMixedTags(new Object[] { first, reordered, other }, CONTAINER));
+            Assert.IsFalse(GameplayTagDrawerHelper.HasMixedTags(new Object[] { other }, CONTAINER));
+
+            Object.DestroyImmediate(first);
+            Object.DestroyImmediate(reordered);
+            Object.DestroyImmediate(other);
+        }
+
+        [Test]
+        public void CommonTags_AreTheIntersection_InFirstTargetOrder()
+        {
+            var first = CreateScriptableObject(C, A, D);
+            var second = CreateScriptableObject(A, E, C);
+
+            CollectionAssert.AreEqual(new[] { C, A }, GameplayTagDrawerHelper.CommonTags(new Object[] { first, second }, CONTAINER));
+
+            Object.DestroyImmediate(first);
+            Object.DestroyImmediate(second);
+        }
+
+        [Test]
+        public void ApplyChange_EditsEachTargetByValue_InOneUndo()
+        {
+            var first = CreateScriptableObject(A, C, D);
+            var second = CreateScriptableObject(D, GameplayTag.None, A, E);
+            var targets = new Object[] { first, second };
+
+            GameplayTagDrawerHelper.ApplyChange(targets, CONTAINER, new[] { E, C }, new[] { A }, "Edit");
+
+            AssertList(first, C, D, E);
+            AssertList(second, D, GameplayTag.None, E, C);
+
+            Undo.PerformUndo();
+            AssertList(first, A, C, D);
+            AssertList(second, D, GameplayTag.None, A, E);
+
+            Object.DestroyImmediate(first);
+            Object.DestroyImmediate(second);
+        }
+
+        [Test]
+        public void RemoveAllLive_KeepsMissingAndNoneEntries()
+        {
+            var first = CreateScriptableObject(A, B, C);
+            var second = CreateScriptableObject(GameplayTag.None, D);
+            DeleteB();
+
+            GameplayTagDrawerHelper.RemoveAllLive(new Object[] { first, second }, CONTAINER, "Clear");
+
+            AssertList(first, B);
+            AssertList(second, GameplayTag.None);
+
+            Object.DestroyImmediate(first);
+            Object.DestroyImmediate(second);
+        }
+
+        [Test]
         public void ZeroGuid_IsNotMissing()
         {
             var fixture = CreateScriptableObject(A, GameplayTag.None);

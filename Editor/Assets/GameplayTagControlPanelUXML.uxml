@@ -8,10 +8,6 @@
 >
 <Style src="GeneralGameplayTagUSS.uss"/>
 <Style src="GameplayTagControlPanelUSS.uss"/>
-    <ui:VisualElement name="search-bar-controls">
-        <lmk:SearchBar name="search-bar" placeholder-text="Search Gameplay Tags"/>
-        <ui:Button name="general-controls" tooltip="Options"/>
-    </ui:VisualElement>
     <ui:VisualElement class="fill">
         <ui:ScrollView name="tag-tree-scroll-view" class="fill-background"/>
         <ui:Label name="empty-data-label" text="No Gameplay Tag Registry"/>

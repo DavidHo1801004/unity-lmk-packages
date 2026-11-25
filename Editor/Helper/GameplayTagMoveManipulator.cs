@@ -218,7 +218,7 @@ namespace LMK.Editor.GameplayTags
 
         private void UpdateHovered()
         {
-            var element = target.panel == null ? null : FindRowOwner(target.panel.Pick(lastPosition));
+            var element = FindTargetAt(lastPosition);
             if (element == hovered) return;
 
             hovered?.HideMovePreview();
@@ -228,6 +228,39 @@ namespace LMK.Editor.GameplayTags
             if (hoveredIsValid)
                 hovered.ShowMovePreview(source.TagNode);
         }
+
+        /// <summary>
+        /// The row under <paramref name="_Position"/> as the tree is laid out without the current preview. <br/>
+        /// The preview pushes the rows after it down, and isn't a target itself. Picked as laid out now, a pointer
+        /// moving down from the hovered row would reach the preview, lose its target, and hide the preview, which
+        /// pulls the rows back up under the pointer for a frame. Picked without it, the pointer always lands on the row
+        /// that will be under it once the preview moves there, as when moving up.
+        /// </summary>
+        private GameplayTagNodeElement FindTargetAt(Vector2 _Position)
+        {
+            if (target.panel == null) return null;
+
+            var region = hovered?.MovePreviewBound;
+            if (region == null || _Position.y < region.Value.yMin)
+                return FindRowOwner(target.panel.Pick(_Position));
+
+            var picked = MapPastPreview(_Position, region.Value);
+            var element = FindRowOwner(target.panel.Pick(picked));
+            if (element != null) return element;
+
+            // Over the preview with nothing after it, or with the row after it scrolled out of view, where it can't be
+            // picked: the preview stays where it is.
+            var viewport = target.GetFirstAncestorOfType<ScrollView>()?.contentViewport.worldBound;
+            bool clipped = viewport.HasValue && !viewport.Value.Contains(picked);
+            return _Position.y < region.Value.yMax || clipped ? hovered : null;
+        }
+
+        /// <summary>
+        /// Where <paramref name="_Position"/> is, as laid out now, in a tree laid out without <paramref name="_Preview"/>:
+        /// at or below its top, the rows are its height further down.
+        /// </summary>
+        internal static Vector2 MapPastPreview(Vector2 _Position, Rect _Preview)
+            => _Position.y < _Preview.yMin ? _Position : new Vector2(_Position.x, _Position.y + _Preview.height);
 
         /// <summary>
         /// A tag or the header of the dragged tag's registry, where <see cref="TagOperations.CheckMove(RegistryGuid, RegistryGuid)"/> allows a move.
